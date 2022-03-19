@@ -1,8 +1,17 @@
-import community as community_louvain
+import networkx as nx
 
 
+# TODO read more here
+# https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html?highlight=louvain#networkx.algorithms.community.louvain.louvain_communities
 def louvain(G):
-    return community_louvain.best_partition(G)
+    return nx.algorithms.community.louvain_communities(G)
+
+
+# TODO read more here
+# https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.centrality.girvan_newman.html?highlight=newman#networkx.algorithms.community.centrality.girvan_newman
+def newman(G):
+    comp = nx.algorithms.community.centrality.girvan_newman(G)
+    return tuple(sorted(c) for c in next(comp))
 
 
 def create_partition(G):
@@ -14,3 +23,4 @@ def create_partition(G):
             partition[node] = col
         col += 1
     return partition
+

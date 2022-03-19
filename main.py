@@ -6,6 +6,7 @@ possible_ns = [1000, 10000]
 
 def create_example():
     G = create_random_network(250, 0.1, 3, 1.5, 5, 20)
+    print(newman(G))
     partition = create_partition(G)
     figure = create_visual_graph(G, partition)
 
