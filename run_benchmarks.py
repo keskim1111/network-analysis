@@ -5,10 +5,8 @@ from output_generator import *
 #
 
 G = create_random_network(250, 0.1, 3, 1.5, 5, 20)
-partition = real_partition(G)
 
 # visualization
-create_visual_graph(G, partition)
 
 
 """
