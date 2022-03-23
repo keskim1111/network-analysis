@@ -2,7 +2,6 @@ from networkx.generators.community import LFR_benchmark_graph
 import networkx as nx
 from LFRBenchmark.LFRBenchmark import generate_lfr_benchmarks
 from os.path import abspath
-
 from consts import edges_files
 
 
@@ -39,4 +38,4 @@ def read_clusters_file(filename):
     pass
 
 
-# print(create_graph_from_edge_list(abspath(edges_files[0])).number_of_edges())
+
