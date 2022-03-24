@@ -145,15 +145,15 @@ def graph_accuracy(known_communities, candidate_communities):
     return math.sqrt(sn * ppv)
 
 
-G = create_random_network(250, 0.1, 3, 1.5, 5, 20)
-communities_louvain = louvain(G)
-communities_newman = newman(G)
-real_communities1 = {frozenset(G.nodes[v]["community"]) for v in G}
-# print(graph_conductance(G,communities_louvain))
-print("jaccard is newman: ", jaccard(communities_newman, real_communities1))
-print("graph_sensitivity with newman is: ", graph_sensitivity(real_communities1, communities_newman))
-print("graph_accuracy with newman is: ", graph_accuracy(real_communities1, communities_newman))
-
-print("jaccard is lovauin: ", jaccard(communities_louvain, real_communities1))
-print("graph_sensitivity with louvain is: ", graph_sensitivity(real_communities1, communities_louvain))
-print("graph_accuracy with louvain is: ", graph_accuracy(real_communities1, communities_louvain))
+# G = create_random_network(250, 0.1, 3, 1.5, 5, 20)
+# communities_louvain = louvain(G)
+# communities_newman = newman(G)
+# real_communities1 = {frozenset(G.nodes[v]["community"]) for v in G}
+# # print(graph_conductance(G,communities_louvain))
+# print("jaccard is newman: ", jaccard(communities_newman, real_communities1))
+# print("graph_sensitivity with newman is: ", graph_sensitivity(real_communities1, communities_newman))
+# print("graph_accuracy with newman is: ", graph_accuracy(real_communities1, communities_newman))
+#
+# print("jaccard is lovauin: ", jaccard(communities_louvain, real_communities1))
+# print("graph_sensitivity with louvain is: ", graph_sensitivity(real_communities1, communities_louvain))
+# print("graph_accuracy with louvain is: ", graph_accuracy(real_communities1, communities_louvain))
