@@ -2,9 +2,9 @@ import pickle
 
 
 class Graph:
-    def __init__(self, edges_file, load_pickle=False):
+    def __init__(self, edges_file, edges_is_list=False):
         self.nodes_range = None  # create_edges_list() updates nodes_range to be node with highest value
-        self.edges_list = self.create_edges_list(edges_file, load_pickle)
+        self.edges_list = self.create_edges_list(edges_file, edges_is_list)
         self.num_edges = len(self.edges_list)  # maybe need to multiply by 2 ?
         self.adj_matrix = self.create_adj_matrix()
         self.degree_list = self.create_degree_list()  # maybe remove this from init bc heavy
@@ -38,10 +38,10 @@ class Graph:
                 degree_list[j - 1] += 1  # Assumption: G is undirected graph - if there is (i,j) then there isn't (j,i)
         return degree_list
 
-    def create_edges_list(self, edges_file, load_pickle):
+    def create_edges_list(self, edges_file, edges_is_list):
         max_node_val = 0
 
-        if not load_pickle:
+        if not edges_is_list:
             edges_list = []
             with open(edges_file) as file:
                 while line := file.readline():
@@ -51,8 +51,9 @@ class Graph:
                     max_node_val = max(max_node_val, edge[0], edge[1])
 
         else:
-            with open(edges_file, "rb") as f:
-                edges_list = pickle.load(f)
+            edges_list = edges_file
+            # with open(edges_file, "rb") as f:
+            #     edges_list = pickle.load(f)
             for i, j in edges_list:
                 max_node_val = max(max_node_val, i, j)
 
