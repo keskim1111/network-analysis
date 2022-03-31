@@ -1,52 +1,40 @@
 from input_networks import *
 from algorithms import *
 from output_generator import *
-import networkx as nx
+
+community_file = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks " \
+                  "sadna\\network-analysis\\LFRBenchmark\\Graphs\\1000_0.4_0\\community.dat "
+edge_list_path = "C:\\Users\\kimke\OneDrive\\Documents\\4th year\\semeter B\\Biological networks " \
+                  "sadna\\network-analysis\\LFRBenchmark\\Graphs\\1000_0.4_2\\network.dat "
+
+n=250
+mu=0.1
+tau1=3
+tau2=1.5
+average_degree=5
+min_com=20
+
+@timeit
+def create_example(is_networkX=False):
+    if is_networkX:
+        G = create_random_network(n, mu, tau1, tau2, average_degree, min_com)
+    else:
+        G = create_graph_from_edge_list(edge_list_path)
+    print(G)
+    algo_dict_partition = run_algos(G)
+    data, index = generate_outputs(G, algo_dict_partition, community_file)
+    df = create_df(data, evaluation_measures, index)
+    params_dict = {"n": n}
+    directory = f"output_{current_time()}"
+    path = create_output_folder(directory, G)
+    create_pdf(df, f"{path}\\results.pdf", params_dict)
+    print(f"Output file created at {path}")
+    try:
+        create_visual_graphs(G, algo_dict_partition, path)
+    except AttributeError:
+        print(f"There was an Exception with creating visual_graphs:\n {AttributeError} ")
 
 
-possible_mus = [0.4, 0.5, 0.6]
-possible_ns = [1000, 10000]
-msg = "The modularity result of the Algorithm is: "
-def create_example_networkx():
-    G = create_random_network(250, 0.1, 3, 1.5, 5, 20)
-    communities_newman = newman(G)
-    newman_partition = algorithms_partition_for_colors(communities_newman)
-
-    print(f"Newman - {msg}{nx.algorithms.community.modularity(G,communities_newman)} with {len(communities_newman)} "
-          f"communities and {sum(len(sett) for sett in communities_newman)} items")
-    communities_louvain = louvain(G)
-    louvain_partition = algorithms_partition_for_colors(communities_louvain)
-    print(f"Louvain - {msg}{nx.algorithms.community.modularity(G,communities_louvain)} with {len(communities_louvain)} "
-          f"communities and {sum(len(sett) for sett in communities_louvain)} items")
-
-    real_communities = {frozenset(G.nodes[v]["community"]) for v in G}
-    real_partition = algorithms_partition_for_colors(real_communities)
-    print(f"Real - {msg}{nx.algorithms.community.modularity(G,real_communities)} with {len(real_communities)} "
-          f"communities and {sum(len(sett) for sett in real_communities)} items")
-
-    #creates graphs
-    create_visual_graph(G, real_partition, "real")
-    create_visual_graph(G, newman_partition, "newman_partition")
-    create_visual_graph(G, louvain_partition, "louvain_partition")
-
-def create_example_files():
-    G = create_graph_from_edge_list(edges_files[0])
-    communities_newman = newman(G)
-    newman_partition = algorithms_partition_for_colors(communities_newman)
-
-    print(f"Newman - {msg}{nx.algorithms.community.modularity(G,communities_newman)} with {len(communities_newman)} "
-          f"communities and {sum(len(sett) for sett in communities_newman)} items")
-    communities_louvain = louvain(G)
-    louvain_partition = algorithms_partition_for_colors(communities_louvain)
-    print(f"Louvain - {msg}{nx.algorithms.community.modularity(G,communities_louvain)} with {len(communities_louvain)} "
-          f"communities and {sum(len(sett) for sett in communities_louvain)} items")
-
-    #creates graphs
-    create_visual_graph(G, newman_partition, "newman_partition")
-    create_visual_graph(G, louvain_partition, "louvain_partition")
-
-
-create_example_files()
-
-
-
+if __name__ == '__main__':
+    create_example()
+    pass
