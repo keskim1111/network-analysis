@@ -1,4 +1,3 @@
-from algorithms import louvain, newman
 from input_networks import *
 import math
 
@@ -32,7 +31,6 @@ def intersection_size(set1, set2):
     for item in shorter_set:
         if item in longer_set:
             intersection_size += 1
-
     return intersection_size
 
 
@@ -121,7 +119,7 @@ def graph_sensitivity(known_communities, candidate_communities):
 
 
 # TODO make more efficient and make sure is right
-def PPV_max_per_community(candidate_community, known_communities):
+def ppv_max_per_community(candidate_community, known_communities):
     max_res = 0
     for known_community in known_communities:
         int_with_current = intersection_size(candidate_community, known_community)
@@ -135,25 +133,16 @@ def graph_PPV(known_communities, candidate_communities):
     for candidate_community in candidate_communities:
         int_with_all = sum([intersection_size(candidate_community, com) for com in known_communities])
         int_all_total += int_with_all
-        PPV += PPV_max_per_community(candidate_community, known_communities)
-    return PPV / int_all_total
+        PPV += ppv_max_per_community(candidate_community, known_communities)
+    try:
+        result = PPV / int_all_total
+        return result
+    except ZeroDivisionError:
+        print(f"Error {ZeroDivisionError}")
+        return 0
 
 
 def graph_accuracy(known_communities, candidate_communities):
     ppv = graph_PPV(known_communities, candidate_communities)
     sn = graph_sensitivity(known_communities, candidate_communities)
     return math.sqrt(sn * ppv)
-
-
-# G = create_random_network(250, 0.1, 3, 1.5, 5, 20)
-# communities_louvain = louvain(G)
-# communities_newman = newman(G)
-# real_communities1 = {frozenset(G.nodes[v]["community"]) for v in G}
-# # print(graph_conductance(G,communities_louvain))
-# print("jaccard is newman: ", jaccard(communities_newman, real_communities1))
-# print("graph_sensitivity with newman is: ", graph_sensitivity(real_communities1, communities_newman))
-# print("graph_accuracy with newman is: ", graph_accuracy(real_communities1, communities_newman))
-#
-# print("jaccard is lovauin: ", jaccard(communities_louvain, real_communities1))
-# print("graph_sensitivity with louvain is: ", graph_sensitivity(real_communities1, communities_louvain))
-# print("graph_accuracy with louvain is: ", graph_accuracy(real_communities1, communities_louvain))
