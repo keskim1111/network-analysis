@@ -63,8 +63,17 @@ def create_binary_network_file(G):
 if __name__ == '__main__':
     path = 'graph.in'
     G = read_binary_network(path)
-    print(f"this is the original {G}")
+    print(f"##### G ##### {G}")
+    g_nodes = G.nodes
+    g_edges = G.edges
+
     path2 = create_binary_network_file(G)
     G2 = read_binary_network(path2)
-    print(f"this is the original {G2}")
-    pass
+    print(f"##### G2 ##### {G2}")
+    g2_nodes = G2.nodes
+    g2_edges = G2.edges
+
+    assert g_nodes == g2_nodes
+    assert g_edges == g2_edges
+    diff = nx.difference(G,G2)
+    assert len(diff.edges) == 0
