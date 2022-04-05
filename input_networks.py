@@ -37,6 +37,40 @@ def create_graph_from_edge_list(filename):
     G = nx.Graph()
     with open(filename) as file:
         while line := file.readline():
-            edge = tuple(line.rstrip().split())
-            G.add_edge(*edge)
+            node1, node2 = line.rstrip().split()
+            G.add_edge(int(node1),int(node2))
     return G
+
+
+yeast_edges = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks sadna\\network-analysis\\Benchmarks\\Yeast\\edges.txt"
+
+
+def create_graph_from_edge_list_strings(filename):
+    '''
+    :param filename:
+    :return: a networkX graph from the file
+    '''
+    G = nx.Graph()
+    dict_str_to_num = dict()
+    i = 0
+    with open(filename) as file:
+        try:
+            while line := file.readline():
+                node1, node2 = line.rstrip().split()
+                if node1 not in dict_str_to_num:
+                    dict_str_to_num[node1] = i
+                    i += 1
+                if node2 not in dict_str_to_num:
+                    dict_str_to_num[node2] = i
+                    i += 1
+                node1_num = dict_str_to_num[node1]
+                node2_num = dict_str_to_num[node2]
+                G.add_edge(node1_num, node2_num)
+        except ValueError:
+            print(line)
+            raise ValueError
+    return G
+
+
+if __name__ == '__main__':
+    create_graph_from_edge_list_strings(yeast_edges)

@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 import pandas as pd
 from algorithms import newman, louvain, algorithms_partition_for_colors
 from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, modularity
-from input_networks import  read_communities_file
+from input_networks import read_communities_file
 
 RESULTS_FOLDER = "results"
 community_file = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks " \
@@ -30,6 +30,12 @@ def create_visual_graphs(G, algo_dict_partition, path):
                                node_color=list(color_dict.values()))
         nx.draw_networkx_edges(G, pos)
         plt.savefig(f"{path}\\{algo}.png", dpi=120)
+
+
+def write_to_file(file, content):
+    with open(file, "w") as f:
+        f.write(content)
+    return file
 
 
 def create_output_folder(folder_name, G):
@@ -73,7 +79,7 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
     data = []
     index = []
     if is_networkx:
-        real_partition = [list(G.nodes[v]["community"]) for v in G]
+        real_partition = {frozenset(G.nodes[v]["community"]) for v in G}
     else:
         real_partition = read_communities_file(real_communities_path)
     for algo in algo_dict.keys():

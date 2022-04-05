@@ -17,7 +17,7 @@ average_degree=5
 min_com=20
 
 @timeit
-def create_example(is_networkX=False):
+def create_example( is_networkX=False, edge_list_path= None):
     if is_networkX:
         G = create_random_network(n, mu, tau1, tau2, average_degree, min_com)
     else:
@@ -38,5 +38,5 @@ def create_example(is_networkX=False):
 
 
 if __name__ == '__main__':
-    create_example()
+    create_example(True)
     pass

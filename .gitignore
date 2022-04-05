@@ -130,4 +130,5 @@ dmypy.json
 
 .png
 results
-.in
+graph.in
+graph.out
