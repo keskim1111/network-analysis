@@ -37,8 +37,8 @@ class ILP:
 
     # TODO: add input of mapping and then change node1, node2 according to mapping
     def find_communities(self):
-        communities_per_node = {i: [i] for i in range(self.graph.nodes_range)}  # i:com - com is the full community that node i is part of
-        node_is_done_list = [0]*self.graph.nodes_range  # 0 if node not in community from the communities list yet
+        communities_per_node = {i: [i] for i in range(self.num_of_nodes)}  # i:com - com is the full community that node i is part of
+        node_is_done_list = [0]*self.num_of_nodes  # 0 if node not in community from the communities list yet
         communities = []
 
         for v in self.model.getVars():

@@ -18,7 +18,7 @@ def newman(G):
     return list(sorted(c) for c in next(comp))
 
 def run_ilp(G):
-    ilp_obj = ILP(G.edges, num_nodes=len(G.nodes), edges_is_list=True)
+    ilp_obj = ILP(G, is_networx_graph=True)
     return ilp_obj.communities
 
 def algorithms_partition_for_colors(partition):

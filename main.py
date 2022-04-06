@@ -1,3 +1,4 @@
+from binary_files import read_binary_network_output, read_binary_network_input
 from consts import evaluation_measures
 from helpers import current_time, create_sub_graphs_from_communities
 from input_networks import *
@@ -9,12 +10,12 @@ community_file = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Bi
 edge_list_path = "C:\\Users\\kimke\OneDrive\\Documents\\4th year\\semeter B\\Biological networks " \
                   "sadna\\network-analysis\\LFRBenchmark\\Graphs\\1000_0.4_2\\network.dat "
 
-n=250
+n=100
 mu=0.1
 tau1=3
 tau2=1.5
-average_degree=4
-min_com=15
+average_degree=5
+min_com=6
 
 @timeit
 def create_example( is_networkX=False, edge_list_path= None):
@@ -38,5 +39,6 @@ def create_example( is_networkX=False, edge_list_path= None):
 
 
 if __name__ == '__main__':
+    create_example(is_networkX=True)
     pass
 

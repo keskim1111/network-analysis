@@ -62,7 +62,7 @@ def read_binary_network_output(fileName):
             the k1 indices of its neighbors, in increasing order.
             The next value is k2, followed by the k2 indices of the neighbors of the second node, then k3
             and its k3 neighbors, and so on until node n.
-    :return: a networkX graph created based on the binary file
+    :return: list of lists (comm)
     """
     f = open(fileName, "rb")
     res = []
