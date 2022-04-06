@@ -3,7 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pandas as pd
-from algorithms import newman, louvain, algorithms_partition_for_colors
+from algorithms import newman, louvain, algorithms_partition_for_colors, run_ilp
 from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, modularity
 from input_networks import read_communities_file
 
@@ -68,7 +68,7 @@ def create_pdf(df, path, params):
 
 
 def run_algos(G):
-    algo_dict = {"newman": {"func": newman}, "louvain": {"func": louvain}}
+    algo_dict = {"newman": {"func": newman}, "louvain": {"func": louvain}, "ilp": {"func": run_ilp}}
     for algo in algo_dict.keys():
         partition = algo_dict[algo]["func"](G)
         algo_dict[algo]["partition"] = partition
@@ -82,8 +82,10 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
         real_partition = {frozenset(G.nodes[v]["community"]) for v in G}
     else:
         real_partition = read_communities_file(real_communities_path)
+    print(f"real partition: {real_partition}")
     for algo in algo_dict.keys():
         partition = algo_dict[algo]["partition"]
+        print(f'communities of {algo}: {partition}')
         res = []
         index.append(algo)
         res.append(modularity(G, partition))

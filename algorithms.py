@@ -1,5 +1,5 @@
 import networkx as nx
-
+from ilp import ILP
 # TODO read more here
 # https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html?highlight=louvain#networkx.algorithms.community.louvain.louvain_communities
 from helpers import timeit
@@ -17,6 +17,9 @@ def newman(G):
     comp = nx.algorithms.community.centrality.girvan_newman(G)
     return list(sorted(c) for c in next(comp))
 
+def run_ilp(G):
+    ilp_obj = ILP(G.edges, num_nodes=len(G.nodes), edges_is_list=True)
+    return ilp_obj.communities
 
 def algorithms_partition_for_colors(partition):
     color = 0
