@@ -8,6 +8,7 @@ via mathematical programming.
 """
 # TODO: make sure I can deal with inner edges
 
+
 import gurobipy as gp
 from gurobipy import GRB
 from Graph import Graph
@@ -16,15 +17,17 @@ from input_networks import create_random_network
 from algorithms import algorithms_partition_for_colors
 import networkx as nx
 from output_generator import create_visual_graph
-
+from helpers import timeit
 
 msg = "The modularity result of the Algorithm is: "
 
-
+"""
+Assumption: the graph nodes are continous from 0 to num_nodes-1
+"""
 class ILP:
-    def __init__(self, edges, edges_is_list=False):
+    def __init__(self, edges, num_nodes, edges_is_list=False):
         start = datetime.now()
-        self.graph = Graph(edges, edges_is_list)
+        self.graph = Graph(edges, num_nodes, edges_is_list)
         self.model = gp.Model("mip1")
         self.set_objective()  # Sets objective function
         self.add_constraints()
@@ -33,6 +36,7 @@ class ILP:
         end = datetime.now()
         print(f'ILP object took {end-start} seconds')
 
+    # TODO: finish writing
     def find_communities(self):
         communities_per_node = {}
         counter = 0
@@ -57,9 +61,8 @@ class ILP:
     objective_function: 1/m * [sum_ij](q_ij * (1 - x_ij))
     while: q_ij = a_ij - (d_i * d_j)/2m
     """
+    @timeit
     def set_objective(self):
-        start = datetime.now()
-        print(f'function set_objective starting - {start}')
         G = self.graph
         m = len(G.edges_list)
         sum = 0
@@ -70,19 +73,16 @@ class ILP:
                 sum += (q_ij * (1 - globals()[f'x_{i}_{j}']))
 
         objective_function = 1/m * (sum)
-        #objective_function = sum
         self.model.setObjective(objective_function, GRB.MAXIMIZE)
-        end = datetime.now()
-        print(f'function set_objective ended and took {end-start} seconds')
+
     # Assumption: this function is called after set_objective() - which creates the variables
     """
     x_ij + x_jk - x_ik >= 0
     x_ij - x_jk + x_ik >= 0
     -x_ij +x_jk + x_ik >= 0
     """
+    @timeit
     def add_constraints(self):
-        start = datetime.now()
-        print(f'function add_constraints starting - {start}')
         G = self.graph
         for k in range(G.nodes_range):
             for j in range(k):  # j < k
@@ -90,11 +90,10 @@ class ILP:
                     self.model.addConstr(globals()[f'x_{i}_{j}'] + globals()[f'x_{j}_{k}'] - globals()[f'x_{i}_{k}'] >= 0)
                     self.model.addConstr(globals()[f'x_{i}_{j}'] - globals()[f'x_{j}_{k}'] + globals()[f'x_{i}_{k}'] >= 0)
                     self.model.addConstr(-globals()[f'x_{i}_{j}'] + globals()[f'x_{j}_{k}'] + globals()[f'x_{i}_{k}'] >= 0)
-        end = datetime.now()
-        print(f'function add_constraints ended and took {end-start} seconds')
+        for c in self.model.getConstrs():
+            print(c.ConstrName, c.Slack)
 
-
-ilp_obj = ILP("C:/Users/97252/Documents/year_4/sadna/tests/network_2_cliques.dat")
+ilp_obj = ILP("C:/Users/97252/Documents/year_4/sadna/tests/network_2_cliques.dat", num_nodes=6)
 # G = create_random_network(50, 0.1, 3, 1.5, 2, 5)
 # real_communities = {frozenset(G.nodes[v]["community"]) for v in G}
 # print(f'real_communities: {real_communities}')
