@@ -13,8 +13,8 @@ n=250
 mu=0.1
 tau1=3
 tau2=1.5
-average_degree=5
-min_com=20
+average_degree=4
+min_com=15
 
 @timeit
 def create_example( is_networkX=False, edge_list_path= None):
@@ -26,7 +26,7 @@ def create_example( is_networkX=False, edge_list_path= None):
     algo_dict_partition = run_algos(G)
     data, index = generate_outputs(G, algo_dict_partition, community_file)
     df = create_df(data, evaluation_measures, index)
-    params_dict = {"n": n}
+    params_dict = {"n": n, "original modularity": modularity(G,{frozenset(G.nodes[v]["community"]) for v in G})}
     directory = f"output_{current_time()}"
     path = create_output_folder(directory, G)
     create_pdf(df, f"{path}\\results.pdf", params_dict)
@@ -40,3 +40,4 @@ def create_example( is_networkX=False, edge_list_path= None):
 if __name__ == '__main__':
     create_example(True)
     pass
+
