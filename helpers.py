@@ -12,6 +12,7 @@ def timeit(func):
         print('function [{}] finished in {} ms'.format(
             func.__name__, int(elapsed_time * 1_000)))
         return result
+
     return new_func
 
 
@@ -19,3 +20,20 @@ def current_time():
     now = datetime.now()
     dt_string = now.strftime("%d-%m-%Y--%H-%M-%S")
     return dt_string
+
+
+def adjacency_matrix(G):
+    num_of_nodes = G.number_of_nodes()
+    adj_mat = [[0] * num_of_nodes for _ in range(num_of_nodes)]  # Initialize adjacency matrix
+    for i, j in G.edges:
+        adj_mat[i][j] = 1
+        adj_mat[j][i] = 1  # make sure it is undirected graph
+    return adj_mat
+
+
+def create_sub_graphs_from_communities(G, communities):
+    sub_graphs = []
+    for community in communities:
+        sub_graphs.append(G.subgraph(community))
+    return sub_graphs
+

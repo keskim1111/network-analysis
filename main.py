@@ -1,5 +1,5 @@
 from consts import evaluation_measures
-from helpers import current_time
+from helpers import current_time, create_sub_graphs_from_communities
 from input_networks import *
 from algorithms import *
 from output_generator import *
@@ -38,5 +38,4 @@ def create_example( is_networkX=False, edge_list_path= None):
 
 
 if __name__ == '__main__':
-    create_example(True)
     pass
