@@ -132,3 +132,10 @@ dmypy.json
 results
 graph.in
 graph.out
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/network-analysis.iml
+.idea/vcs.xml
+Benchmarks/Arabidopsis/.DS_Store
+Benchmarks/Yeast/.DS_Store
