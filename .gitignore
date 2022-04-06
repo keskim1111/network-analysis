@@ -132,3 +132,8 @@ dmypy.json
 results
 graph.in
 graph.out
+
+
+.idea/
+newman_partition.png
+real.png
