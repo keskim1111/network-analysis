@@ -1,9 +1,11 @@
 import pickle
 
+# TODO: add mapping to all edge list - to be contiuous from 0
+# TODO: use networks for as many functions as possible
 
 class Graph:
-    def __init__(self, edges_file, edges_is_list=False):
-        self.nodes_range = None  # create_edges_list() updates nodes_range to be node with highest value
+    def __init__(self, edges_file, num_nodes, edges_is_list=False):
+        self.nodes_range = num_nodes  # create_edges_list() updates nodes_range to be node with highest value
         self.edges_list = self.create_edges_list(edges_file, edges_is_list)
         self.num_edges = len(self.edges_list)  # maybe need to multiply by 2 ?
         self.adj_matrix = self.create_adj_matrix()
@@ -17,11 +19,12 @@ class Graph:
     """
 
     # TODO: in future - implement more space-efficiently (adjacency list?)
+    # ASSUMPTION: the nodes start from 0 till num_nodes-1
     def create_adj_matrix(self):
         adj_mat = [[0] * self.nodes_range for _ in range(self.nodes_range)]  # Initialize adjacency matrix
         for i, j in self.edges_list:
-            adj_mat[i - 1][j - 1] = 1
-            adj_mat[j - 1][i - 1] = 1  # make sure it is undirected graph
+            adj_mat[i][j] = 1
+            adj_mat[j][i] = 1  # make sure it is undirected graph
         return adj_mat
 
     def print_adj_matrix(self):
@@ -34,10 +37,11 @@ class Graph:
     def create_degree_list(self):
         degree_list = [0] * self.nodes_range  # initializing node degrees list
         for i, j in self.edges_list:
-            degree_list[i - 1] += 1
+            degree_list[i] += 1
             if i != j:  # not an edge to itself
-                degree_list[j - 1] += 1  # Assumption: G is undirected graph - if there is (i,j) then there isn't (j,i)
+                degree_list[j] += 1  # Assumption: G is undirected graph - if there is (i,j) then there isn't (j,i)
         return degree_list
+
 
     def create_edges_list(self, edges_file, edges_is_list):
         max_node_val = 0
@@ -58,7 +62,6 @@ class Graph:
             for i, j in edges_list:
                 max_node_val = max(max_node_val, i, j)
 
-        self.nodes_range = max_node_val + 1
         return edges_list
 
 # G = Graph("LFRBenchmark/Graphs/1000_0.4_0/network.dat")
@@ -66,4 +69,5 @@ class Graph:
 # G.print_adj_matrix()
 # print(G.degree_list)
 # G = Graph("C://Users//97252//Documents//year_4//sadna//tests//edges_tuple.list", load_pickle=True)
-# print("cool")
+#print("cool")
+#G = Graph("C:/Users/97252/Documents/year_4/sadna/tests/network_2_cliques.dat", 6)
