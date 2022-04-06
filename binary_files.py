@@ -174,6 +174,12 @@ def are_graphs_the_same(G, H):
     R = nx.difference(G, H)
     return len(R.edges) == 0
 
+def create_sub_graphs_from_communities(G, communities):
+    sub_graphs = []
+    for community in communities:
+        sub_graphs.append(G.subgraph(community))
+    return sub_graphs
+
 
 if __name__ == '__main__':
     pass
