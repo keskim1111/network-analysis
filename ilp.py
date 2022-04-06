@@ -36,26 +36,27 @@ class ILP:
         end = datetime.now()
         print(f'ILP object took {end-start} seconds')
 
-    # TODO: finish writing
+    # TODO: add input of mapping and then change node1, node2 according to mapping
     def find_communities(self):
-        communities_per_node = {}
-        counter = 0
+        communities_per_node = {i: [i] for i in range(self.graph.nodes_range)}  # i:com - com is the full community that node i is part of
+        node_is_done_list = [0]*self.graph.nodes_range  # 0 if node not in community from the communities list yet
+        communities = []
+
         for v in self.model.getVars():
-            counter += 1
-            node1 = v.VarName.split("_")[1]
-            node2 = v.VarName.split("_")[2]
-            inSameCommunity = int(abs(v.X))
-            if inSameCommunity:
-                if node1 not in communities_per_node:
-                    communities_per_node[node1] = []
+            node1 = int(v.VarName.split("_")[1])
+            node2 = int(v.VarName.split("_")[2])
+            if not int(abs(v.X)):  # if in same community
                 communities_per_node[node1].append(node2)
-                if node2 not in communities_per_node:
-                    communities_per_node[node2] = []
                 communities_per_node[node2].append(node1)
-            else:
-                print(f'{node1}, {node2} not in same community')
-        print(counter)
-        return communities_per_node
+
+        # adding community list to communities
+        for node, node_community in communities_per_node.items():
+            if not node_is_done_list[node]:
+                communities.append(node_community)
+                for i in node_community:
+                    node_is_done_list[i] = 1
+
+        return communities
 
     """
     objective_function: 1/m * [sum_ij](q_ij * (1 - x_ij))
