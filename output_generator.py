@@ -85,7 +85,6 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
     print(f"real partition: {real_partition}")
     for algo in algo_dict.keys():
         partition = algo_dict[algo]["partition"]
-        print(f'communities of {algo}: {partition}')
         res = []
         index.append(algo)
         res.append(modularity(G, partition))
