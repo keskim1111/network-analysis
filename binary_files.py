@@ -3,14 +3,14 @@ import struct
 
 from consts import edge_file
 from evaluation import jaccard, graph_accuracy, graph_sensitivity, modularity
-from input_networks import create_graph_from_edge_list, create_graph_from_edge_list_strings, \
+from input_networks import create_graph_from_edge_file, create_graph_from_edge_strings_file, \
     create_random_network
 from helpers import timeit, current_time
-
+import os
 
 def create_mapping(edge_file):
     d = dict()
-    G = create_graph_from_edge_list(edge_file)
+    G = create_graph_from_edge_file(edge_file)
     i = 0
     nodes = sorted(G.nodes)
     for node in nodes:
@@ -83,7 +83,7 @@ def read_binary_network_output(fileName):
     return res
 
 
-def create_binary_network_file(G, title=""):
+def create_binary_network_file(G, path, title="bin"):
     """
     :param: G - a networkX graph created based on the binary file
     :return: A path to a binary file created in the following format:
@@ -93,8 +93,8 @@ def create_binary_network_file(G, title=""):
             The next value is k2, followed by the k2 indices of the neighbors of the second node, then k3
             and its k3 neighbors, and so on until node n.
     """
-    file_name = f'{current_time()}-{title}-graph.in'
-    f = open(file_name, "wb")
+    file_name = f'{title}-graph.in'
+    f = open(os.path.join(path, file_name), "wb")
     try:
         nodes_list = sorted(G.nodes())
         num_of_nodes = len(nodes_list)
@@ -107,21 +107,20 @@ def create_binary_network_file(G, title=""):
                 f.write(struct.pack('i', int(neighbor)))
     finally:
         f.close()
-    print(file_name)
     return file_name
 
 
 # TODO remove after
 def create_for_esty_from_edges_strings(edge_list):
     print(f"The path is {edge_list}")
-    G = create_graph_from_edge_list_strings(edge_list)
+    G = create_graph_from_edge_strings_file(edge_list)
     print(G)
     return create_binary_network_file(G)
 
 
 def create_for_esty_from_edges(edge_list):
     print(f"The path is {edge_list}")
-    G = create_graph_from_edge_list(edge_list)
+    G = create_graph_from_edge_file(edge_list)
     return create_binary_network_file(G)
 
 
@@ -151,7 +150,7 @@ def compare_c_output_to_real(output_path, real_communities_path, real_edges_path
 
 
 def check_binary_from_edges_file():
-    G = create_graph_from_edge_list(edge_file)
+    G = create_graph_from_edge_file(edge_file)
     path = create_binary_network_file(G, "1000_0.4_8_new")
     G2 = read_binary_network_input(path, edge_file)
     assert are_graphs_the_same(G, G2)

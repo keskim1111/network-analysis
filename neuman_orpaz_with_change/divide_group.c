@@ -9,7 +9,7 @@
 #include "spmat.h"
 
 #define IS_POSITIVE(X) ((X) > 0.00001)
-#define LP_CRITICAL 20
+#define LP_CRITICAL 200
 
 /* Put the value num in each element of the vector s */
 void make_vector_to_num(double *s, int size, double num) {

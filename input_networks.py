@@ -29,7 +29,7 @@ def create_lfr_benchmarks():
     generate_lfr_benchmarks()
 
 
-def create_graph_from_edge_list(filename):
+def create_graph_from_edge_file(filename):
     '''
     :param filename:
     :return: a networkX graph from the file
@@ -41,11 +41,20 @@ def create_graph_from_edge_list(filename):
             G.add_edge(int(node1),int(node2))
     return G
 
+def create_graph_from_edge_list(edges_list):
+    '''
+    :param python list of sets of edges:
+    :return: a networkX graph from the file
+    '''
+    G = nx.Graph()
+    for node1, node2 in edges_list:
+        G.add_edge(int(node1), int(node2))
+    return G
 
 yeast_edges = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks sadna\\network-analysis\\Benchmarks\\Yeast\\edges.txt"
 
 
-def create_graph_from_edge_list_strings(filename):
+def create_graph_from_edge_strings_file(filename):
     '''
     :param filename:
     :return: a networkX graph from the file
@@ -73,4 +82,4 @@ def create_graph_from_edge_list_strings(filename):
 
 
 if __name__ == '__main__':
-    create_graph_from_edge_list_strings(yeast_edges)
+    create_graph_from_edge_strings_file(yeast_edges)
