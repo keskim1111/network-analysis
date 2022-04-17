@@ -67,11 +67,16 @@ def create_pdf(df, path, params):
     plt.close(fig)
 
 
-def run_algos(G):
-    algo_dict = {"newman": {"func": newman}, "louvain": {"func": louvain}, "ilp": {"func": run_ilp}}
+def run_algos(G, with_ilp=False):
+    if with_ilp:
+        algo_dict = {"newman": {"func": newman}, "louvain": {"func": louvain}, "ilp": {"func": run_ilp}}
+    else:
+        algo_dict = {"newman": {"func": newman}, "louvain": {"func": louvain}}
     for algo in algo_dict.keys():
+        print(f'running {algo}')
         partition = algo_dict[algo]["func"](G)
         algo_dict[algo]["partition"] = partition
+        print(f'finished running {algo}')
     return algo_dict
 
 
@@ -84,6 +89,7 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
         real_partition = read_communities_file(real_communities_path)
     print(f"real partition: {real_partition}")
     for algo in algo_dict.keys():
+        print(f'starting generating output for {algo}')
         partition = algo_dict[algo]["partition"]
         res = []
         index.append(algo)
@@ -93,4 +99,18 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
         res.append(graph_sensitivity(real_partition, partition))
         res.append(graph_accuracy(real_partition, partition))
         data.append(res)
+        print(f'finished generating output for {algo}')
     return data, index
+
+
+def generate_outputs_for_community_list(G, real_communities_list, new_communities_list):
+    # TODO: dont the evaluation functions need to be inputed the real vs new in certain order? if yes it should be explained what the order should be in the function
+    evals = {}
+    evals["modularity"] = modularity(G, new_communities_list)
+    evals["graph_conductance"] = graph_conductance(G, new_communities_list)
+    evals["jaccard"] = jaccard(new_communities_list, real_communities_list)
+    evals["graph_sensitivity"] = graph_sensitivity(real_communities_list, new_communities_list)
+    evals["graph_accuracy"] = graph_accuracy(real_communities_list, new_communities_list)
+    return evals
+
+

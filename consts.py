@@ -1,6 +1,11 @@
+import os
+
+yeast_path = "Benchmarks\\Yeast"
+arabidopsis_path =  "Benchmarks\\Arabidopsis"
+
 edges_files = [
-    'Benchmarks\\Yeast\\edges.txt',
-    'Benchmarks\\Arabidopsis\\edges.txt',
+    os.path.join(yeast_path, "edges.txt"),
+    os.path.join(arabidopsis_path, "edges.txt"),
 ]
 clusters_files = [
     'Benchmarks\\Yeast\\clusters.txt',
