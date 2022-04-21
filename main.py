@@ -146,14 +146,14 @@ def compare_algorithms(res_path):
 
 if __name__ == '__main__':
     # new_res_path = init_results_folder()
-    # real_communities = init_graph_and_folder_yeast(new_res_path)
-
+    # # real_communities = init_graph_and_folder_yeast(new_res_path)
+    #
     # params_dict = {"n": 1000, "mu": 0.1, "tau1": 2, "tau2": 1.1, "average_degree": 25, "minimum_community": 50}
     # real_communities = init_graph_and_folders(params_dict, new_res_path)
 
     # run this after running neuman code on network (original and ilp version)
     existing_res_path = os.path.join(RESULTS_FOLDER, "17-04-2022--17-53-03")
-    # neuman_ilp_communities = run_ilp_on_neuman_output(existing_res_path)
+    neuman_ilp_communities = run_ilp_on_neuman_output(existing_res_path)
 
     print(f'evaluating results')
     compare_algorithms(existing_res_path)
