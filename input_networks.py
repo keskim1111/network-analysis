@@ -5,6 +5,8 @@ from collections import defaultdict
 import os, pickle
 from helpers import init_results_folder
 
+from helpers import timeit
+
 
 def create_random_network(n=1000, mu=0.4, tau1=2, tau2=1.1, average_degree=15, min_community=20, max_degree=50,max_community =50):
     return LFR_benchmark_graph(
@@ -12,10 +14,8 @@ def create_random_network(n=1000, mu=0.4, tau1=2, tau2=1.1, average_degree=15, m
         min_community=min_community, max_community=max_community
     )
 
-# param_dict = {"n": 50, "mu": 0.1, "tau1": 3, "tau2":  1.5, "average_degree": 5, "minimum_community": 5}
-# create_random_network(50, 0.1, 3, 1.5, 2, 5)
 
-
+@timeit
 def read_communities_file(path):
     '''
         :param path:
@@ -25,14 +25,14 @@ def read_communities_file(path):
     with open(path) as file:
         while line := file.readline():
             node, community = line.rstrip().split()
-            community_dict[community].append(node)
+            community_dict[community].append(int(node))
     return list(community_dict.values())
 
 
 def create_lfr_benchmarks():
     generate_lfr_benchmarks()
 
-
+@timeit
 def create_graph_from_edge_file(filename):
     '''
     :param filename:
@@ -86,7 +86,7 @@ def create_graph_from_edge_strings_file(filename):
 
 
 # Before running neumann C code - creating graph from LFR benchmark networkx
-def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results_folder()):
+def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results_folder("res")):
     '''
     :param: param_dict - dictionary of parameters to create networkx graph, save_path - path to save results
     :example: param_dict={"n": 1000, "mu": 0.1, "tau1": 2, "tau2": 1.1, "average_degree": 25, "minimum_community": 50}
