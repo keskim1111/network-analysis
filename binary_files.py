@@ -83,7 +83,7 @@ def read_binary_network_output(fileName):
     return res
 
 
-def create_binary_network_file(G, path, title="bin"):
+def create_binary_network_file(G, path, title="bin",is_shanis_file=False):
     """
     :param: G - a networkX graph created based on the binary file
     :return: A path to a binary file created in the following format:
@@ -101,9 +101,13 @@ def create_binary_network_file(G, path, title="bin"):
         f.write(struct.pack('i', num_of_nodes))
         for node in nodes_list:
             neighbors = sorted(list(G.neighbors(node)))
+            if is_shanis_file:
+                node -= 1
             num_of_neighbors = len(neighbors)
             f.write(struct.pack('i', num_of_neighbors))
             for neighbor in neighbors:
+                if is_shanis_file:
+                    neighbor -= 1
                 f.write(struct.pack('i', int(neighbor)))
     finally:
         f.close()

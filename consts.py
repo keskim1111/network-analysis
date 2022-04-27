@@ -22,3 +22,6 @@ yeast_com = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biologi
 Arabidopsis_edges = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks sadna\\network-analysis\\Benchmarks\\Arabidopsis\\edges.txt"
 
 RESULTS_FOLDER = 'results'
+RESULTS_FOLDER = "results"
+community_file = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks " \
+                 "sadna\\network-analysis\\LFRBenchmark\\Graphs\\1000_0.4_0\\community.dat "
