@@ -4,12 +4,10 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pandas as pd
 from algorithms import newman, louvain, algorithms_partition_for_colors, run_ilp
+from consts import RESULTS_FOLDER
 from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, modularity
 from input_networks import read_communities_file
 
-RESULTS_FOLDER = "results"
-community_file = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks " \
-                 "sadna\\network-analysis\\LFRBenchmark\\Graphs\\1000_0.4_0\\community.dat "
 
 
 def create_visual_graph(G, partition, output, pos):
@@ -38,12 +36,12 @@ def write_to_file(file, content):
     return file
 
 
-def create_output_folder(folder_name, G):
+def create_output_folder(folder_name, G, edges_name="graph_edges"):
     path = f"{RESULTS_FOLDER}/{folder_name}"
     if not os.path.exists(f"{RESULTS_FOLDER}"):
         os.mkdir(f"{RESULTS_FOLDER}")
     os.mkdir(path)
-    with open(f"{RESULTS_FOLDER}/{folder_name}/graph_edges.txt", "w") as f:
+    with open(f"{RESULTS_FOLDER}/{folder_name}/{edges_name}.txt", "w") as f:
         f.write(str(G.edges))
     return path
 
@@ -107,6 +105,7 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     # TODO: dont the evaluation functions need to be inputed the real vs new in certain order? if yes it should be explained what the order should be in the function
     evals = {}
     evals["modularity"] = modularity(G, new_communities_list)
+    evals["modularity real_communities_list"] = modularity(G, real_communities_list)
     evals["graph_conductance"] = graph_conductance(G, new_communities_list)
     evals["jaccard"] = jaccard(new_communities_list, real_communities_list)
     evals["graph_sensitivity"] = graph_sensitivity(real_communities_list, new_communities_list)

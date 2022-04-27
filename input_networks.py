@@ -4,11 +4,10 @@ from LFRBenchmark.LFRBenchmark import generate_lfr_benchmarks
 from collections import defaultdict
 
 
-def create_random_network(n, mu, tau1=2, tau2=1.1, average_degree=25, min_community=50):
-    max_degree = int(n / 10)
+def create_random_network(n=1000, mu=0.4, tau1=2, tau2=1.1, average_degree=15, min_community=20, max_degree=50,max_community =50):
     return LFR_benchmark_graph(
         n=n, tau1=tau1, tau2=tau2, mu=mu, average_degree=average_degree, max_degree=max_degree,
-        min_community=min_community, max_community=int(n / 10)
+        min_community=min_community, max_community=max_community
     )
 
 
