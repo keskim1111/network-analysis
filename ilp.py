@@ -28,20 +28,20 @@ Assumption: the graph nodes are continous from 0 to num_nodes-1
 
 @timeit
 class ILP:
-    def __init__(self, graph_input, is_networx_graph=False, is_edges_file=False):
+    def __init__(self, graph_input, is_networkx_graph=False, is_edges_file=False):
         if is_edges_file:
             self.graph = create_graph_from_edge_file(graph_input)  # creates networkX graph from edges_file
-        if is_networx_graph:
+        if is_networkx_graph:
             self.graph = graph_input  # networkX graph
         self.num_of_nodes = self.graph.number_of_nodes()
         self.nodes_list = list(self.graph.nodes())
         self.model = gp.Model("mip1")
         self.set_objective()  # Sets objective function
         self.add_constraints()
+        print("starting to optimize")
         self.model.optimize()
         self.communities = self.find_communities()
 
-    # TODO: add input of mapping and then change node1, node2 according to mapping
     def find_communities(self):
         communities_per_node = {i: [i] for i in self.nodes_list}  # i:com - com is the full community that node i is part of
         node_is_done_dict = {i: 0 for i in self.nodes_list}  # 0 if node not in community from the communities list yet
@@ -87,6 +87,7 @@ class ILP:
 
         objective_function = 1 / m * total_sum
         self.model.setObjective(objective_function, GRB.MAXIMIZE)
+        print("finished setting objective function")
 
     # Assumption: this function is called after set_objective() - which creates the variables
     """
@@ -108,6 +109,7 @@ class ILP:
                         globals()[f'x_{i}_{j}'] - globals()[f'x_{j}_{k}'] + globals()[f'x_{i}_{k}'] >= 0)
                     self.model.addConstr(
                         -globals()[f'x_{i}_{j}'] + globals()[f'x_{j}_{k}'] + globals()[f'x_{i}_{k}'] >= 0)
+        print("finished adding constraints")
         # for c in self.model.getConstrs():
         #     print(c.ConstrName, c.Slack)
 

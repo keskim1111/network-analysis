@@ -104,8 +104,10 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
 def generate_outputs_for_community_list(G, real_communities_list, new_communities_list):
     # TODO: dont the evaluation functions need to be inputed the real vs new in certain order? if yes it should be explained what the order should be in the function
     evals = {}
-    evals["modularity"] = modularity(G, new_communities_list)
-    evals["modularity real_communities_list"] = modularity(G, real_communities_list)
+    evals["num communities - real"] = len(real_communities_list)
+    evals["num communities - algo"] = len(new_communities_list)
+    evals["modularity - real"] = modularity(G, real_communities_list)
+    evals["modularity - algo"] = modularity(G, new_communities_list)
     evals["graph_conductance"] = graph_conductance(G, new_communities_list)
     evals["jaccard"] = jaccard(new_communities_list, real_communities_list)
     evals["graph_sensitivity"] = graph_sensitivity(real_communities_list, new_communities_list)

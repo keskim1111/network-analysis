@@ -3,7 +3,6 @@ import networkx as nx
 from LFRBenchmark.LFRBenchmark import generate_lfr_benchmarks
 from collections import defaultdict
 import os, pickle
-from binary_files import create_binary_network_file
 from helpers import init_results_folder
 
 
@@ -12,6 +11,9 @@ def create_random_network(n=1000, mu=0.4, tau1=2, tau2=1.1, average_degree=15, m
         n=n, tau1=tau1, tau2=tau2, mu=mu, average_degree=average_degree, max_degree=max_degree,
         min_community=min_community, max_community=max_community
     )
+
+# param_dict = {"n": 50, "mu": 0.1, "tau1": 3, "tau2":  1.5, "average_degree": 5, "minimum_community": 5}
+# create_random_network(50, 0.1, 3, 1.5, 2, 5)
 
 
 def read_communities_file(path):
@@ -88,7 +90,7 @@ def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results
     '''
     :param: param_dict - dictionary of parameters to create networkx graph, save_path - path to save results
     :example: param_dict={"n": 1000, "mu": 0.1, "tau1": 2, "tau2": 1.1, "average_degree": 25, "minimum_community": 50}
-    :return: create pickle file objects in save_path - edges.list, real_communities.dict, params.dict
+    :return: create pickle file objects in save_path - edges.list, real_communities.dict, params.dict, returns save_path
     '''
     n = params_dict["n"]
     max_degree = int(n / 10)
@@ -102,7 +104,7 @@ def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results
     real_communities = {frozenset(G.nodes[v]["community"]) for v in G}
     real_modularity = nx.algorithms.community.modularity(G, real_communities)
     print(f'real_modularity: {real_modularity}')
-    binary_network = create_binary_network_file(G, save_path, title=os.path.basename(save_path))
+    # binary_network = create_binary_network_file(G, save_path, title=os.path.basename(save_path))
 
     # saving results for future use
     with open(os.path.join(save_path, "edges.list"), "wb") as f:
@@ -113,7 +115,7 @@ def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results
         pickle.dump(params_dict, f)
     print(f'saved results in {save_path}')
 
-    return real_communities
+    return save_path
 
-if __name__ == '__main__':
-    create_graph_from_edge_strings_file(yeast_edges)
+# if __name__ == '__main__':
+#     create_graph_from_edge_strings_file(yeast_edges)
