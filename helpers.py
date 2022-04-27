@@ -77,11 +77,13 @@ def create_sub_graphs_from_communities(G, communities):
         sub_graphs.append(G.subgraph(community))
     return sub_graphs
 
-
-def init_results_folder():
-    curr_res_path = os.path.join(RESULTS_FOLDER, f"{current_time()}")
+@timeit
+def init_results_folder(init_path):
+    if not os.path.isdir(init_path):
+        os.mkdir(init_path)
+    curr_res_path = os.path.join(init_path, f"{current_time()}")
     os.mkdir(curr_res_path)
-    return curr_res_path
+    return os.path.join(os.getcwd(), curr_res_path)
 
 def save_str_graph_in_good_format(graph_path):
     edges_file = os.path.join(graph_path, "edges.txt")

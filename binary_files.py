@@ -82,8 +82,8 @@ def read_binary_network_output(fileName):
         f.close()
     return res
 
-
-def create_binary_network_file(G, path, title="bin",is_shanis_file=False):
+@timeit
+def create_binary_network_file(G, path, title="bin", is_shanis_file=False):
     """
     :param: G - a networkX graph created based on the binary file
     :return: A path to a binary file created in the following format:
@@ -111,7 +111,7 @@ def create_binary_network_file(G, path, title="bin",is_shanis_file=False):
                 f.write(struct.pack('i', int(neighbor)))
     finally:
         f.close()
-    return file_name
+    return os.path.join(path, file_name)
 
 
 # TODO remove after
