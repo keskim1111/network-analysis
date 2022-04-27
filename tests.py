@@ -46,60 +46,7 @@ def read_neuman_binary_files_and_print_evaluations(neuman_res_path, original_res
             print(f'{file}: {neuman_eval}')
 
 
-@timeout(120)
-def run_cmd(command, run_path):
-    os.chdir(run_path)
-    print(f"current path = {os.getcwd()}")
-    print(f"current cmd running = {command}")
-    process = subprocess.Popen(command, shell=True)
-    process.communicate()
-    errcode = process.returncode
-    process.kill()
-    process.terminate()
-
-
-def run_func_after_file_created(file_created_path, func, arg):
-    '''
-    :param file_created_path:
-    :param func:
-    :param arg: a dict with key as arg name and value
-    :return:
-    '''
-    print(" running run_func_after_file_created")
-    while not os.path.exists(file_created_path):
-        time.sleep(1)
-    if os.path.isfile(file_created_path):
-        print("file created!")
-        res = func(arg)
-        return res
-    else:
-        raise ValueError("%s isn't a file!" % file_created_path)
-
-
-def full_flow(input_network_folder):
-    res_folder = init_results_folder("full_flow")
-    network_name = os.path.basename(input_network_folder)
-    network_file_path = os.path.join(input_network_folder, "network.dat")
-    community_file_path = os.path.join(input_network_folder, "community.dat")
-    G = create_graph_from_edge_file(network_file_path)
-    real_communities = read_communities_file(community_file_path)
-    binary_input_path = create_binary_network_file(G, res_folder, title=network_name, is_shanis_file =True)
-    output_file_path = os.path.join(res_folder, f"{network_name}.out")
-    print("binary_input_path: ",binary_input_path)
-    command = f".\cluster '{binary_input_path}' '{output_file_path}'"
-    run_cmd(command, C_CODE)
-    comm = run_func_after_file_created(output_file_path, read_binary_network_output, output_file_path)
-    print(comm)
-
-    pass
-
 
 if __name__ == '__main__':
     # read_neuman_binary_files_and_print_evaluations( r"C:\Users\kimke\OneDrive\Documents\4th year\semeter
-    # B\Biological networks sadna\network-analysis\Graphs_shani\binaries\27-04-2022--11-10-11",
-    # r'C:\Users\kimke\OneDrive\Documents\4th year\semeter B\Biological networks
-    # sadna\network-analysis\LFRBenchmark\Graphs') run_cmd(in_path, out_path)
-    input_community_file = r"C:\Users\kimke\OneDrive\Documents\4th year\semeter B\Biological networks sadna\network-analysis\LFRBenchmark\Graphs\1000_0.4_0"
-    full_flow(input_community_file)
-
     pass

@@ -86,7 +86,7 @@ def create_graph_from_edge_strings_file(filename):
 
 
 # Before running neumann C code - creating graph from LFR benchmark networkx
-def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results_folder()):
+def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results_folder("res")):
     '''
     :param: param_dict - dictionary of parameters to create networkx graph, save_path - path to save results
     :example: param_dict={"n": 1000, "mu": 0.1, "tau1": 2, "tau2": 1.1, "average_degree": 25, "minimum_community": 50}

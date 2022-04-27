@@ -58,6 +58,19 @@ def current_time():
     dt_string = now.strftime("%d-%m-%Y--%H-%M-%S")
     return dt_string
 
+
+def write_to_file(file, content, is_log=False):
+    now = datetime.now()
+    if is_log:
+        current_time = now.strftime("%H:%M:%S")
+        line = f"[{current_time}]: {content}\n"
+        print(line)
+    else:
+        line = f"{content}"
+    with open(file, "a") as f:
+        f.write(line)
+    return file
+
 #
 # def adjacency_matrix(G):
 #     num_of_nodes = G.number_of_nodes()
@@ -77,7 +90,6 @@ def create_sub_graphs_from_communities(G, communities):
         sub_graphs.append(G.subgraph(community))
     return sub_graphs
 
-@timeit
 def init_results_folder(init_path):
     if not os.path.isdir(init_path):
         os.mkdir(init_path)
