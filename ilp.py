@@ -11,9 +11,11 @@ via mathematical programming.
 
 import gurobipy as gp
 from gurobipy import GRB
-from input_networks import create_graph_from_edge_file, create_random_network
-from helpers import timeit
+from input_networks import create_graph_from_edge_file, create_random_network, create_graph_from_edge_list
+from helpers import timeit, create_sub_graphs_from_communities
 import networkx as nx
+import os, pickle
+from binary_files import read_binary_network_output
 
 
 msg = "The modularity result of the Algorithm is: "
@@ -136,6 +138,36 @@ def run_ilp_on_nx_graph(G):
     return ilp_obj
 
 
+# After running Neumann C code
+def run_ilp_on_neuman_output(curr_res_path):
+    '''
+    :param: path to binary graph.out file - community division of neuman
+    :return: division to communities of ilp (python list of lists)
+    '''
+    with open(os.path.join(curr_res_path, "edges.list"), "rb") as f:
+        edges_list = pickle.load(f)
+
+    G = create_graph_from_edge_list(edges_list)
+
+    neuman_communities = read_binary_network_output(os.path.join(curr_res_path, f'lp-{os.path.basename(curr_res_path)}-graph.out'))
+
+    sub_graphs = create_sub_graphs_from_communities(G, neuman_communities)
+    # run ilp on each communities to continue dividing the communities
+    all_communities = []
+    for i in range(len(sub_graphs)): # TODO: in the future we can try to run this parallel
+        g = sub_graphs[i]
+        print(f'------------ {i}/{len(sub_graphs)-1}: starting to run ilp on {g.number_of_nodes()} nodes ----------')
+        ilp_obj = ILP(g, is_networx_graph=True)
+        curr_communities = ilp_obj.communities
+        all_communities += curr_communities
+    print(f'finished running ilp')
+
+    # save results
+    print(f'saving neuman-ilp results')
+    with open(os.path.join(curr_res_path, "neuman_ilp_communities.list"), "wb") as f:
+        pickle.dump(all_communities, f)
+
+    return all_communities
 
 # if __name__ == '__main__':
 #     # trivial_run()
