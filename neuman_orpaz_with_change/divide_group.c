@@ -9,7 +9,6 @@
 #include "spmat.h"
 
 #define IS_POSITIVE(X) ((X) > 0.00001)
-#define LP_CRITICAL 200
 
 /* Put the value num in each element of the vector s */
 void make_vector_to_num(double *s, int size, double num) {
@@ -151,7 +150,7 @@ void find_optimal_division(spmat *A, double *s) {
 }
 
 /* Divide a group of verteces, regarding to the division that maximize the modularity */
-void divide_group(mat_group **mat_list, group **P, group **O) {
+void divide_group(mat_group **mat_list, group **P, group **O, int lp_critical) {
 	spmat *A = mat_pop(mat_list);
 	node *orig_group = pop(P);
 	double *s = malloc(A->n * sizeof(double));
@@ -165,25 +164,25 @@ void divide_group(mat_group **mat_list, group **P, group **O) {
 	find_optimal_division(A, s);
 	split_list(orig_group, s, &g1, &g2, &n1 ,&n2);
 
-	/* adding to O when other group is empty or size is <= LP_critical*/
-	if (n1 == 0 || (n2 <= LP_CRITICAL && n2 >= 1) ) {
+	/* adding to O when other group is empty or size is <= lp_critical*/
+	if (n1 == 0 || (n2 <= lp_critical && n2 >= 1) ) {
 		printf("pushing to O group g2 of size %d\n", n2);
 		push(O, g2, n2);
 	}
-	if (n2 == 0 || (n1 <= LP_CRITICAL && n1 >= 1)) {
+	if (n2 == 0 || (n1 <= lp_critical && n1 >= 1)) {
 		printf("pushing to O group g1 of size %d\n", n1);
 		push(O, g1, n1);
 	}
 	
-	/* adding to P when size is > LP_critical*/
-	if (n1 > LP_CRITICAL && n2 > 0) {
+	/* adding to P when size is > lp_critical*/
+	if (n1 > lp_critical && n2 > 0) {
 		spmat *sub1  = spmat_allocate_list(n1, A->M);
 		spmat_sub(A, sub1, g1);
 		printf("pushing to P group g1 of size %d\n", n1);
 		push(P, g1, n1);
 		mat_push(mat_list, sub1);
 	}
-	if (n2 > LP_CRITICAL && n1 > 0) {
+	if (n2 > lp_critical && n1 > 0) {
 		spmat *sub2  = spmat_allocate_list(n2, A->M);
 		spmat_sub(A, sub2, g2);
 		printf("pushing to P group g2 of size %d\n", n2);

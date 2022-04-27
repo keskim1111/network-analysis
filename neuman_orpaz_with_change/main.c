@@ -108,6 +108,11 @@ spmat *create_matrix(FILE *in) {
 	return matrix;
 }
 
+/*
+argv[1] - input binary file
+argv[2] - output binary file
+argv[3] - lp_critical
+*/
 int main(int argc, char *argv[]) {
 	FILE *in = fopen(argv[1], "rb");
 	spmat *A = create_matrix(in);
@@ -116,11 +121,12 @@ int main(int argc, char *argv[]) {
 	group **P = malloc(sizeof(group*));
 	node *all_nodes = NULL;
 	int i = A->n - 1;
+	int lp_critical;
 
 	if (mats == NULL || O == NULL || P == NULL) {
 		print_and_exit(1, "Error: malloc had failed\n");
 	}
-	if (argc != 3) {
+	if (argc != 4) {
 		print_and_exit(1, "Error: Wrong number of arguments\n");
 	}
 
@@ -139,10 +145,11 @@ int main(int argc, char *argv[]) {
 	
 	push(P, all_nodes, A->n);
 	mat_push(mats, A);
-	
+	sscanf(argv[3], "%d", &lp_critical);
+
 	while (*P != NULL) {
 		printf("starting to divide groups");
-		divide_group(mats, P, O);
+		divide_group(mats, P, O, lp_critical);
 	}
 
 	print_groups(O, argv[2]);
