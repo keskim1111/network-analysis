@@ -1,3 +1,8 @@
+"""
+fp = file path
+dp = dir path
+"""
+
 import os
 
 C_CODE = os.path.join(os.getcwd(), 'neuman_orpaz_with_change')

@@ -85,7 +85,7 @@ def read_binary_network_output(fileName, is_shani=False):
     return res
 
 @timeit
-def create_binary_network_file(G, path, title="bin", is_shanis_file=False):
+def create_binary_network_file(G, path, title="graph", is_shanis_file=False):
     """
     :param: G - a networkX graph created based on the binary file
     :return: A path to a binary file created in the following format:
@@ -95,7 +95,7 @@ def create_binary_network_file(G, path, title="bin", is_shanis_file=False):
             The next value is k2, followed by the k2 indices of the neighbors of the second node, then k3
             and its k3 neighbors, and so on until node n.
     """
-    file_name = f'{title}-graph.in'
+    file_name = f'{title}.in'
     f = open(os.path.join(path, file_name), "wb")
     try:
         nodes_list = sorted(G.nodes())
