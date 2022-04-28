@@ -65,33 +65,38 @@ def get_neumann_communities(network_obj, lp_critical=1):
     return neumann_communities
 
 
-def run_algo_on_neumann(network_obj, neumann_communities, run_ilp=False, run_louvain=False, max_ilp_size=100):
+def run_algo_on_neumann(network_obj, neumann_communities, run_ilp=False, run_louvain=False):
     neumann_sub_graphs = create_sub_graphs_from_communities(network_obj.G, neumann_communities)
     neumann_and_algo_communities = []
 
     count_louvain = 0
     count_ilp = 0
-
+    count_no_divide = 0
     for i in range(len(neumann_sub_graphs)):
         g = neumann_sub_graphs[i]
         g_size = len(g.nodes)
-        print(f'============== Iteration {i}, subgraph size = {g_size} ================')
+        curr_communities = []
 
-        if run_ilp and g_size<=max_ilp_size: # TODO: add try and except with timeout instead of graph size
-            ilp_obj = ILP(g, is_networkx_graph=True)
-            curr_communities = ilp_obj.communities
-            count_ilp += 1
+        print(f'============== Iteration {i+1}/{len(neumann_sub_graphs)}, subgraph size = {g_size} ================')
 
-        elif run_louvain:
+        if run_ilp:
+            try:
+                print(f'============Trying to run ILP')
+                ilp_obj = ILP(g, is_networkx_graph=True)
+                curr_communities = ilp_obj.communities
+                count_ilp += 1
+            except Exception: # not sure I have to add 60 here
+                print(f'passed timeout time')
+        if run_louvain:
             count_louvain += 1
             curr_communities = louvain(g)
-
         else: # Don't divide group more
             curr_communities = [list(g.nodes)]  # TODO: check that this is the correct list format (list of list)
+            count_no_divide += 1
         print(f'Num of curr_communities: {len(curr_communities)}')
         neumann_and_algo_communities += curr_communities
 
-        print(f'count_louvain: {count_louvain}, count_ilp: {count_ilp}, total: {len(neumann_sub_graphs)}')
+        print(f'count_louvain: {count_louvain}, count_ilp: {count_ilp}, count_no_divide: {count_no_divide}, total: {len(neumann_sub_graphs)}')
 
     return neumann_and_algo_communities
 
@@ -103,7 +108,7 @@ class NetworkObj:
         self.network_dp = os.path.join(PATH2SHANIS_GRAPHS, self.network_name)
         self.real_communities = read_communities_file(os.path.join(self.network_dp, "community.dat"))
         _pickle(os.path.join(self.save_folder, "real.communities"), self.real_communities, is_dump=True)
-        self.G = create_graph_from_edge_file(self.network_dp)  # creating graph object
+        self.G = create_graph_from_edge_file(os.path.join(self.network_dp, "network.dat"))  # creating graph object
         self.binary_input_fp = create_binary_network_file(self.G, self.save_folder, title=self.network_name,
                                                      is_shanis_file=True)  # converting network to binary file
 
@@ -135,10 +140,10 @@ def multi_run():
             curr_neumann_com = get_neumann_communities(network_obj, lp_critical=lp_critical)
 
             curr_com = run_algo_on_neumann(network_obj, curr_neumann_com, run_ilp=True,
-                                                                  run_louvain=True) # TODO: add timeout
+                                                                  run_louvain=True)
             algo_communities_dict[f'Neumann-Louvain-ILP-{lp_critical}'] = curr_com
 
-            curr_com = run_algo_on_neumann(network_obj, curr_neumann_com, run_ilp=True) # TODO: add timeout
+            curr_com = run_algo_on_neumann(network_obj, curr_neumann_com, run_ilp=True)
             algo_communities_dict[f'Neumann-ILP-{lp_critical}'] = curr_com
 
         print(f'========Saving all results=========')

@@ -3,7 +3,7 @@ import struct
 
 from consts import edge_file
 from evaluation import jaccard, graph_accuracy, graph_sensitivity, modularity
-from input_networks import create_graph_from_edge_file, create_graph_from_edge_strings_file, \
+from input_networks import create_graph_from_edge_file, \
     create_random_network
 from helpers import timeit, current_time
 import os
