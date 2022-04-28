@@ -2,8 +2,8 @@ import os
 
 C_CODE = os.path.join(os.getcwd(), 'neuman_orpaz_with_change')
 
-yeast_path = "Benchmarks\\Yeast"
-arabidopsis_path =  "Benchmarks\\Arabidopsis"
+yeast_path = os.path.join("Benchmarks", "Yeast")
+arabidopsis_path = os.path.join("Benchmarks", "Arabidopsis")
 
 edges_files = [
     os.path.join(yeast_path, "edges.txt"),

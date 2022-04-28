@@ -1,7 +1,7 @@
 import functools
 import time
 from datetime import datetime
-from consts import RESULTS_FOLDER, yeast_path
+from consts import RESULTS_FOLDER, yeast_path, arabidopsis_path
 import os
 import networkx as nx
 import pickle, os
@@ -71,24 +71,13 @@ def write_to_file(file, content, is_log=False):
         f.write(line)
     return file
 
-#
-# def adjacency_matrix(G):
-#     num_of_nodes = G.number_of_nodes()
-#     adj_mat = [[0] * num_of_nodes for _ in range(num_of_nodes)]  # Initialize adjacency matrix
-#     for i in range(num_of_nodes):
-#         for j in range(num_of_nodes):
-#
-#     for i, j in G.edges:
-#         adj_mat[i][j] = 1
-#         adj_mat[j][i] = 1  # make sure it is undirected graph
-#     return adj_mat
-
 
 def create_sub_graphs_from_communities(G, communities):
     sub_graphs = []
     for community in communities:
         sub_graphs.append(G.subgraph(community))
     return sub_graphs
+
 
 def init_results_folder(init_path):
     if not os.path.isdir(init_path):
@@ -97,46 +86,57 @@ def init_results_folder(init_path):
     os.mkdir(curr_res_path)
     return os.path.join(os.getcwd(), curr_res_path)
 
+
 def save_str_graph_in_good_format(graph_path):
+    '''
+    :param graph_path: path to graph built from nodes that are strings
+    :return: a networkX graph created from the strings edges file, with
+    nodes that are numbers.
+    a list of communities with numbers created from the community strings file
+    a dict that maps the strings of the nodes to numbers
+    '''
     edges_file = os.path.join(graph_path, "edges.txt")
     clusters_file = os.path.join(graph_path, "clusters.txt")
 
     G = nx.Graph()
     dict_str_to_num = dict()
     i = 0
-    with open(edges_file) as file:
-        try:
-            while line := file.readline():
-                node1, node2 = line.rstrip().split()
-                if node1 not in dict_str_to_num:
-                    dict_str_to_num[node1] = i
+    clusters = {}
+    with open(clusters_file) as f:
+        while line := f.readline():
+            try:
+                node, community = line.rstrip().split("\t")
+                if node not in dict_str_to_num:
+                    dict_str_to_num[node] = i
                     i += 1
-                if node2 not in dict_str_to_num:
-                    dict_str_to_num[node2] = i
-                    i += 1
-                node1_num = dict_str_to_num[node1]
-                node2_num = dict_str_to_num[node2]
-                G.add_edge(node1_num, node2_num)
-        except ValueError:
-            print(line)
-            raise ValueError
+                if community not in clusters:
+                    clusters[community] = []
+                clusters[community].append(dict_str_to_num[node])
+            except ValueError:
+                print(line)
+                raise ValueError
+    clusters_list = [nodes for nodes in clusters.values()]
 
+    with open(os.path.join(graph_path, "clusters.list"), "wb") as f:
+        pickle.dump(clusters_list, f)
+
+    with open(edges_file) as file:
+        while line := file.readline():
+            str_node1, str_node2 = line.rstrip().split("\t")
+            # map str node name to a number
+            num_node1 = dict_str_to_num[str_node1]
+            num_node2 = dict_str_to_num[str_node2]
+            G.add_edge(num_node1, num_node2)
+
+    # save values
     with open(os.path.join(graph_path, "edges.list"), "wb") as f:
         pickle.dump(G.edges, f)
 
     with open(os.path.join(graph_path, "str_to_num.dict"), "wb") as f:
         pickle.dump(dict_str_to_num, f)
 
-    clusters = {}
-    with open(clusters_file) as f:
-        while line := f.readline():
-            n, c = line.rstrip().split()
-            if c not in clusters:
-                clusters[c] = []
-            clusters[c].append(dict_str_to_num[n])
-    clusters_list = [nodes for nodes in clusters.values()]
+    return G, clusters_list, dict_str_to_num
 
-    with open(os.path.join(graph_path, "clusters.list"), "wb") as f:
-        pickle.dump(clusters_list, f)
 
-# save_str_graph_in_good_format(yeast_path)
+if __name__ == '__main__':
+    print(save_str_graph_in_good_format(arabidopsis_path))

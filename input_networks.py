@@ -4,6 +4,8 @@ from LFRBenchmark.LFRBenchmark import generate_lfr_benchmarks
 from collections import defaultdict
 import os, pickle
 from helpers import init_results_folder
+from consts import RESULTS_FOLDER, yeast_path, arabidopsis_path
+
 
 from helpers import timeit
 
@@ -58,32 +60,6 @@ def create_graph_from_edge_list(edges_list):
 yeast_edges = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks sadna\\network-analysis\\Benchmarks\\Yeast\\edges.txt"
 
 
-def create_graph_from_edge_strings_file(filename):
-    '''
-    :param filename:
-    :return: a networkX graph from the file
-    '''
-    G = nx.Graph()
-    dict_str_to_num = dict()
-    i = 0
-    with open(filename) as file:
-        try:
-            while line := file.readline():
-                node1, node2 = line.rstrip().split()
-                if node1 not in dict_str_to_num:
-                    dict_str_to_num[node1] = i
-                    i += 1
-                if node2 not in dict_str_to_num:
-                    dict_str_to_num[node2] = i
-                    i += 1
-                node1_num = dict_str_to_num[node1]
-                node2_num = dict_str_to_num[node2]
-                G.add_edge(node1_num, node2_num)
-        except ValueError:
-            print(line)
-            raise ValueError
-    return G
-
 
 # Before running neumann C code - creating graph from LFR benchmark networkx
 def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results_folder("res")):
@@ -117,5 +93,5 @@ def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results
 
     return save_path
 
-# if __name__ == '__main__':
-#     create_graph_from_edge_strings_file(yeast_edges)
+if __name__ == '__main__':
+    pass
