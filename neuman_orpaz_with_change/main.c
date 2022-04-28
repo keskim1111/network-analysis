@@ -148,7 +148,6 @@ int main(int argc, char *argv[]) {
 	sscanf(argv[3], "%d", &lp_critical);
 
 	while (*P != NULL) {
-		printf("starting to divide groups");
 		divide_group(mats, P, O, lp_critical);
 	}
 

@@ -178,14 +178,12 @@ void divide_group(mat_group **mat_list, group **P, group **O, int lp_critical) {
 	if (n1 > lp_critical && n2 > 0) {
 		spmat *sub1  = spmat_allocate_list(n1, A->M);
 		spmat_sub(A, sub1, g1);
-		printf("pushing to P group g1 of size %d\n", n1);
 		push(P, g1, n1);
 		mat_push(mat_list, sub1);
 	}
 	if (n2 > lp_critical && n1 > 0) {
 		spmat *sub2  = spmat_allocate_list(n2, A->M);
 		spmat_sub(A, sub2, g2);
-		printf("pushing to P group g2 of size %d\n", n2);
 		push(P,g2, n2);
 		mat_push(mat_list, sub2);
 	}

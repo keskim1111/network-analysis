@@ -54,7 +54,7 @@ def read_binary_network_input(fileName, edgesFile=None):
 
 
 @timeit
-def read_binary_network_output(fileName):
+def read_binary_network_output(fileName, is_shani=False):
     """
     :param: fileName of a binary file of the following format:
             The first value represents the number of nodes in the network, n = |V |.
@@ -76,6 +76,8 @@ def read_binary_network_output(fileName):
             for j in range(num_of_nodes_in_group):
                 group_member_byte = f.read(4)
                 group_member = struct.unpack('i', group_member_byte)[0]
+                if is_shani:
+                    group_member += 1
                 group.append(group_member)
             res.append(group)
     finally:

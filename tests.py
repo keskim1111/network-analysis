@@ -10,7 +10,7 @@ import os.path
 import time
 from helpers import init_results_folder
 
-C_CODE = r'C:\Users\kimke\OneDrive\Documents\4th year\semeter B\Biological networks sadna\network-analysis\neuman_orpaz_with_change'
+C_CODE = os.path.join(os.getcwd(), 'neuman_orpaz_with_change')
 in_path = "g.in"
 out_path = "g.out"
 
