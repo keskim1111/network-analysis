@@ -154,8 +154,9 @@ def multi_run():
             # Evaluate results and save to eval_dict
             eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
             evals_list.append(eval_dict)
-            # add network_obj.network_name to evals_list
+            # TODO: add network_obj.network_name to evals_list
 
+    # TODO: continue from here
     data_dict = create_data_dict(evals_list)
     df = pd.DataFrame(data_dict)
 
