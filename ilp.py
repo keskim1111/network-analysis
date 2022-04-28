@@ -12,7 +12,7 @@ via mathematical programming.
 import gurobipy as gp
 from gurobipy import GRB
 from input_networks import create_graph_from_edge_file, create_random_network, create_graph_from_edge_list
-from helpers import timeit, create_sub_graphs_from_communities
+from helpers import timeit, timeout, create_sub_graphs_from_communities
 import networkx as nx
 import os, pickle
 from binary_files import read_binary_network_output
@@ -27,6 +27,7 @@ Assumption: the graph nodes are continous from 0 to num_nodes-1
 
 
 @timeit
+@timeout
 class ILP:
     def __init__(self, graph_input, is_networkx_graph=False, is_edges_file=False):
         if is_edges_file:

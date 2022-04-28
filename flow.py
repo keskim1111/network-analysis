@@ -3,14 +3,12 @@ import pandas as pd
 
 from algorithms import louvain
 from binary_files import read_binary_network_output, create_binary_network_file
-from consts import C_CODE, PATH2SHANIS_GRAPHS
+from consts import C_CODE, PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS
 from input_networks import create_graph_from_edge_file, read_communities_file, create_graph_from_edge_list
 from helpers import init_results_folder, timeout, _pickle, timeit, create_sub_graphs_from_communities
 from output_generator import generate_outputs_for_community_list
 from pprint import pprint
 from ilp import ILP
-
-
 
 
 @timeout(120)
@@ -43,127 +41,6 @@ def run_func_after_file_created(file_created_path, func, args):
         raise ValueError("%s isn't a file!" % file_created_path)
 
 
-
-
-def run_louvain_on_neuman_iterations():
-    shani_graphs_dp = os.path.join(os.getcwd(), "LFRBenchmark", "Graphs")
-    networks_dir = sorted(os.listdir(shani_graphs_dp), reverse=True)
-    for input_network_folder in networks_dir:
-        print(f'input_network_folder: {input_network_folder}')
-        input_network_fp = os.path.join(shani_graphs_dp, input_network_folder)
-
-        # Compare original neuman results to real communties
-        res_fp, binary_output_fp = get_neuman_communities_shani_file(input_network_fp) # default - lp_critical==1
-
-        real_communities = _pickle(res_fp, "real_communities.list", is_load=True)
-        edges_list = _pickle(res_fp, "edges.list", is_load=True)
-        G = create_graph_from_edge_list(edges_list)
-
-        neuman_communities = _pickle(res_fp, "algo_communities.list", is_load=True)
-        neuman_original_eval = generate_outputs_for_community_list(G, real_communities, neuman_communities)
-        pprint(neuman_original_eval)
-
-        sub_graphs = create_sub_graphs_from_communities(G, neuman_communities)
-
-        # Run neuman community results on ilp or louvain
-        neuman_louvain_communities = []
-        for i in range(len(sub_graphs)):
-            g = sub_graphs[i]
-            print(f'============================== Iteration {i}, subgraph size = {len(g.nodes)} ============================================')
-            curr_communities = louvain(g)
-            print(f'Num of communities: {len(curr_communities)}')
-            neuman_louvain_communities += curr_communities
-
-        # Evaluate results
-        neuman_ilp_louvain_eval = generate_outputs_for_community_list(G, real_communities, neuman_louvain_communities)
-
-        print('neuman original')
-        pprint(neuman_original_eval)
-
-        print('neuman + louvain:')
-        pprint(neuman_ilp_louvain_eval)
-
-@timeit
-def get_neuman_communities_shani_file(input_network_dp, results_folder="full_flow", lp_critical=1):
-    """
-    :param: path to folder with network for input, path to folder to save results, lp_critical - for neuman code
-    :saves: saves in save_folder the binary in and out files,
-             saves pickle objects of the the real community division and the algo community division.
-    :returns the graph G, the real community division and the algo community division
-    """
-    save_folder = init_results_folder(results_folder)
-    network_name = os.path.basename(input_network_dp) # shows parameters of network (num of nodes + mixing parameter)
-    network_file_path = os.path.join(input_network_dp, "network.dat") # for input
-
-    G = create_graph_from_edge_file(network_file_path) # creating graph object
-    _pickle(save_folder, "edges.list", G.edges, is_dump=True) # save graph edges to file
-    binary_input_fp = create_binary_network_file(G, save_folder, title=network_name, is_shanis_file=True) # converting network to binary file
-    binary_output_fp = os.path.join(save_folder, f"{network_name}_{lp_critical}.out") # defining path to output file
-
-    command = f".\cluster {binary_input_fp} {binary_output_fp} {lp_critical}" # command for neuman C code
-    run_cmd(command, C_CODE)
-
-    algo_communities = run_func_after_file_created(binary_output_fp, read_binary_network_output, {"fileName":binary_output_fp, "is_shani": True})
-    real_communities = read_communities_file(os.path.join(input_network_dp, "community.dat")) # for comparing results
-
-    # Saving the community division results
-    _pickle(save_folder, "algo_communities.list", algo_communities, is_dump=True)
-    _pickle(save_folder, "real_communities.list", real_communities, is_dump=True)
-
-    return save_folder, binary_output_fp
-
-
-def run_ilp_on_neuman_iterations(lp_critical_list, add_louvain=False):
-
-    for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        print(f'input_network_folder: {input_network_folder}')
-        input_network_fp = os.path.join(PATH2SHANIS_GRAPHS, input_network_folder)
-
-        # Compare original neuman results to real communties
-        res_fp, binary_output_fp = get_neuman_communities_shani_file(input_network_fp) # default - lp_critical==1
-
-        real_communities = _pickle(res_fp, "real_communities.list", is_load=True)
-        edges_list = _pickle(res_fp, "edges.list", is_load=True)
-        G = create_graph_from_edge_list(edges_list)
-
-        neuman_communities = _pickle(res_fp, "algo_communities.list", is_load=True)
-        neuman_original_eval = generate_outputs_for_community_list(G, real_communities, neuman_communities)
-        pprint(neuman_original_eval)
-
-        for lp_critical in lp_critical_list:
-            print(f'================================== LP_critical={lp_critical} ==================================')
-            # Run neuman on network input
-            res_fp, binary_output_fp = get_neuman_communities_shani_file(input_network_fp, lp_critical=lp_critical)
-
-            neuman_communities = read_binary_network_output(binary_output_fp, is_shani=True)
-            sub_graphs = create_sub_graphs_from_communities(G, neuman_communities)
-
-            neuman_ilp_louvain_communities = []
-            count_louvain = 0
-            count_ilp = 0
-            # Run neuman community results on ilp or louvain
-            for i in range(len(sub_graphs)):
-                g = sub_graphs[i]
-                print(f'============================== Iteration {i}, subgraph size = {len(g.nodes)} ============================================')
-                if add_louvain and len(g.nodes) >= 0:
-                    print(f'Running louvain')
-                    count_louvain += 1
-                    curr_communities = louvain(g)
-                else:
-                    print(f'Running ilp')
-                    count_ilp += 1
-                    ilp_obj = ILP(g, is_networkx_graph=True)
-                    curr_communities = ilp_obj.communities
-                print(f'Num of communities: {len(curr_communities)}')
-                neuman_ilp_louvain_communities += curr_communities
-
-            print(f'count_louvain: {count_louvain}, count_ilp: {count_ilp}, total: {len(sub_graphs)}')
-            # Evaluate results
-            neuman_ilp_louvain_eval = generate_outputs_for_community_list(G, real_communities, neuman_ilp_louvain_communities)
-            pprint(neuman_ilp_louvain_eval)
-            pprint(neuman_original_eval)
-
-
 def create_data_dict(evals_list):
     """
     :param evals_list: list of eval dictionaries
@@ -178,55 +55,108 @@ def create_data_dict(evals_list):
     return data_dict
 
 
-def get_neumann_c_communities(save_folder, input_network_folder_name, binary_input_fp, lp_critical=1):
-    binary_output_fp = os.path.join(save_folder,
-                                    f"{input_network_folder_name}_{lp_critical}.out")  # defining path to output file
-    command = f".\cluster {binary_input_fp} {binary_output_fp} {lp_critical}" # command for neuman C code
+def get_neumann_communities(network_obj, lp_critical=1):
+    binary_output_fp = os.path.join(network_obj.save_folder,
+                                    f"{network_obj.network_name}_{lp_critical}.out")  # defining path to output file
+    command = f".\cluster {network_obj.binary_input_fp} {binary_output_fp} {lp_critical}" # command for neuman C code
     run_cmd(command, C_CODE)
     neumann_communities = run_func_after_file_created(binary_output_fp, read_binary_network_output, {"fileName": binary_output_fp, "is_shani": True})
-    _pickle(save_folder, "neumann.communities", neumann_communities, is_dump=True)
+
     return neumann_communities
 
 
-def create_df():
-    evals_list = []
-    index = ["neumann", "louvain", "neumann-louvain", "neumann-louvain-ilp", "neumann-ilp"]
+def run_algo_on_neumann(network_obj, neumann_communities, run_ilp=False, run_louvain=False, max_ilp_size=100):
+    neumann_sub_graphs = create_sub_graphs_from_communities(network_obj.G, neumann_communities)
+    neumann_and_algo_communities = []
 
-    for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        print(f'input_network_folder: {input_network_folder}')
-        input_network_dp = os.path.join(PATH2SHANIS_GRAPHS, input_network_folder)
+    count_louvain = 0
+    count_ilp = 0
 
-        save_folder = init_results_folder("full_flow")
+    for i in range(len(neumann_sub_graphs)):
+        g = neumann_sub_graphs[i]
+        g_size = len(g.nodes)
+        print(f'============== Iteration {i}, subgraph size = {g_size} ================')
 
-        # Save real communities to folder
-        real_communities = read_communities_file(
-            os.path.join(input_network_dp, "community.dat"))
-        _pickle(save_folder, "real.communities", real_communities, is_dump=True)
+        if run_ilp and g_size<=max_ilp_size: # TODO: add try and except with timeout instead of graph size
+            ilp_obj = ILP(g, is_networkx_graph=True)
+            curr_communities = ilp_obj.communities
+            count_ilp += 1
 
-        # Convert network to binary file
-        G = create_graph_from_edge_file(input_network_dp)  # creating graph object
-        binary_input_fp = create_binary_network_file(G, save_folder, title=input_network_folder,
+        elif run_louvain:
+            count_louvain += 1
+            curr_communities = louvain(g)
+
+        else: # Don't divide group more
+            curr_communities = [list(g.nodes)]  # TODO: check that this is the correct list format (list of list)
+        print(f'Num of curr_communities: {len(curr_communities)}')
+        neumann_and_algo_communities += curr_communities
+
+        print(f'count_louvain: {count_louvain}, count_ilp: {count_ilp}, total: {len(neumann_sub_graphs)}')
+
+    return neumann_and_algo_communities
+
+
+class NetworkObj:
+    def __init__(self, network_name):
+        self.network_name = network_name
+        self.save_folder = init_results_folder(FOLDER2FLOW_RESULTS)
+        self.network_dp = os.path.join(PATH2SHANIS_GRAPHS, self.network_name)
+        self.real_communities = read_communities_file(os.path.join(self.network_dp, "community.dat"))
+        _pickle(os.path.join(self.save_folder, "real.communities"), self.real_communities, is_dump=True)
+        self.G = create_graph_from_edge_file(self.network_dp)  # creating graph object
+        self.binary_input_fp = create_binary_network_file(self.G, self.save_folder, title=self.network_name,
                                                      is_shanis_file=True)  # converting network to binary file
 
-        # =================================  Neumann - original ==================================
-        # Run Neumann - original
-        neumann_communities = get_neumann_c_communities(save_folder, input_network_folder, binary_input_fp)
-        neuman_eval_dict = generate_outputs_for_community_list(G, real_communities, neumann_communities)
 
-        # Add to data_dict the file name
-        neuman_eval_dict["network"] = input_network_folder
-        evals_list.append(neuman_eval_dict)
+def multi_run():
+    evals_list = []
+
+    for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
+        network_obj = NetworkObj(input_network_folder)
+
+        algo_communities_dict = {}
+        print(f'===================== Running: Neumann C =======================')
+        # Get evaluations
+        neumann_communities = get_neumann_communities(network_obj, lp_critical=1)
+        algo_communities_dict["Neumann"] = neumann_communities
+
+        print(f'===================== Running: Louvain networkx =======================')
+        curr_com = louvain(network_obj.G)
+        algo_communities_dict["Louvain"] = curr_com
+
+        print(f'===================== Running: Neumann C + Louvain networkx =======================')
+        curr_com = run_algo_on_neumann(network_obj, neumann_communities, run_louvain=True)
+        algo_communities_dict["Neumann-Louvain"] = curr_com
+
+        print(f'===================== Running: Neumann C + Louvain networkx + ILP (according to timeit) =======================')
+        lp_critical_list = [50, 100, 150]
+        for lp_critical in lp_critical_list:
+            print(f'=================== LP_critical={lp_critical} ===============')
+            curr_neumann_com = get_neumann_communities(network_obj, lp_critical=lp_critical)
+
+            curr_com = run_algo_on_neumann(network_obj, curr_neumann_com, run_ilp=True,
+                                                                  run_louvain=True) # TODO: add timeout
+            algo_communities_dict[f'Neumann-Louvain-ILP-{lp_critical}'] = curr_com
+
+            curr_com = run_algo_on_neumann(network_obj, curr_neumann_com, run_ilp=True) # TODO: add timeout
+            algo_communities_dict[f'Neumann-ILP-{lp_critical}'] = curr_com
+
+        print(f'========Saving all results=========')
+        for algo, com_list in algo_communities_dict.items():
+            # Saving results to file
+            _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
+
+            # Evaluate results and save to eval_dict
+            eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
+            evals_list.append(eval_dict)
+            # add network_obj.network_name to evals_list
 
     data_dict = create_data_dict(evals_list)
-    df = pd.DataFrame(data_dict, index=index)
-
-
+    df = pd.DataFrame(data_dict)
 
 
 if __name__ == '__main__':
-    lp_critical_list = [50, 100, 150]
-    # run_ilp_on_neuman_iterations(lp_critical_list, add_louvain=True)
-    run_louvain_on_neuman_iterations()
+    multi_run()
     pass
 
 

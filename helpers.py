@@ -138,5 +138,14 @@ def save_str_graph_in_good_format(graph_path):
     return G, clusters_list, dict_str_to_num
 
 
+def _pickle(fp, object="", is_load=False, is_dump=False):
+    if is_dump:
+        with open(fp, "wb") as f:
+            pickle.dump(object, f)
+    elif is_load:
+        with open(fp, "rb") as f:
+            return pickle.load(f)
+    return None
+
 if __name__ == '__main__':
     print(save_str_graph_in_good_format(arabidopsis_path))
