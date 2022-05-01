@@ -26,7 +26,7 @@ Assumption: the graph nodes are continous from 0 to num_nodes-1
 """
 
 
-@timeout(60)
+@timeout(120)
 class ILP:
     def __init__(self, graph_input, is_networkx_graph=False, is_edges_file=False):
         if is_edges_file:
