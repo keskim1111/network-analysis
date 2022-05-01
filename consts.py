@@ -34,4 +34,4 @@ community_file = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Bi
                  "sadna\\network-analysis\\LFRBenchmark\\Graphs\\1000_0.4_0\\community.dat "
 
 PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "LFRBenchmark", "Graphs")
-FOLDER2FLOW_RESULTS = "full_flow"
+FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(),"full_flow")

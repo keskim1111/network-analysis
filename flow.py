@@ -7,7 +7,7 @@ from consts import C_CODE, PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS
 from input_networks import create_graph_from_edge_file, read_communities_file, create_graph_from_edge_list
 from helpers import init_results_folder, timeout, _pickle, timeit, create_sub_graphs_from_communities
 from output_generator import generate_outputs_for_community_list
-from pprint import pprint
+from IPython.display import display
 from ilp import ILP
 
 
@@ -65,7 +65,7 @@ def get_neumann_communities(network_obj, lp_critical=1):
     return neumann_communities
 
 
-def run_algo_on_neumann(network_obj, neumann_communities, run_ilp=False, run_louvain=False):
+def run_algo_on_neumann_results(network_obj, neumann_communities, run_ilp=False, run_louvain=False):
     neumann_sub_graphs = create_sub_graphs_from_communities(network_obj.G, neumann_communities)
     neumann_and_algo_communities = []
 
@@ -75,7 +75,6 @@ def run_algo_on_neumann(network_obj, neumann_communities, run_ilp=False, run_lou
     for i in range(len(neumann_sub_graphs)):
         g = neumann_sub_graphs[i]
         g_size = len(g.nodes)
-        curr_communities = []
 
         print(f'============== Iteration {i+1}/{len(neumann_sub_graphs)}, subgraph size = {g_size} ================')
 
@@ -87,12 +86,19 @@ def run_algo_on_neumann(network_obj, neumann_communities, run_ilp=False, run_lou
                 count_ilp += 1
             except Exception: # not sure I have to add 60 here
                 print(f'passed timeout time')
-        if run_louvain:
+                if run_louvain: # Run Louvain on graphs that ilp didn't manage
+                    count_louvain += 1
+                    curr_communities = louvain(g)
+                else: # Don't divide subgraph more
+                    curr_communities = [
+                        list(g.nodes)]  # TODO: check that this is the correct list format (list of list)
+                    count_no_divide += 1
+        elif (run_louvain and not run_ilp):
             count_louvain += 1
             curr_communities = louvain(g)
-        else: # Don't divide group more
-            curr_communities = [list(g.nodes)]  # TODO: check that this is the correct list format (list of list)
-            count_no_divide += 1
+        else:
+            print("need to choose run_ilp or run_louvain")
+            raise Exception
         print(f'Num of curr_communities: {len(curr_communities)}')
         neumann_and_algo_communities += curr_communities
 
@@ -102,9 +108,9 @@ def run_algo_on_neumann(network_obj, neumann_communities, run_ilp=False, run_lou
 
 
 class NetworkObj:
-    def __init__(self, network_name):
+    def __init__(self, main_dp, network_name):
         self.network_name = network_name
-        self.save_folder = init_results_folder(FOLDER2FLOW_RESULTS)
+        self.save_folder = init_results_folder(main_dp, network_name)
         self.network_dp = os.path.join(PATH2SHANIS_GRAPHS, self.network_name)
         self.real_communities = read_communities_file(os.path.join(self.network_dp, "community.dat"))
         _pickle(os.path.join(self.save_folder, "real.communities"), self.real_communities, is_dump=True)
@@ -114,10 +120,13 @@ class NetworkObj:
 
 
 def multi_run():
-    evals_list = []
+    path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
 
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        network_obj = NetworkObj(input_network_folder)
+        print(f'Starting to run algos on input_network_folder= {input_network_folder}')
+        evals_list = []
+
+        network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
 
         algo_communities_dict = {}
         print(f'===================== Running: Neumann C =======================')
@@ -130,7 +139,7 @@ def multi_run():
         algo_communities_dict["Louvain"] = curr_com
 
         print(f'===================== Running: Neumann C + Louvain networkx =======================')
-        curr_com = run_algo_on_neumann(network_obj, neumann_communities, run_louvain=True)
+        curr_com = run_algo_on_neumann_results(network_obj, neumann_communities, run_louvain=True)
         algo_communities_dict["Neumann-Louvain"] = curr_com
 
         print(f'===================== Running: Neumann C + Louvain networkx + ILP (according to timeit) =======================')
@@ -139,11 +148,11 @@ def multi_run():
             print(f'=================== LP_critical={lp_critical} ===============')
             curr_neumann_com = get_neumann_communities(network_obj, lp_critical=lp_critical)
 
-            curr_com = run_algo_on_neumann(network_obj, curr_neumann_com, run_ilp=True,
-                                                                  run_louvain=True)
+            curr_com = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True,
+                                                   run_louvain=True)
             algo_communities_dict[f'Neumann-Louvain-ILP-{lp_critical}'] = curr_com
 
-            curr_com = run_algo_on_neumann(network_obj, curr_neumann_com, run_ilp=True)
+            curr_com = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True)
             algo_communities_dict[f'Neumann-ILP-{lp_critical}'] = curr_com
 
         print(f'========Saving all results=========')
@@ -154,11 +163,16 @@ def multi_run():
             # Evaluate results and save to eval_dict
             eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
             evals_list.append(eval_dict)
-            # TODO: add network_obj.network_name to evals_list
 
-    # TODO: continue from here
-    data_dict = create_data_dict(evals_list)
-    df = pd.DataFrame(data_dict)
+        print(f'Finished running algos on input_network_folder= {input_network_folder}')
+
+        # Create df per network
+        print(f'Creating DF for this network:')
+        data_dict = create_data_dict(evals_list)
+        df = pd.DataFrame(data_dict)
+        df.to_pickle(os.path.join(network_obj.save_folder, "results.df"))
+        display(df)
+        # df.read_pickle to read results
 
 
 if __name__ == '__main__':
