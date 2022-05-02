@@ -11,6 +11,7 @@ from IPython.display import display
 from ilp import ILP
 
 
+
 @timeout(120)
 def run_cmd(command, run_path):
     os.chdir(run_path)
@@ -68,7 +69,7 @@ def get_neumann_communities(network_obj, lp_critical=1):
 def run_algo_on_neumann_results(network_obj, neumann_communities, run_ilp=False, run_louvain=False):
     neumann_sub_graphs = create_sub_graphs_from_communities(network_obj.G, neumann_communities)
     neumann_and_algo_communities = []
-
+    counts = {"count_ilp": 0, "count_no_divide": 0, "count_louvain": 0}
     count_louvain = 0
     count_ilp = 0
     count_no_divide = 0
@@ -103,8 +104,11 @@ def run_algo_on_neumann_results(network_obj, neumann_communities, run_ilp=False,
         neumann_and_algo_communities += curr_communities
 
         print(f'count_louvain: {count_louvain}, count_ilp: {count_ilp}, count_no_divide: {count_no_divide}, total: {len(neumann_sub_graphs)}')
+        counts["count_ilp"] = count_ilp
+        counts["count_no_divide"] = count_no_divide
+        counts["count_louvain"] = count_louvain
 
-    return neumann_and_algo_communities
+    return neumann_and_algo_communities, counts
 
 
 class NetworkObj:
@@ -119,10 +123,24 @@ class NetworkObj:
                                                      is_shanis_file=True)  # converting network to binary file
 
 
-def multi_run():
+def save_and_eval(network_obj, evals_list, algo, com_list, counts):
+
+    _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
+
+    # Evaluate results and save to eval_dict
+    eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
+    eval_dict["algo"] = algo
+    for k, v in counts.items():
+        eval_dict[k] = v
+
+    evals_list.append(eval_dict)
+
+def multi_run(lp_critical_list):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
 
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
+        counts = {"count_ilp": 0, "count_no_divide": 0, "count_louvain": 0}
+
         print(f'Starting to run algos on input_network_folder= {input_network_folder}')
         evals_list = []
 
@@ -131,72 +149,29 @@ def multi_run():
         print(f'===================== Running: Neumann C =======================')
         # Get evaluations
         neumann_communities = get_neumann_communities(network_obj, lp_critical=1)
-
-        # Saving results to file
-        algo = "Neumann"
-        com_list = neumann_communities
-        _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
-
-        # Evaluate results and save to eval_dict
-        eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
-        eval_dict["algo"] = algo
-        evals_list.append(eval_dict)
+        save_and_eval(network_obj, evals_list, algo="Neumann", com_list=neumann_communities, counts=counts)
 
         print(f'===================== Running: Louvain networkx =======================')
         curr_com = louvain(network_obj.G)
+        save_and_eval(network_obj, evals_list, algo="Louvain", com_list=curr_com, counts=counts)
 
-        # Saving results to file
-        algo = "Louvain"
-        com_list = curr_com
-        _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
 
-        # Evaluate results and save to eval_dict
-        eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
-        eval_dict["algo"] = algo
-        evals_list.append(eval_dict)
-
-        print(f'===================== Running: Neumann C + Louvain networkx =======================')
-        curr_com = run_algo_on_neumann_results(network_obj, neumann_communities, run_louvain=True)
-
-        # Saving results to file
-        algo = "Neumann-Louvain"
-        com_list = curr_com
-        _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
-
-        # Evaluate results and save to eval_dict
-        eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
-        eval_dict["algo"] = algo
-        evals_list.append(eval_dict)
+        # print(f'===================== Running: Neumann C + Louvain networkx =======================')
+        # curr_com = run_algo_on_neumann_results(network_obj, neumann_communities, run_louvain=True)
+        # save_and_eval(network_obj, evals_list, algo="Neumann-Louvain", com_list=curr_com, counts=counts)
 
         print(f'===================== Running: Neumann C + Louvain networkx + ILP (according to timeit) =======================')
-        lp_critical_list = [50, 100, 150]
         for lp_critical in lp_critical_list:
             print(f'=================== LP_critical={lp_critical} ===============')
             curr_neumann_com = get_neumann_communities(network_obj, lp_critical=lp_critical)
+            curr_com, counts = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True)
+            save_and_eval(network_obj, evals_list, algo=f'Neumann-ILP-{lp_critical}', com_list=curr_com, counts=counts)
 
-            curr_com = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True,
-                                                   run_louvain=True)
-            # Saving results to file
-            algo = f'Neumann-Louvain-ILP-{lp_critical}'
-            com_list = curr_com
-            _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
-
-            # Evaluate results and save to eval_dict
-            eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
-            eval_dict["algo"] = algo
-            evals_list.append(eval_dict)
+            # curr_com, counts = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True,
+            #                                        run_louvain=True)
+            # save_and_eval(network_obj, evals_list, algo=f'Neumann-Louvain-ILP-{lp_critical}', com_list=curr_com, counts=counts)
 
 
-            curr_com = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True)
-            # Saving results to file
-            algo = f'Neumann-ILP-{lp_critical}'
-            com_list = curr_com
-            _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
-
-            # Evaluate results and save to eval_dict
-            eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
-            eval_dict["algo"] = algo
-            evals_list.append(eval_dict)
         _pickle(os.path.join(network_obj.save_folder, 'evals.list'), object=evals_list, is_dump=True)
         print(f'Finished running algos on input_network_folder= {input_network_folder}')
 
@@ -210,13 +185,8 @@ def multi_run():
 
 
 if __name__ == '__main__':
-    multi_run()
-    # res = _pickle("C://Users//97252//Documents//year_4//sadna//network-analysis//full_flow//01-05-2022--22-35-12//1000_0.6_9//evals.list", is_load=True)
-    #
-    # df = pd.DataFrame(res)
-    # df2 = pd.read_pickle("C://Users//97252//Documents//year_4//sadna//network-analysis//full_flow//01-05-2022--22-35-12//1000_0.6_9//results.df")
-    # df2.to_csv("C://Users//97252//Documents//year_4//sadna//network-analysis//full_flow//01-05-2022--22-35-12//1000_0.6_9//results_df.csv")
-    # display(df2)
+    lp_critical_list = [150]
+    multi_run(lp_critical_list)
     pass
 
 
