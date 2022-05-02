@@ -115,7 +115,7 @@ class ILP:
 
 
 def trivial_run():
-    edges_file = "cliqs_2"
+    edges_file = "tests/cliqs_2"
     ilp_obj = ILP(edges_file, is_edges_file=True)
     print(ilp_obj.model.display())
     # for v in ilp_obj.model.getVars():

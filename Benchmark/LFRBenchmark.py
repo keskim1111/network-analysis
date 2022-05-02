@@ -2,9 +2,9 @@ import os
 import subprocess
 import shutil
 
-#LFR_RESULTS_FOLDER = "LFRBenchmark\\Graphs"
-LFR_RESULTS_FOLDER = "/home/student/Documents/Sadna/Benchmarks/LFRBenchmark/Graphs"
-LFR_TEMP_RES_FOLDER = "/home/student/Documents/Sadna/Benchmarks/LFRBenchmark/binary_networks"
+#LFR_RESULTS_FOLDER = "Benchmark\\Graphs"
+LFR_RESULTS_FOLDER = "/home/student/Documents/Sadna/Benchmarks/Benchmark/Graphs"
+LFR_TEMP_RES_FOLDER = "/home/student/Documents/Sadna/Benchmarks/Benchmark/binary_networks"
 
 
 def create_benchmark_folder(folder_name):
@@ -21,7 +21,7 @@ def create_benchmark_folder(folder_name):
 
     os.rename(f"{LFR_TEMP_RES_FOLDER}/network.dat", f"{LFR_RESULTS_FOLDER}/{folder_name}/network.dat")
     os.rename(f"{LFR_TEMP_RES_FOLDER}/community.dat", f"{LFR_RESULTS_FOLDER}/{folder_name}/community.dat")
-    #os.rename("LFRBenchmark\\binary_networks\\statistics.dat", f"{LFR_RESULTS_FOLDER}\\{folder_name}\\statistics.dat")
+    #os.rename("Benchmark\\binary_networks\\statistics.dat", f"{LFR_RESULTS_FOLDER}\\{folder_name}\\statistics.dat")
     shutil.copy(f"{LFR_TEMP_RES_FOLDER}/time_seed.dat", f"{LFR_RESULTS_FOLDER}/{folder_name}/time_seed.dat")
 
 

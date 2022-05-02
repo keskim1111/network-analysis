@@ -1,6 +1,6 @@
 from networkx.generators.community import LFR_benchmark_graph
 import networkx as nx
-from LFRBenchmark.LFRBenchmark import generate_lfr_benchmarks
+from Benchmark.LFRBenchmark import generate_lfr_benchmarks
 from collections import defaultdict
 import os, pickle
 from helpers import init_results_folder

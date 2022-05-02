@@ -64,7 +64,7 @@ class Graph:
 
         return edges_list
 
-# G = Graph("LFRBenchmark/Graphs/1000_0.4_0/network.dat")
+# G = Graph("Benchmark/Graphs/1000_0.4_0/network.dat")
 # G = Graph("C:/Users/97252/Documents/year_4/sadna/tests/network.dat")
 # G.print_adj_matrix()
 # print(G.degree_list)
