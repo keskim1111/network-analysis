@@ -65,50 +65,72 @@ def get_neumann_communities(network_obj, lp_critical=1):
 
     return neumann_communities
 
+
+def calculate_modularity(G, communities: list):
+    """
+    :param G: networkx graph
+    :param communities: list of lists of ints (nodes)
+    :return:
+    """
+    sum_modularity = 0
+    for i in range(len(communities)):
+        nodes_list = communities[i]
+        num_of_nodes = len(nodes_list)
+        m = G.number_of_edges()
+        adj = G.adj
+        cur_modularity = 0 # [sum_ij] (a_ij - (d_i * d_j)/2m)
+        for node_range_1 in range(num_of_nodes):
+            for node_range_2 in range(node_range_1):  # i < j
+                j = nodes_list[node_range_1]
+                i = nodes_list[node_range_2]
+
+                if dict(adj[i].items()).get(j) is not None:
+                    a_ij = dict(adj[i].items())[j].get("weight", 1)
+                else:
+                    a_ij = 0
+
+                cur_modularity = a_ij - (G.degree(i) * G.degree(j)) / (2 * m)
+        sum_modularity += cur_modularity
+    return sum_modularity
+
+
 @timeit
-def run_algo_on_neumann_results(network_obj, neumann_communities, run_ilp=False, run_louvain=False):
-    neumann_sub_graphs = create_sub_graphs_from_communities(network_obj.G, neumann_communities)
+def run_algo_on_neumann_results(network_obj, neumann_communities, lp_critical):
     neumann_and_algo_communities = []
-    counts = {"count_ilp": 0, "count_no_divide": 0, "count_louvain": 0}
-    count_louvain = 0
-    count_ilp = 0
-    count_no_divide = 0
-    for i in range(len(neumann_sub_graphs)):
-        g = neumann_sub_graphs[i]
-        g_size = len(g.nodes)
+    # counts = {"count_ilp": 0, "count_no_divide": 0, "count_louvain": 0}
+    G = network_obj.G  # Original graph
 
-        print(f'============== Iteration {i+1}/{len(neumann_sub_graphs)}, subgraph size = {g_size} ================')
+    for i in range(len(neumann_communities)):
+        nodes_list = neumann_communities[i]
+        num_nodes = len(nodes_list)
 
-        if run_ilp:
-            try:
-                print(f'============Trying to run ILP')
-                ilp_obj = ILP(g, is_networkx_graph=True)
-                curr_communities = ilp_obj.communities
-                count_ilp += 1
-            except Exception: # not sure I have to add 60 here
-                print(f'passed timeout time')
-                if run_louvain: # Run Louvain on graphs that ilp didn't manage
-                    count_louvain += 1
-                    curr_communities = louvain(g)
-                else: # Don't divide subgraph more
-                    curr_communities = [
-                        list(g.nodes)]  # TODO: check that this is the correct list format (list of list)
-                    count_no_divide += 1
-        elif (run_louvain and not run_ilp):
-            count_louvain += 1
-            curr_communities = louvain(g)
-        else:
-            print("need to choose run_ilp or run_louvain")
-            raise Exception
+        if num_nodes > lp_critical:  # This community already reached maximal modularity - no need to divide more
+            continue
+
+        curr_modularity = calculate_modularity(G, [nodes_list]) # Modularity before dividing more with ILP
+
+        print(f'============== Iteration {i+1}/{len(neumann_communities)}, subgraph size = {num_nodes} ================')
+
+        try: # TODO: Remove this try and exception when timeout is param of Gurobi
+            print(f'============Trying to run ILP')
+            ilp_obj = ILP(G, nodes_list)
+            new_modularity = calculate_modularity(G, ilp_obj.communities)  # TODO: make sure this is equal to ilp_obj.model.ObjVal
+
+            if new_modularity > curr_modularity:
+                curr_communities = ilp_obj.communities  # New division
+            else:
+                curr_communities = [nodes_list]  # Initial division
+
+        except Exception:
+            print(f'passed timeout time')
+            # Don't divide subgraph more
+            curr_communities = [nodes_list]
+            # count_no_divide += 1
+
         print(f'Num of curr_communities: {len(curr_communities)}')
         neumann_and_algo_communities += curr_communities
 
-        print(f'count_louvain: {count_louvain}, count_ilp: {count_ilp}, count_no_divide: {count_no_divide}, total: {len(neumann_sub_graphs)}')
-        counts["count_ilp"] = count_ilp
-        counts["count_no_divide"] = count_no_divide
-        counts["count_louvain"] = count_louvain
-
-    return neumann_and_algo_communities, counts
+    return neumann_and_algo_communities
 
 
 class NetworkObj:
@@ -123,54 +145,40 @@ class NetworkObj:
                                                      is_shanis_file=True)  # converting network to binary file
 
 
-def save_and_eval(network_obj, evals_list, algo, com_list, counts):
+def save_and_eval(network_obj, evals_list, algo, com_list):
 
     _pickle(os.path.join(network_obj.save_folder, f'{algo}.communities'), object=com_list, is_dump=True)
 
     # Evaluate results and save to eval_dict
     eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, com_list)
     eval_dict["algo"] = algo
-    for k, v in counts.items():
-        eval_dict[k] = v
-
     evals_list.append(eval_dict)
+
 
 def multi_run(lp_critical_list):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
 
+    # run on all of shani's networks
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        counts = {"count_ilp": 0, "count_no_divide": 0, "count_louvain": 0}
 
         print(f'Starting to run algos on input_network_folder= {input_network_folder}')
-        evals_list = []
-
+        evals_list = []  # Save all final results in this list (for creating df later)
         network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
 
         print(f'===================== Running: Neumann C =======================')
-        # Get evaluations
         neumann_communities = get_neumann_communities(network_obj, lp_critical=1)
-        save_and_eval(network_obj, evals_list, algo="Neumann", com_list=neumann_communities, counts=counts)
+        save_and_eval(network_obj, evals_list, algo="Neumann", com_list=neumann_communities)
 
         print(f'===================== Running: Louvain networkx =======================')
         curr_com = louvain(network_obj.G)
-        save_and_eval(network_obj, evals_list, algo="Louvain", com_list=curr_com, counts=counts)
+        save_and_eval(network_obj, evals_list, algo="Louvain", com_list=curr_com)
 
-
-        # print(f'===================== Running: Neumann C + Louvain networkx =======================')
-        # curr_com = run_algo_on_neumann_results(network_obj, neumann_communities, run_louvain=True)
-        # save_and_eval(network_obj, evals_list, algo="Neumann-Louvain", com_list=curr_com, counts=counts)
-
-        print(f'===================== Running: Neumann C + Louvain networkx + ILP (according to timeit) =======================')
+        print(f'===================== Running: Neumann C + ILP (according to timeit) =======================')
         for lp_critical in lp_critical_list:
             print(f'=================== LP_critical={lp_critical} ===============')
             curr_neumann_com = get_neumann_communities(network_obj, lp_critical=lp_critical)
             curr_com, counts = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True)
-            save_and_eval(network_obj, evals_list, algo=f'Neumann-ILP-{lp_critical}', com_list=curr_com, counts=counts)
-
-            # curr_com, counts = run_algo_on_neumann_results(network_obj, curr_neumann_com, run_ilp=True,
-            #                                        run_louvain=True)
-            # save_and_eval(network_obj, evals_list, algo=f'Neumann-Louvain-ILP-{lp_critical}', com_list=curr_com, counts=counts)
-
+            save_and_eval(network_obj, evals_list, algo=f'Neumann-ILP-{lp_critical}', com_list=curr_com)
 
         _pickle(os.path.join(network_obj.save_folder, 'evals.list'), object=evals_list, is_dump=True)
         print(f'Finished running algos on input_network_folder= {input_network_folder}')
@@ -185,7 +193,7 @@ def multi_run(lp_critical_list):
 
 
 if __name__ == '__main__':
-    lp_critical_list = [150]
+    lp_critical_list = [100]
     multi_run(lp_critical_list)
     pass
 
