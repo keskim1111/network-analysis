@@ -8,24 +8,18 @@ via mathematical programming.
 """
 # TODO: make sure I can deal with inner edges
 
-
-import gurobipy as gp
-from gurobipy import GRB
-from input_networks import create_graph_from_edge_file, create_random_network, create_graph_from_edge_list
-from helpers import timeit, timeout, create_sub_graphs_from_communities
-import networkx as nx
-import os, pickle
-from binary_files import read_binary_network_output
-
-
-msg = "The modularity result of the Algorithm is: "
-
 """
 # NEW: i changed the code - in a way that the nodes do NOT have to be continuous.
 """
 
+import gurobipy as gp
+from gurobipy import GRB
+from input_networks import create_graph_from_edge_file, create_random_network, create_graph_from_edge_list
+from helpers import timeit, timeout
+import networkx as nx
 
-# @timeout(120)
+
+@timeout(300) # 5 min
 class ILP:
     def __init__(self, G, nodes: list):
         """
@@ -116,9 +110,8 @@ class ILP:
 
         return communities
 
-def trivial_run():
-    edges_file = "tests/cliqs_2"
-    G = create_graph_from_edge_file(edges_file)
+def trivial_run(edges_fp):
+    G = create_graph_from_edge_file(edges_fp)
     ilp_obj = ILP(G, list(G.nodes))
     print(ilp_obj.model.display())
     # for v in ilp_obj.model.getVars():
@@ -137,27 +130,30 @@ def run_ilp_on_nx_graph(G):
     # print(ilp_obj.model.display())
     # for v in ilp_obj.model.getVars():
     #     print('%s %g ' % (v.VarName, v.X))
-    print('Obj: %g ' % ilp_obj.model.ObjVal)
-    print(f'nodes_range: {ilp_obj.num_of_nodes}')
-    print(ilp_obj.communities)
+    # print('Obj: %g ' % ilp_obj.model.ObjVal)
+    # print(f'nodes_range: {ilp_obj.num_of_nodes}')
+    # print(ilp_obj.communities)
     return ilp_obj
 
 
 if __name__ == '__main__':
-    # trivial_run()
+    # trivial_run(edges_fp="tests//cliqs3.txt")
     n = 100
-    mu = 0.1
+    mu = 0.3
     tau1 = 3
     tau2 = 1.5
     average_degree = 2
     min_com = 5
     G = create_random_network(n, mu, tau1, tau2, average_degree, min_com)
     real_communities = {frozenset(G.nodes[v]["community"]) for v in G}
-    print(f'real_communities: {real_communities}')
     real_modularity = nx.algorithms.community.modularity(G, real_communities)
-    print(f'real_modularity: {real_modularity}')
     ilp_obj = run_ilp_on_nx_graph(G)
     ilp_modularity = nx.algorithms.community.modularity(G, ilp_obj.communities)
+    print(f'real_communities: {real_communities}')
+    print(f'ilp communities: {ilp_obj.communities}')
+    print(f'len real_communities: {len(real_communities)}')
+    print(f'len ilp communities: {len(ilp_obj.communities)}')
+    print(f'real_modularity: {real_modularity}')
     print(f'ilp_modularity: {ilp_modularity}')
 #
 #     pass

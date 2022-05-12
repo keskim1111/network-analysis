@@ -1,8 +1,8 @@
 import networkx as nx
 import struct
 
-from consts import edge_file
-from evaluation import jaccard, graph_accuracy, graph_sensitivity, modularity
+# from consts import edge_file
+from evaluation import jaccard, graph_accuracy, graph_sensitivity, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, \
     create_random_network
 from helpers import timeit, current_time
@@ -144,7 +144,7 @@ def compare_c_output_to_real(output_path, real_communities_path, real_edges_path
     print(f"num of  real communities is: {len(real_communities)}")
     print(real_communities)
     print("modularity is")
-    print(modularity(G, our_communities))
+    print(calc_modularity_nx(G, our_communities))
     print("jaccard is")
     print(jaccard(our_communities, real_communities))
     print("graph_sensitivity is")
