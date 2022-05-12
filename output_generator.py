@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 import pandas as pd
 from algorithms import newman, louvain, algorithms_partition_for_colors, run_ilp
 from consts import RESULTS_FOLDER
-from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, modularity
+from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, calc_modularity_nx
 from input_networks import read_communities_file
 
 
@@ -91,7 +91,7 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
         partition = algo_dict[algo]["partition"]
         res = []
         index.append(algo)
-        res.append(modularity(G, partition))
+        res.append(calc_modularity_nx(G, partition))
         res.append(graph_conductance(G, partition))
         res.append(jaccard(partition, real_partition))
         res.append(graph_sensitivity(real_partition, partition))
@@ -101,17 +101,19 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
     return data, index
 
 
-def generate_outputs_for_community_list(G, real_communities_list, new_communities_list):
+def generate_outputs_for_community_list(G, real_communities_list, new_communities_list, algo=""):
     # TODO: dont the evaluation functions need to be inputed the real vs new in certain order? if yes it should be explained what the order should be in the function
+    # TODO: maybe change calc_modularity_nx to calc_modularity_manual (bc not identical)
     evals = {}
-    evals["num communities - real"] = len(real_communities_list)
-    evals["num communities - algo"] = len(new_communities_list)
-    evals["modularity - real"] = modularity(G, real_communities_list)
-    evals["modularity - algo"] = modularity(G, new_communities_list)
-    evals["graph_conductance"] = graph_conductance(G, new_communities_list)
+    evals["algo"] = algo
+    evals["modularity - real"] = calc_modularity_nx(G, real_communities_list)
+    evals["modularity - algo"] = calc_modularity_nx(G, new_communities_list)
     evals["jaccard"] = jaccard(new_communities_list, real_communities_list)
+    evals["graph_conductance"] = graph_conductance(G, new_communities_list)
     evals["graph_sensitivity"] = graph_sensitivity(real_communities_list, new_communities_list)
     evals["graph_accuracy"] = graph_accuracy(real_communities_list, new_communities_list)
+    evals["num communities - real"] = len(real_communities_list)
+    evals["num communities - algo"] = len(new_communities_list)
     return evals
 
 

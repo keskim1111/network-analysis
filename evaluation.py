@@ -71,8 +71,37 @@ def create_clusters_dict(communities_list):
 
 
 # Internal
-def modularity(G, communities):
+def calc_modularity_nx(G, communities):
     return nx.algorithms.community.modularity(G, communities)
+
+
+# TODO: make sure it make sense to not normalize (1/m)
+def calc_modularity_manual(G, communities: [[]]):
+    """
+    :param G: networkx graph
+    :param communities: list of lists of communities (nodes)
+    :return:
+    """
+    sum_modularity = 0
+    for i in range(len(communities)):
+        nodes_list = communities[i]
+        num_of_nodes = len(nodes_list)
+        m = G.number_of_edges()
+        adj = G.adj
+        cur_modularity = 0 # [sum_ij] (a_ij - (d_i * d_j)/2m)
+        for node_range_1 in range(num_of_nodes):
+            for node_range_2 in range(node_range_1):  # i < j
+                j = nodes_list[node_range_1]
+                i = nodes_list[node_range_2]
+
+                if dict(adj[i].items()).get(j) is not None:
+                    a_ij = dict(adj[i].items())[j].get("weight", 1)
+                else:
+                    a_ij = 0
+
+                cur_modularity += a_ij - (G.degree(i) * G.degree(j)) / (2 * m)
+        sum_modularity += cur_modularity
+    return sum_modularity
 
 
 # TODO make sure it is the same as in requiremants
