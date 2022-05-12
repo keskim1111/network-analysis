@@ -17,9 +17,11 @@ def newman(G):
     comp = nx.algorithms.community.centrality.girvan_newman(G)
     return list(sorted(c) for c in next(comp))
 
+
 def run_ilp(G):
     ilp_obj = ILP(G, is_networx_graph=True)
     return ilp_obj.communities
+
 
 def algorithms_partition_for_colors(partition):
     color = 0

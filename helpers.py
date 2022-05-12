@@ -82,9 +82,9 @@ def create_sub_graphs_from_communities(G, communities):
 def init_results_folder(init_path, folder_name=""):
     if not os.path.isdir(init_path):
         os.mkdir(init_path)
-    if len(folder_name) == 0: # Create new folder according to current date
+    if len(folder_name) == 0:  # Create new folder according to current date
         curr_res_path = os.path.join(init_path, f"{current_time()}")
-    else: # Create new folder according to folder_name
+    else:  # Create new folder according to folder_name
         curr_res_path = os.path.join(init_path, folder_name)
     os.mkdir(curr_res_path)
     return os.path.join(os.getcwd(), curr_res_path)
