@@ -25,7 +25,8 @@ def read_communities_file(path):
         '''
     community_dict = defaultdict(list)
     with open(path) as file:
-        while line := file.readline():
+        lines = file.readlines()
+        for line in lines:
             node, community = line.rstrip().split()
             community_dict[community].append(int(node))
     return list(community_dict.values())
