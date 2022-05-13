@@ -43,7 +43,8 @@ def create_graph_from_edge_file(filename):
     '''
     G = nx.Graph()
     with open(filename) as file:
-        while line := file.readline():
+        lines = file.readlines()
+        for line in lines:
             node1, node2 = line.rstrip().split()
             G.add_edge(int(node1),int(node2))
     return G
