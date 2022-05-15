@@ -19,9 +19,9 @@ from helpers import timeit, timeout
 import networkx as nx
 
 
-@timeout(300) # 5 min
+# @timeout(300) # 5 min
 class ILP:
-    def __init__(self, G, nodes: list):
+    def __init__(self, G, nodes: list, IntFeasTol=float(1e-5), TimeLimit=False):
         """
         :param G: networkx graph
         :param nodes:
@@ -30,6 +30,10 @@ class ILP:
         self.num_of_nodes = len(self.nodes_list)
         self.G = G
         self.model = gp.Model("mip1")
+        #params
+        self.model.setParam("IntFeasTol", IntFeasTol)
+        if TimeLimit:
+            self.model.setParam("TimeLimit", 60)
         self.run()  # setting objective function and constraints and optimizing
         self.communities = self.get_communities()
 

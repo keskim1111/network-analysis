@@ -1,11 +1,9 @@
-import functools
 import time
 from datetime import datetime
-from consts import RESULTS_FOLDER, yeast_path, arabidopsis_path
-import os
+from consts import arabidopsis_path
 import networkx as nx
 import pickle, os
-
+import logging
 from threading import Thread
 import functools
 
@@ -86,7 +84,8 @@ def init_results_folder(init_path, folder_name=""):
         curr_res_path = os.path.join(init_path, f"{current_time()}")
     else:  # Create new folder according to folder_name
         curr_res_path = os.path.join(init_path, folder_name)
-    os.mkdir(curr_res_path)
+    if not os.path.isdir(curr_res_path):
+        os.mkdir(curr_res_path)
     return os.path.join(os.getcwd(), curr_res_path)
 
 
@@ -149,6 +148,18 @@ def _pickle(fp, object="", is_load=False, is_dump=False):
         with open(fp, "rb") as f:
             return pickle.load(f)
     return None
+
+
+def define_logger(file_directory):
+    my_handlers = [logging.FileHandler(f"{file_directory}-logs.txt"), logging.StreamHandler()]
+    format = '%(asctime)s: %(message)s'
+    logging.basicConfig(format=format, level=logging.DEBUG, handlers=my_handlers)
+
+
+def prompt_file(path):
+    path = os.path.realpath(path)
+    os.startfile(path)
+
 
 if __name__ == '__main__':
     print(save_str_graph_in_good_format(arabidopsis_path))

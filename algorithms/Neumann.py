@@ -4,6 +4,7 @@ from consts import C_CODE
 import time
 from binary_files import read_binary_network_output
 
+
 @timeout(120)
 def run_cmd(command, run_path):
     os.chdir(run_path)
@@ -38,8 +39,9 @@ def run_func_after_file_created(file_created_path, func, args):
 def get_neumann_communities(save_dp, network_name, binary_input_fp, lp_critical=1):
     binary_output_fp = os.path.join(save_dp,
                                     f"{network_name}_{lp_critical}.out")  # defining path to output file
-    command = f".\cluster {binary_input_fp} {binary_output_fp} {lp_critical}" # command for neuman C code
+    command = f".\cluster {binary_input_fp} {binary_output_fp} {lp_critical}"  # command for Neumann C code
     run_cmd(command, C_CODE)
-    neumann_communities = run_func_after_file_created(binary_output_fp, read_binary_network_output, {"fileName": binary_output_fp, "is_shani": True})
+    neumann_communities = run_func_after_file_created(binary_output_fp, read_binary_network_output,
+                                                      {"fileName": binary_output_fp, "is_shani": True})
 
     return neumann_communities

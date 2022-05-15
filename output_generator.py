@@ -1,11 +1,13 @@
+import logging
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pandas as pd
-from algorithms import newman, louvain, algorithms_partition_for_colors, run_ilp
+from algorithms.algorithms import newman, louvain, algorithms_partition_for_colors, run_ilp
 from consts import RESULTS_FOLDER
 from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, calc_modularity_nx
+from helpers import _pickle
 from input_networks import read_communities_file
 
 
@@ -101,7 +103,7 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
     return data, index
 
 
-def generate_outputs_for_community_list(G, real_communities_list, new_communities_list, algo=""):
+def generate_outputs_for_community_list(G, real_communities_list, new_communities_list, algo="", time=None):
     # TODO: dont the evaluation functions need to be inputed the real vs new in certain order? if yes it should be explained what the order should be in the function
     # TODO: maybe change calc_modularity_nx to calc_modularity_manual (bc not identical)
     evals = {}
@@ -114,6 +116,17 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     evals["graph_accuracy"] = graph_accuracy(real_communities_list, new_communities_list)
     evals["num communities - real"] = len(real_communities_list)
     evals["num communities - algo"] = len(new_communities_list)
+    evals["time-sec"] = time
     return evals
+
+# TODO: add run time
+def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, algo, time=None):
+    logging.info("Saving communities object to folder")
+    # Saving communities object to folder
+    _pickle(os.path.join(save_dp, f'{algo}.communities'), object=new_communities, is_dump=True)
+    # Evaluate results and save to eval_dict
+    eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo, time=time)
+    evals_list.append(eval_dict)
+
 
 

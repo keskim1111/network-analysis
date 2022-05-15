@@ -81,6 +81,7 @@ def calc_modularity_manual(G, communities: [[]]):
     :param G: networkx graph
     :param communities: list of lists of communities (nodes)
     :return:
+            Q =  \sum_{ij} ( A_{ij} - {k_ik_j}/{2m})
     """
     sum_modularity = 0
     for i in range(len(communities)):

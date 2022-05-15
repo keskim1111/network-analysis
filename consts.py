@@ -5,7 +5,7 @@ dp = dir path
 
 import os
 
-C_CODE = os.path.join(os.getcwd(), 'neuman_orpaz_with_change')
+C_CODE = os.path.join(os.getcwd(), 'neuman_with_change')
 
 yeast_path = os.path.join("Benchmark", "Yeast")
 arabidopsis_path = os.path.join("Benchmark", "Arabidopsis")
@@ -25,4 +25,4 @@ msg = "The modularity result of the Algorithm is: "
 RESULTS_FOLDER = 'results'
 
 PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "Benchmark", "Graphs")
-FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(),RESULTS_FOLDER, "full_flow")
+FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(), RESULTS_FOLDER, "full_flow")

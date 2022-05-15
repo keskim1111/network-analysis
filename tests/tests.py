@@ -1,16 +1,12 @@
 import os
-import subprocess
 
-from algorithms import louvain, newman
-from binary_files import read_binary_network_output, create_binary_network_file
-from helpers import timeout, current_time
+from algorithms.algorithms import louvain, newman
+from binary_files import read_binary_network_output
 from input_networks import create_random_network, create_graph_from_edge_file, read_communities_file
 from output_generator import generate_outputs_for_community_list
 import os.path
-import time
-from helpers import init_results_folder
 
-C_CODE = os.path.join(os.getcwd(), 'neuman_orpaz_with_change')
+C_CODE = os.path.join(os.getcwd(), 'neuman_with_change')
 in_path = "g.in"
 out_path = "g.out"
 
