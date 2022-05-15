@@ -1,3 +1,4 @@
+import logging
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -6,6 +7,7 @@ import pandas as pd
 from algorithms.algorithms import newman, louvain, algorithms_partition_for_colors, run_ilp
 from consts import RESULTS_FOLDER
 from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, calc_modularity_nx
+from helpers import _pickle
 from input_networks import read_communities_file
 
 
@@ -116,5 +118,15 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     evals["num communities - algo"] = len(new_communities_list)
     evals["time-sec"] = time
     return evals
+
+# TODO: add run time
+def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, algo, time=None):
+    logging.info("Saving communities object to folder")
+    # Saving communities object to folder
+    _pickle(os.path.join(save_dp, f'{algo}.communities'), object=new_communities, is_dump=True)
+    # Evaluate results and save to eval_dict
+    eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo, time=time)
+    evals_list.append(eval_dict)
+
 
 

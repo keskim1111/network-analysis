@@ -152,7 +152,8 @@ def _pickle(fp, object="", is_load=False, is_dump=False):
 
 def define_logger(file_directory):
     my_handlers = [logging.FileHandler(f"{file_directory}-logs.txt"), logging.StreamHandler()]
-    logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.DEBUG, handlers=my_handlers)
+    format = '%(asctime)s: %(message)s'
+    logging.basicConfig(format=format, level=logging.DEBUG, handlers=my_handlers)
 
 
 def prompt_file(path):
