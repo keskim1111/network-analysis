@@ -19,7 +19,7 @@ from helpers import timeit, timeout
 import networkx as nx
 
 
-@timeout(300) # 5 min
+# @timeout(300) # 5 min
 class ILP:
     def __init__(self, G, nodes: list):
         """

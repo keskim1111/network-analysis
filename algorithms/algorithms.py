@@ -1,7 +1,7 @@
 import networkx as nx
-from ilp import ILP
 # TODO read more here
 # https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html?highlight=louvain#networkx.algorithms.community.louvain.louvain_communities
+from algorithms.ilp import ILP
 from helpers import timeit, timeout
 
 
