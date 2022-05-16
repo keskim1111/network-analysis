@@ -44,7 +44,7 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
     final_communities = []
     num_communities_divided_by_ilp = 0
     num_communities_skipped_by_ilp = 0
-    num_to_divide = len([len(x)<=lp_critical for x in neumann_communities])
+    num_to_divide = sum([len(x)<=lp_critical for x in neumann_communities])
     logging.info(f'num_to_divide: {num_to_divide}')
     for i in range(len(neumann_communities)):
         nodes_list = neumann_communities[i]
@@ -111,15 +111,15 @@ class NetworkObj:
 
 
 # run on all of shani's networks
-def multi_run(lp_criticals):
+def multi_run(lp_criticals, lp_timelimit):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         # if "10000" in input_network_folder: # skip graphs with 10,000 nodes
         #     continue
-        one_run(input_network_folder,path2curr_date_folder,lp_criticals)
+        one_run(input_network_folder,path2curr_date_folder,lp_criticals, lp_timelimit)
 
 
-def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
+def one_run(input_network_folder, path2curr_date_folder, lp_criticals, lp_timelimit):
     ########### define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
 
@@ -148,7 +148,7 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
         start = timer()
         neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
                                                          network_obj.binary_input_fp, lp_critical=lp_critical)
-        TimeLimit = 5*60  # in seconds
+        TimeLimit = lp_timelimit  # in seconds
         newman_ilp_results_obj = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
                                              withTimeLimit=True, TimeLimit=TimeLimit)
         end = timer()
@@ -173,6 +173,6 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
 
 if __name__ == '__main__':
     lp_critical_list = [100, 150, 200]
-    multi_run(lp_critical_list)
+    multi_run(lp_critical_list, lp_timelimit=10*60)
     # one_run("1000_0.6_7")
     pass
