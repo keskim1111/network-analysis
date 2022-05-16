@@ -89,12 +89,13 @@ def calc_modularity_manual(G, communities: [[]]):
         num_of_nodes = len(nodes_list)
         m = G.number_of_edges()
         adj = G.adj
+        print(adj)
         cur_modularity = 0 # [sum_ij] (a_ij - (d_i * d_j)/2m)
         for node_range_1 in range(num_of_nodes):
             for node_range_2 in range(node_range_1):  # i < j
                 j = nodes_list[node_range_1]
                 i = nodes_list[node_range_2]
-
+                # TODO this is problamatic
                 if dict(adj[i].items()).get(j) is not None:
                     a_ij = dict(adj[i].items())[j].get("weight", 1)
                 else:

@@ -3,30 +3,18 @@ from timeit import default_timer as timer
 import pandas as pd
 import logging
 from algorithms.algorithms import louvain
+from algorithms.modified_louvain import modified_louvain_communities
 from binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS
 from evaluation import calc_modularity_manual
 from input_networks import create_graph_from_edge_file, read_communities_file
-from helpers import init_results_folder, _pickle, define_logger, prompt_file
+from helpers import init_results_folder, _pickle
 from logger import setup_logger
 from output_generator import generate_outputs_for_community_list, save_and_eval
 from algorithms.ilp import ILP
 from algorithms.Neumann import get_neumann_communities
-
-
-def create_data_dict(evals_list):
-    """
-    :param evals_list: list of eval dictionaries
-    :return: data dict for df input
-    """
-    data_dict = {}
-    for eval_dict in evals_list:
-        for k, v in eval_dict.items():
-            if not data_dict.get(k):
-                data_dict[k] = []
-            data_dict[k].append(v)
-    return data_dict
-
+from output_generator import save_and_eval, create_data_dict
+from algorithms.ilp import run_ilp_on_neumann, run_ilp_on_louvain
 
 class AlgoRes:
     def __init__(self, communities: list, lp_critical=None, num_coms_divided=None, num_coms_skipped=None):
@@ -111,15 +99,27 @@ class NetworkObj:
 
 
 # run on all of shani's networks
-def multi_run(lp_criticals, lp_timelimit):
+def multi_run(lp_critical_values):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        # if "10000" in input_network_folder: # skip graphs with 10,000 nodes
-        #     continue
-        one_run(input_network_folder,path2curr_date_folder,lp_criticals, lp_timelimit)
+        one_run(input_network_folder, path2curr_date_folder, lp_critical_values)
+
+def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical):
+    # define logger output ##############
+    setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
+    logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
+    eval_results_per_network = []  # Save all final results in this list (for creating df later)
+    network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
+    logging.info(f'===================== Running: Louvain Changed networkx =======================')
+    start = timer()
+    inner_partition, mega_graph  = modified_louvain_communities(network_obj.G, num_com_bound=5)
+    mega_communities = run_ilp_on_louvain(mega_graph)
+    print(mega_communities)
+    end = timer()
 
 
-def one_run(input_network_folder, path2curr_date_folder, lp_criticals, lp_timelimit):
+
+def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
     ########### define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
 
@@ -143,21 +143,43 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals, lp_timeli
                   network_obj.real_communities,
                   new_communities=louvain_communities, algo="Louvain", time=end - start)
 
+    logging.info(
+        f'===================== Running: Neumann C + ILP (according to timeit) regular =======================')
     for lp_critical in lp_criticals:
+        logging.info(f'=================== LP_critical={lp_critical} ===============')
+        start = timer()
+        neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
+                                                         network_obj.binary_input_fp, lp_critical=lp_critical)
+        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical)
+        end = timer()
+        save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
+                      network_obj.real_communities,
+                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}', time=end - start)
+
+        logging.info(f'=================== LP_critical={lp_critical} -IntFeasTol ===============')
+        start = timer()
+        neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
+                                                         network_obj.binary_input_fp, lp_critical=lp_critical)
+        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
+                                             IntFeasTol=float(1e-3))
+        end = timer()
+        save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
+                      network_obj.real_communities,
+                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}-{float(1e-3)}',
+                      time=end - start)
+
         logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
         start = timer()
         neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
                                                          network_obj.binary_input_fp, lp_critical=lp_critical)
-        TimeLimit = lp_timelimit  # in seconds
-        newman_ilp_results_obj = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
+        TimeLimit = 5 * 60  # in seconds
+        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
                                              withTimeLimit=True, TimeLimit=TimeLimit)
         end = timer()
-        newman_ilp_results_obj.runtime = end-start
         save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                       network_obj.real_communities,
-                      new_communities=newman_ilp_results_obj.communities,
-                      algo=f'Neumann-ILP-{lp_critical}-TimeLimit-{TimeLimit}', time=newman_ilp_results_obj.runtime,
-                      extra_evals=newman_ilp_results_obj)
+                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}-TimeLimit-{TimeLimit}',
+                      time=end - start)
 
     # Finished
     logging.info(f'Finished running algos on input_network_folder= {input_network_folder}')
@@ -173,6 +195,7 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals, lp_timeli
 
 if __name__ == '__main__':
     lp_critical_list = [100, 150, 200]
-    multi_run(lp_critical_list, lp_timelimit=10*60)
+    multi_run(lp_critical_list)
     # one_run("1000_0.6_7")
+    run_one_louvain("1000_0.6_7",init_results_folder(FOLDER2FLOW_RESULTS),50)
     pass
