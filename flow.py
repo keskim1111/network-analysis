@@ -28,6 +28,18 @@ def create_data_dict(evals_list):
     return data_dict
 
 
+class AlgoRes:
+    def __init__(self, communities: list, lp_critical=None, num_coms_divided=None, num_coms_skipped=None):
+        self.communities = communities
+        self.lp_critical = None
+        self.num_coms_divided = None
+        self.num_coms_skipped = None
+        self.runtime = None
+
+    def set_runtime(self, runtime):
+        self.runtime = runtime
+
+
 def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeasTol=float(1e-5), withTimeLimit=False, TimeLimit=0):
     final_communities = []
     num_communities_divided_by_ilp = 0
@@ -48,7 +60,6 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
 
         curr_modularity = calc_modularity_manual(G, [nodes_list])  # Modularity before dividing more with ILP
         logging.info(f'Modularity of graph before {i + 1}th ILP iteration: {curr_modularity}')
-        sub_graph = G.subgraph(nodes_list)
         logging.info(f'============Trying to run ILP')
         if withTimeLimit:
             ilp_obj = ILP(G, nodes_list, IntFeasTol, TimeLimit=TimeLimit/num_to_divide)
@@ -60,13 +71,14 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
         logging.info(f'New modularity of graph after {i + 1}th ILP iteration: {new_modularity}')
         delta_Q = new_modularity - curr_modularity
         logging.info(f'Delta Q modularity is: {delta_Q}')
+        assert delta_Q >= 0, "delta Q should be none-negative (best is trivial division)"
         if delta_Q > 0 and len(ilp_obj.communities) > 1:
             num_communities_divided_by_ilp += 1
             logging.info(
                 f'Delta Q modularity is ++positive++: {delta_Q}. Adding ILP division to {len(ilp_obj.communities)} communities.')
             curr_communities = ilp_obj.communities  # New division
         else:
-            logging.info(f'Delta Q modularity is --Negative-- or Zero: {delta_Q}.Not adding ILP division.')
+            logging.info(f'Delta Q modularity is Zero: {delta_Q}. Not adding ILP division.')
             curr_communities = [nodes_list]  # Initial division
 
         logging.info(f'Num of curr_communities: {len(curr_communities)}')
@@ -75,7 +87,13 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
         f"Num of communities skipped by ILP (len(comm))> lp_critical) algo is {num_communities_skipped_by_ilp}/{len(neumann_communities)}")
     logging.info(
         f"Num of communities changed by ILP algo is {num_communities_divided_by_ilp}/{len(neumann_communities)}")
-    return final_communities
+
+    ilp_results_obj = AlgoRes(communities=final_communities)
+    ilp_results_obj.lp_critical = lp_critical
+    ilp_results_obj.num_coms_divided = num_communities_divided_by_ilp
+    ilp_results_obj.num_coms_skipped = num_communities_skipped_by_ilp
+
+    return ilp_results_obj
 
 
 class NetworkObj:
@@ -96,6 +114,8 @@ class NetworkObj:
 def multi_run(lp_criticals):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
+        # if "10000" in input_network_folder: # skip graphs with 10,000 nodes
+        #     continue
         one_run(input_network_folder,path2curr_date_folder,lp_criticals)
 
 
@@ -123,40 +143,21 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
                   network_obj.real_communities,
                   new_communities=louvain_communities, algo="Louvain", time=end - start)
 
-    logging.info(
-        f'===================== Running: Neumann C + ILP (according to timeit) regular =======================')
     for lp_critical in lp_criticals:
-        logging.info(f'=================== LP_critical={lp_critical} ===============')
-        start = timer()
-        neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
-                                                         network_obj.binary_input_fp, lp_critical=lp_critical)
-        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical)
-        end = timer()
-        save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
-                      network_obj.real_communities,
-                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}', time=end - start)
-
-        logging.info(f'=================== LP_critical={lp_critical} -IntFeasTol ===============')
-        start = timer()
-        neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
-                                                         network_obj.binary_input_fp, lp_critical=lp_critical)
-        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,IntFeasTol=float(1e-3))
-        end = timer()
-        save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
-                      network_obj.real_communities,
-                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}-{float(1e-3)}', time=end - start)
-
         logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
         start = timer()
         neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
                                                          network_obj.binary_input_fp, lp_critical=lp_critical)
         TimeLimit = 5*60  # in seconds
-        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
+        newman_ilp_results_obj = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
                                              withTimeLimit=True, TimeLimit=TimeLimit)
         end = timer()
+        newman_ilp_results_obj.runtime = end-start
         save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                       network_obj.real_communities,
-                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}-TimeLimit-{TimeLimit}', time=end - start)
+                      new_communities=newman_ilp_results_obj.communities,
+                      algo=f'Neumann-ILP-{lp_critical}-TimeLimit-{TimeLimit}', time=newman_ilp_results_obj.runtime,
+                      extra_evals=newman_ilp_results_obj)
 
     # Finished
     logging.info(f'Finished running algos on input_network_folder= {input_network_folder}')
