@@ -21,7 +21,7 @@ import networkx as nx
 
 # @timeout(300) # 5 min
 class ILP:
-    def __init__(self, G, nodes: list, IntFeasTol=float(1e-5), TimeLimit=False):
+    def __init__(self, G, nodes: list, weight=None, IntFeasTol=float(1e-5), TimeLimit=0):
         """
         :param G: networkx graph
         :param nodes:
@@ -29,11 +29,12 @@ class ILP:
         self.nodes_list = nodes
         self.num_of_nodes = len(self.nodes_list)
         self.G = G
+        self.weight = weight
         self.model = gp.Model("mip1")
         #params
         self.model.setParam("IntFeasTol", IntFeasTol)
-        if TimeLimit:
-            self.model.setParam("TimeLimit", 60)
+        if TimeLimit > 0:
+            self.model.setParam("TimeLimit", TimeLimit)
         self.run()  # setting objective function and constraints and optimizing
         self.communities = self.get_communities()
 
@@ -49,7 +50,7 @@ class ILP:
     """
     @timeit
     def set_objective(self):
-        m = self.G.number_of_edges()
+        m = self.G.size(weight=self.weight)
         adj = self.G.adj
         objective_function = 0
         for node_range_1 in range(self.num_of_nodes):
@@ -113,51 +114,3 @@ class ILP:
                     node_is_done_dict[i] = 1
 
         return communities
-
-def trivial_run(edges_fp):
-    G = create_graph_from_edge_file(edges_fp)
-    ilp_obj = ILP(G, list(G.nodes))
-    print(ilp_obj.model.display())
-    # for v in ilp_obj.model.getVars():
-    #     print('%s %g ' % (v.VarName, v.X))
-    # for c in ilp_obj.model.getConstrs():
-    #     print(c.ConstrName, c.Slack)
-    print('Obj: %g ' % ilp_obj.model.ObjVal)
-    print(f'nodes_range: {ilp_obj.num_of_nodes}')
-    print(ilp_obj.communities)
-    return ilp_obj
-
-
-@timeit
-def run_ilp_on_nx_graph(G):
-    ilp_obj = ILP(G, list(G.nodes))
-    # print(ilp_obj.model.display())
-    # for v in ilp_obj.model.getVars():
-    #     print('%s %g ' % (v.VarName, v.X))
-    # print('Obj: %g ' % ilp_obj.model.ObjVal)
-    # print(f'nodes_range: {ilp_obj.num_of_nodes}')
-    # print(ilp_obj.communities)
-    return ilp_obj
-
-
-if __name__ == '__main__':
-    # trivial_run(edges_fp="tests//cliqs3.txt")
-    n = 100
-    mu = 0.3
-    tau1 = 3
-    tau2 = 1.5
-    average_degree = 2
-    min_com = 5
-    G = create_random_network(n, mu, tau1, tau2, average_degree, min_com)
-    real_communities = {frozenset(G.nodes[v]["community"]) for v in G}
-    real_modularity = nx.algorithms.community.modularity(G, real_communities)
-    ilp_obj = run_ilp_on_nx_graph(G)
-    ilp_modularity = nx.algorithms.community.modularity(G, ilp_obj.communities)
-    print(f'real_communities: {real_communities}')
-    print(f'ilp communities: {ilp_obj.communities}')
-    print(f'len real_communities: {len(real_communities)}')
-    print(f'len ilp communities: {len(ilp_obj.communities)}')
-    print(f'real_modularity: {real_modularity}')
-    print(f'ilp_modularity: {ilp_modularity}')
-#
-#     pass

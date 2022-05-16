@@ -28,10 +28,12 @@ def create_data_dict(evals_list):
     return data_dict
 
 
-def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeasTol=float(1e-5),TimeLimit=False):
+def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeasTol=float(1e-5), withTimeLimit=False, TimeLimit=0):
     final_communities = []
     num_communities_divided_by_ilp = 0
     num_communities_skipped_by_ilp = 0
+    num_to_divide = len([len(x)<=lp_critical for x in neumann_communities])
+    logging.info(f'num_to_divide: {num_to_divide}')
     for i in range(len(neumann_communities)):
         nodes_list = neumann_communities[i]
         num_nodes = len(nodes_list)
@@ -47,27 +49,25 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
         curr_modularity = calc_modularity_manual(G, [nodes_list])  # Modularity before dividing more with ILP
         logging.info(f'Modularity of graph before {i + 1}th ILP iteration: {curr_modularity}')
         sub_graph = G.subgraph(nodes_list)
-        try:  # TODO: Remove this try and exception when timeout is param of Gurobi
-            logging.info(f'============Trying to run ILP')
-            logging.info("complete")
-            ilp_obj = ILP(G, nodes_list, IntFeasTol, TimeLimit)
-            new_modularity = calc_modularity_manual(G,
-                                                    ilp_obj.communities)  # TODO: make sure this is equal to ilp_obj.model.ObjVal
-            logging.info(f'New modularity of graph after {i + 1}th ILP iteration: {new_modularity}')
-            delta_Q = new_modularity - curr_modularity
-            logging.info(f'Delta Q modularity is: {delta_Q}')
-            if delta_Q > 0:
-                num_communities_divided_by_ilp += 1
-                logging.info(
-                    f'Delta Q modularity is ++positive++: {delta_Q}. Adding ILP division to {len(ilp_obj.communities)} communities.')
-                curr_communities = ilp_obj.communities  # New division
-            else:
-                logging.info(f'Delta Q modularity is --Negative-- or Zero: {delta_Q}.Not adding ILP division.')
-                curr_communities = [nodes_list]  # Initial division
-
-        except Exception:  # need to make this exception more specific (timeout)
-            logging.info(f'passed timeout time, adding community without further division.')
-            curr_communities = [nodes_list]  # Don't divide subgraph more
+        logging.info(f'============Trying to run ILP')
+        if withTimeLimit:
+            ilp_obj = ILP(G, nodes_list, IntFeasTol, TimeLimit=TimeLimit/num_to_divide)
+        else:
+            ilp_obj = ILP(G, nodes_list, IntFeasTol)
+        new_modularity = calc_modularity_manual(G,
+                                                ilp_obj.communities)  # TODO: make sure this is equal to ilp_obj.model.ObjVal
+        logging.debug("ILP results===================================")
+        logging.info(f'New modularity of graph after {i + 1}th ILP iteration: {new_modularity}')
+        delta_Q = new_modularity - curr_modularity
+        logging.info(f'Delta Q modularity is: {delta_Q}')
+        if delta_Q > 0 and len(ilp_obj.communities) > 1:
+            num_communities_divided_by_ilp += 1
+            logging.info(
+                f'Delta Q modularity is ++positive++: {delta_Q}. Adding ILP division to {len(ilp_obj.communities)} communities.')
+            curr_communities = ilp_obj.communities  # New division
+        else:
+            logging.info(f'Delta Q modularity is --Negative-- or Zero: {delta_Q}.Not adding ILP division.')
+            curr_communities = [nodes_list]  # Initial division
 
         logging.info(f'Num of curr_communities: {len(curr_communities)}')
         final_communities += curr_communities
@@ -95,7 +95,7 @@ class NetworkObj:
 # run on all of shani's networks
 def multi_run(lp_criticals):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
-    for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True)[:5]:
+    for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         one_run(input_network_folder,path2curr_date_folder,lp_criticals)
 
 
@@ -150,11 +150,13 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
         start = timer()
         neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
                                                          network_obj.binary_input_fp, lp_critical=lp_critical)
-        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,TimeLimit=True)
+        TimeLimit = 5*60  # in seconds
+        neumann_ilp_com = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
+                                             withTimeLimit=True, TimeLimit=TimeLimit)
         end = timer()
         save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                       network_obj.real_communities,
-                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}-TimeLimit-60', time=end - start)
+                      new_communities=neumann_ilp_com, algo=f'Neumann-ILP-{lp_critical}-TimeLimit-{TimeLimit}', time=end - start)
 
     # Finished
     logging.info(f'Finished running algos on input_network_folder= {input_network_folder}')
@@ -169,7 +171,7 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
 
 
 if __name__ == '__main__':
-    lp_critical_list = [100,150]
+    lp_critical_list = [100, 150, 200]
     multi_run(lp_critical_list)
     # one_run("1000_0.6_7")
     pass
