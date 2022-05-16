@@ -103,7 +103,7 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
     return data, index
 
 
-def generate_outputs_for_community_list(G, real_communities_list, new_communities_list, algo="", time=None):
+def generate_outputs_for_community_list(G, real_communities_list, new_communities_list, algo=""):
     # TODO: dont the evaluation functions need to be inputed the real vs new in certain order? if yes it should be explained what the order should be in the function
     # TODO: maybe change calc_modularity_nx to calc_modularity_manual (bc not identical)
     evals = {}
@@ -116,7 +116,6 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     evals["graph_accuracy"] = graph_accuracy(real_communities_list, new_communities_list)
     evals["num communities - real"] = len(real_communities_list)
     evals["num communities - algo"] = len(new_communities_list)
-    evals["time-sec"] = time
     return evals
 
 # TODO: add run time
@@ -125,7 +124,7 @@ def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, alg
     # Saving communities object to folder
     _pickle(os.path.join(save_dp, f'{algo}.communities'), object=new_communities, is_dump=True)
     # Evaluate results and save to eval_dict
-    eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo, time=time)
+    eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo)
 
     if extra_evals is None:
         eval_dict["num_coms_divided"] = None
@@ -133,6 +132,8 @@ def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, alg
     else:
         eval_dict["num_coms_divided"] = extra_evals.num_coms_divided
         eval_dict["num_coms_skipped"] = extra_evals.num_coms_skipped
+
+    eval_dict["time-sec"] = time
 
     evals_list.append(eval_dict)
 
