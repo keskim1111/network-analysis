@@ -120,12 +120,20 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     return evals
 
 # TODO: add run time
-def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, algo, time=None):
+def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, algo, time=None, extra_evals=None):
     logging.info("Saving communities object to folder")
     # Saving communities object to folder
     _pickle(os.path.join(save_dp, f'{algo}.communities'), object=new_communities, is_dump=True)
     # Evaluate results and save to eval_dict
     eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo, time=time)
+
+    if extra_evals is None:
+        eval_dict["num_coms_divided"] = None
+        eval_dict["num_coms_skipped"] = None
+    else:
+        eval_dict["num_coms_divided"] = extra_evals.num_coms_divided
+        eval_dict["num_coms_skipped"] = extra_evals.num_coms_skipped
+
     evals_list.append(eval_dict)
 
 
