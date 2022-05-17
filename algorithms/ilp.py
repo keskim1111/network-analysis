@@ -120,56 +120,6 @@ class ILP:
         return communities
 
 
-def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeasTol=float(1e-5), withTimeLimit=False,
-                       TimeLimit=0):
-    final_communities = []
-    num_communities_divided_by_ilp = 0
-    num_communities_skipped_by_ilp = 0
-    num_to_divide = len([len(x) <= lp_critical for x in neumann_communities])
-    logging.info(f'num_to_divide: {num_to_divide}')
-    for i in range(len(neumann_communities)):
-        nodes_list = neumann_communities[i]
-        num_nodes = len(nodes_list)
-        logging.info(
-            f'============== Iteration {i + 1}/{len(neumann_communities)}, subgraph size = {num_nodes} ================')
-        if num_nodes > lp_critical:  # This community already reached maximal modularity - no need to divide more
-            logging.info(f'num nodes {num_nodes} > lp_critical {lp_critical}, skipping.')
-            num_communities_skipped_by_ilp += 1
-            curr_communities = [nodes_list]
-            final_communities += curr_communities
-            continue
-
-        curr_modularity = calc_modularity_manual(G, [nodes_list])  # Modularity before dividing more with ILP
-        logging.info(f'Modularity of graph before {i + 1}th ILP iteration: {curr_modularity}')
-        logging.info(f'============Trying to run ILP')
-        if withTimeLimit:
-            ilp_obj = ILP(G, nodes_list, IntFeasTol, TimeLimit=TimeLimit / num_to_divide)
-        else:
-            ilp_obj = ILP(G, nodes_list, IntFeasTol)
-        new_modularity = calc_modularity_manual(G,
-                                                ilp_obj.communities)  # TODO: make sure this is equal to ilp_obj.model.ObjVal
-        logging.debug("ILP results===================================")
-        logging.info(f'New modularity of graph after {i + 1}th ILP iteration: {new_modularity}')
-        delta_Q = new_modularity - curr_modularity
-        logging.info(f'Delta Q modularity is: {delta_Q}')
-        if delta_Q > 0 and len(ilp_obj.communities) > 1:
-            num_communities_divided_by_ilp += 1
-            logging.info(
-                f'Delta Q modularity is ++positive++: {delta_Q}. Adding ILP division to {len(ilp_obj.communities)} communities.')
-            curr_communities = ilp_obj.communities  # New division
-        else:
-            logging.info(f'Delta Q modularity is --Negative-- or Zero: {delta_Q}.Not adding ILP division.')
-            curr_communities = [nodes_list]  # Initial division
-
-        logging.info(f'Num of curr_communities: {len(curr_communities)}')
-        final_communities += curr_communities
-    logging.info(
-        f"Num of communities skipped by ILP (len(comm))> lp_critical) algo is {num_communities_skipped_by_ilp}/{len(neumann_communities)}")
-    logging.info(
-        f"Num of communities changed by ILP algo is {num_communities_divided_by_ilp}/{len(neumann_communities)}")
-    return final_communities
-
-
 def run_ilp_on_louvain(G, withTimeLimit=False, TimeLimit=0):
     '''
     :param G: graph with MEGA nodes

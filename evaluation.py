@@ -1,3 +1,5 @@
+import logging
+
 from input_networks import *
 import math
 
@@ -72,7 +74,11 @@ def create_clusters_dict(communities_list):
 
 # Internal
 def calc_modularity_nx(G, communities):
-    return nx.algorithms.community.modularity(G, communities)
+    try:
+        logging.info(f"Running NetwoekX modularity function on:\n Partition: {communities}\n Graph: {G}")
+        return nx.algorithms.community.modularity(G, communities)
+    except Exception as e:
+        logging.info(e)
 
 
 # TODO: make sure it make sense to not normalize (1/m)
