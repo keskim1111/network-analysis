@@ -6,7 +6,7 @@ __pycache__/
 # C extensions
 *.so
 *.o
-
+cluster.exe
 results/
 
 # Distribution / packaging

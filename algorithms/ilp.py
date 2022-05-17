@@ -120,39 +120,6 @@ class ILP:
         return communities
 
 
-def run_ilp_on_louvain(G, withTimeLimit=False, TimeLimit=0):
-    '''
-    :param G: graph with MEGA nodes
-    :return: communites
-    '''
-    nodes_list = list(G.nodes)
-    curr_modularity = calc_modularity_manual(G, [nodes_list],weight="weight")  # Modularity before dividing more with ILP
-    logging.info(f'Modularity of graph before ILP iteration: {curr_modularity}')
-    logging.info(f'============Trying to run ILP')
-    if withTimeLimit:
-        ilp_obj = ILP(G, nodes_list, TimeLimit=TimeLimit, weight="weight")
-    else:
-        ilp_obj = ILP(G, nodes_list, weight="weight")
-    new_modularity = calc_modularity_manual(G,
-                                            ilp_obj.communities,weight="weight")  # TODO: make sure this is equal to ilp_obj.model.ObjVal
-    logging.debug("ILP results===================================")
-    logging.info(f'New modularity of graph after ILP iteration: {new_modularity}')
-    delta_Q = new_modularity - curr_modularity
-    logging.info(f'Delta Q modularity is: {delta_Q}')
-    if delta_Q > 0 and len(ilp_obj.communities) > 1:
-        logging.warning(
-            f'Delta Q modularity is ++positive++: {delta_Q}. Adding ILP division to {len(ilp_obj.communities)} communities.')
-        curr_mega_communities = ilp_obj.communities  # New division
-    else:
-        logging.warning(f'Delta Q modularity is --Negative-- or Zero: {delta_Q}.Not adding ILP division.')
-        curr_mega_communities = [nodes_list]  # Initial division
-
-    logging.warning(f'Num of curr_mega_communities: {len(curr_mega_communities)}')
-    # curr_communities = convert_mega_com_to_regular(G,curr_mega_communities)
-    # print(curr_communities)
-    return curr_mega_communities
-
-
 def convert_mega_com_to_regular(G, mega_communities_partition: [list]):
     final_communities = []
     attribute_dict = nx.get_node_attributes(G, "nodes")
