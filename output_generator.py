@@ -10,6 +10,18 @@ from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accu
 from helpers import _pickle
 from input_networks import read_communities_file
 
+class AlgoRes:
+    def __init__(self, communities=None,mega_communities=None):
+        self.communities = communities
+        self.mega_communities = mega_communities
+        self.number_of_mega_nodes = None
+        self.lp_critical = None
+        self.num_coms_divided = None
+        self.num_coms_skipped = None
+        self.runtime = None
+
+    def set_runtime(self, runtime):
+        self.runtime = runtime
 
 
 def create_visual_graph(G, partition, output, pos):
@@ -126,10 +138,7 @@ def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, alg
     # Evaluate results and save to eval_dict
     eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo)
 
-    if extra_evals is None:
-        eval_dict["num_coms_divided"] = None
-        eval_dict["num_coms_skipped"] = None
-    else:
+    if extra_evals is not None:
         eval_dict["num_coms_divided"] = extra_evals.num_coms_divided
         eval_dict["num_coms_skipped"] = extra_evals.num_coms_skipped
 
