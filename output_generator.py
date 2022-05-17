@@ -137,10 +137,14 @@ def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, alg
     _pickle(os.path.join(save_dp, f'{algo}.communities'), object=new_communities, is_dump=True)
     # Evaluate results and save to eval_dict
     eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo)
-
-    if extra_evals is not None:
+    if extra_evals is None:
+        eval_dict["num_coms_divided"] = None
+        eval_dict["num_coms_skipped"] = None
+        eval_dict["number_of_mega_nodes"] = None
+    else:
         eval_dict["num_coms_divided"] = extra_evals.num_coms_divided
         eval_dict["num_coms_skipped"] = extra_evals.num_coms_skipped
+        eval_dict["number_of_mega_nodes"] = extra_evals.number_of_mega_nodes
 
     eval_dict["time-sec"] = time
 

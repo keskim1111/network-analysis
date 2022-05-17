@@ -8,11 +8,11 @@ from binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS
 from evaluation import calc_modularity_manual
 from input_networks import create_graph_from_edge_file, read_communities_file
-from helpers import init_results_folder, _pickle
+from helpers import init_results_folder, _pickle, prompt_file
 from logger import setup_logger
 from algorithms.ilp import ILP, convert_mega_com_to_regular
 from output_generator import save_and_eval, create_data_dict
-from algorithms.ilp import run_ilp_on_louvain
+from algorithms.Neumann import get_neumann_communities
 
 
 class AlgoRes:
@@ -20,7 +20,7 @@ class AlgoRes:
         self.communities = communities
         self.mega_communities = mega_communities
         self.number_of_mega_nodes = None
-        self.lp_critical = None
+        self.critical = None
         self.num_coms_divided = None
         self.num_coms_skipped = None
         self.runtime = None
@@ -79,14 +79,13 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
         f"Num of communities changed by ILP algo is {num_communities_divided_by_ilp}/{len(neumann_communities)}")
 
     ilp_results_obj = AlgoRes(communities=final_communities)
-    ilp_results_obj.lp_critical = lp_critical
+    ilp_results_obj.critical = lp_critical
     ilp_results_obj.num_coms_divided = num_communities_divided_by_ilp
     ilp_results_obj.num_coms_skipped = num_communities_skipped_by_ilp
 
     return ilp_results_obj
 
 
-from algorithms.Neumann import get_neumann_communities
 
 
 class NetworkObj:
@@ -102,23 +101,50 @@ class NetworkObj:
         self.binary_input_fp = create_binary_network_file(self.G, self.save_directory_path, title=self.network_name,
                                                           is_shanis_file=True)  # converting network to binary file
 
+def run_ilp_on_louvain(G, withTimeLimit=False, TimeLimit=0):
+    '''
+    :param G: graph with MEGA nodes
+    :return: communites
+    '''
+    nodes_list = list(G.nodes)
+    curr_modularity = calc_modularity_manual(G, [nodes_list],weight="weight")  # Modularity before dividing more with ILP
+    logging.info(f'Modularity of graph before ILP iteration: {curr_modularity}')
+    logging.info(f'============Trying to run ILP')
+    if withTimeLimit:
+        ilp_obj = ILP(G, nodes_list, TimeLimit=TimeLimit, weight="weight")
+    else:
+        ilp_obj = ILP(G, nodes_list, weight="weight")
+    new_modularity = calc_modularity_manual(G,
+                                            ilp_obj.communities,weight="weight")  # TODO: make sure this is equal to ilp_obj.model.ObjVal
+    logging.debug("ILP results===================================")
+    logging.info(f'New modularity of graph after ILP iteration: {new_modularity}')
+    delta_Q = new_modularity - curr_modularity
+    logging.info(f'Delta Q modularity is: {delta_Q}')
+    if delta_Q > 0 and len(ilp_obj.communities) > 1:
+        logging.warning(
+            f'Delta Q modularity is ++positive++: {delta_Q}. Adding ILP division to {len(ilp_obj.communities)} communities.')
+        curr_mega_communities = ilp_obj.communities  # New division
+    else:
+        logging.warning(f'Delta Q modularity is --Negative-- or Zero: {delta_Q}.Not adding ILP division.')
+        curr_mega_communities = [nodes_list]  # Initial division
+    logging.warning(f'Num of curr_mega_communities: {len(curr_mega_communities)}')
+    return curr_mega_communities
 
 # run on all of shani's networks
 def multi_run_louvain(lp_critical_values):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         # one_run(input_network_folder, path2curr_date_folder, lp_critical_values)
-        for critical in lp_critical_values:
-            run_one_louvain(input_network_folder, path2curr_date_folder, critical)
+        run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values)
 
 
-def multi_run(lp_criticals, lp_timelimit):
+def multi_run_newman(lp_criticals, lp_timelimit):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp_timelimit)
 
 
-def run_one_louvain(input_network_folder, path2curr_date_folder, louvain_critical):
+def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values):
     # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
@@ -134,22 +160,33 @@ def run_one_louvain(input_network_folder, path2curr_date_folder, louvain_critica
                   new_communities=louvain_communities, algo="Louvain", time=end - start)
 
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
-    start = timer()
-    mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=louvain_critical)
-    logging.warning(f"Number nodes mega_graph: \n{mega_graph.number_of_nodes()}")
-    mega_communities_partition = run_ilp_on_louvain(mega_graph)
-    curr_communities = convert_mega_com_to_regular(mega_graph, mega_communities_partition)
-    end = timer()
-    print(f"num of final communities: \n{len(curr_communities)}")
-    save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
-                  network_obj.real_communities,
-                  new_communities=curr_communities, algo=f'louvain-ILP-num_com_bound {louvain_critical}',
-                  time=end - start)
+    for critical in lp_critical_values:
+        start = timer()
+        mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=critical)
+        ilp_results_obj = AlgoRes()
+        ilp_results_obj.number_of_mega_nodes = mega_graph.number_of_nodes()
+        ilp_results_obj.critical = critical
+        logging.warning(f"Number nodes mega_graph: \n{mega_graph.number_of_nodes()}")
+        mega_communities_partition = run_ilp_on_louvain(mega_graph)
+        curr_communities = convert_mega_com_to_regular(mega_graph, mega_communities_partition)
+        end = timer()
+        ilp_results_obj.communities = curr_communities
+        ilp_results_obj.runtime = end - start
+        print(f"num of final communities: \n{len(curr_communities)}")
+        save_and_eval(
+                      network_obj.save_directory_path,
+                      eval_results_per_network,
+                      network_obj.G,
+                      network_obj.real_communities,
+                      new_communities=curr_communities,
+                      algo=f'LLP-{critical}',
+                      time=end - start,
+                      extra_evals=ilp_results_obj)
     create_outputs(input_network_folder, eval_results_per_network, network_obj)
 
 
 def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp_timelimit):
-    ########### define logger output ##############
+    # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
 
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
@@ -182,11 +219,15 @@ def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp
                                                     withTimeLimit=True, TimeLimit=TimeLimit)
         end = timer()
         newman_ilp_results_obj.runtime = end - start
-        save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
+        save_and_eval(
+                      network_obj.save_directory_path,
+                      eval_results_per_network, network_obj.G,
                       network_obj.real_communities,
                       new_communities=newman_ilp_results_obj.communities,
-                      algo=f'Neumann-ILP-{lp_critical}-TimeLimit-{TimeLimit}', time=newman_ilp_results_obj.runtime,
-                      extra_evals=newman_ilp_results_obj)
+                      algo=f'NLP-{lp_critical}-TL-{TimeLimit}',
+                      time=newman_ilp_results_obj.runtime,
+                      extra_evals=newman_ilp_results_obj
+                      )
 
     # Finished
     logging.info(f'Finished running algos on input_network_folder= {input_network_folder}')
@@ -216,8 +257,8 @@ def create_outputs(input_network_folder, eval_results_per_network, network_obj):
 if __name__ == '__main__':
     lp_critical_list = [100, 150, 200]
     time = 60 * 5
-    multi_run(lp_critical_list, time)
+    # multi_run_newman(lp_critical_list, time)
     # run_one_newman("1000_0.6_7")
     # run_one_louvain("1000_0.6_7", init_results_folder(FOLDER2FLOW_RESULTS), 200)
-    # multi_run_louvain(lp_critical_list)
+    multi_run_louvain(lp_critical_list)
     pass
