@@ -137,5 +137,18 @@ def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, alg
 
     evals_list.append(eval_dict)
 
+def create_data_dict(evals_list):
+    """
+    :param evals_list: list of eval dictionaries
+    :return: data dict for df input
+    """
+    data_dict = {}
+    for eval_dict in evals_list:
+        for k, v in eval_dict.items():
+            if not data_dict.get(k):
+                data_dict[k] = []
+            data_dict[k].append(v)
+    return data_dict
+
 
 

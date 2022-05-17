@@ -14,7 +14,7 @@ from input_networks import create_random_network
 
 @py_random_state("seed")
 def modified_louvain_communities(
-    G, weight="weight", resolution=1, threshold=0.0000001, seed=None, num_com_bound=float("inf")
+        G, weight="weight", resolution=1, threshold=0.0000001, seed=None, num_com_bound=float("inf")
 ):
     r"""Find the best partition of a graph using the Louvain Community Detection
     Algorithm.
@@ -84,10 +84,10 @@ def modified_louvain_communities(
 
     Examples
     --------
-    >>> import networkx as nx
-    >>> import networkx.algorithms.community as nx_comm
-    >>> G = nx.petersen_graph()
-    >>> nx_comm.modified_louvain_communities(G, seed=123)
+    # >>> import networkx as nx
+    # >>> import networkx.algorithms.community as nx_comm
+    # >>> G = nx.petersen_graph()
+    # >>> nx_comm.modified_louvain_communities(G, seed=123)
     [{0, 4, 5, 7, 9}, {1, 2, 3, 6, 8}]
 
     Notes
@@ -109,14 +109,14 @@ def modified_louvain_communities(
     louvain_partitions
     """
 
-    d = louvain_partitions(G, num_com_bound, weight, resolution, threshold, seed )
+    d = louvain_partitions(G, num_com_bound, weight, resolution, threshold, seed)
     q = deque(d, maxlen=1)
     return q.pop()
 
 
 @py_random_state("seed")
 def louvain_partitions(
-    G, num_com_bound, weight="weight", resolution=1, threshold=0.0000001, seed=None,
+        G, louvain_critical, weight="weight", resolution=1, threshold=0.0000001, seed=None,
 ):
     """Yields partitions for each level of the Louvain Community Detection Algorithm
 
@@ -180,19 +180,22 @@ def louvain_partitions(
         graph, m, partition, resolution, is_directed, seed
     )
     # information print
-    # it = 0
+    it = 0
 
     improvement = True
     while improvement:
         # information print
-        # it+=1
-        # print(f"\n###############iteration {it} #####################"
-        #       f"**partition: \n{partition}\n"
-        #       f"**Inner_partition: \n{inner_partition}\n"
-        #       f"**Graph: \n{graph}\n"
-        #       f"**improvement: \n{improvement}"
-        #       )
-        yield partition
+        it += 1
+
+        print(f"\n###############iteration {it} #####################\n"
+              f"======Partition========: \n{partition}\n"
+              f"num of comm: {len(partition)}\n"
+              f"======Inner_partition======: \n{inner_partition}\n"
+              f"======Graph======: \n{graph}\n"
+              # f"{graph.nodes(data=True)}\n"
+              )
+
+        yield _gen_graph(graph, inner_partition)
         new_mod = modularity(
             graph, inner_partition, resolution=resolution, weight="weight"
         )
@@ -202,14 +205,11 @@ def louvain_partitions(
             return
         mod = new_mod
         graph = _gen_graph(graph, inner_partition)
-        if graph.number_of_nodes() <= num_com_bound:
-            # information print
-            # print("returned from graph.number_of_nodes() <= num_com_bound")
+        if graph.number_of_nodes() <= louvain_critical:
             return
         partition, inner_partition, improvement = _one_level(
             graph, m, partition, resolution, is_directed, seed
         )
-
 
 
 def _one_level(G, m, partition, resolution=1, is_directed=False, seed=None):
@@ -264,13 +264,13 @@ def _one_level(G, m, partition, resolution=1, is_directed=False, seed=None):
             for nbr_com, wt in weights2com.items():
                 if is_directed:
                     gain = (
-                        wt
-                        - resolution
-                        * (
-                            out_degree * Stot_in[nbr_com]
-                            + in_degree * Stot_out[nbr_com]
-                        )
-                        / m
+                            wt
+                            - resolution
+                            * (
+                                    out_degree * Stot_in[nbr_com]
+                                    + in_degree * Stot_out[nbr_com]
+                            )
+                            / m
                     )
                 else:
                     gain = 2 * wt - resolution * (Stot[nbr_com] * degree) / m
@@ -348,10 +348,18 @@ def _convert_multigraph(G, weight, is_directed):
     return H
 
 
-G = create_random_network(n=20,min_community=2, max_degree=10, max_community =20, average_degree=2)
 if __name__ == '__main__':
-    # communities = modified_louvain_communities(G, num_com_bound=5)
-    # print("RES**********************")
+    G = create_random_network(n=20, min_community=2, max_degree=10, max_community=20, average_degree=2)
+    graph = modified_louvain_communities(G, num_com_bound=5)
+    print("---------RESULT---------")
+    print(list(graph.nodes(data=True)))
     # print("communities: \n", communities)
     # print("num of communities: \n", len(communities))
+    # print("-------gen graph------")
+    # graph = G.__class__()
+    # graph.add_nodes_from(G)
+    # weight = "weight"
+    # graph.add_weighted_edges_from(G.edges(data=weight, default=1))
+    # print("graph before _gen_graph: \n",graph)
+    # print("graph after _gen_graph: \n", new_graph)
     pass
