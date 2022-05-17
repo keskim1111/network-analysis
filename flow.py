@@ -193,6 +193,14 @@ def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
 
+    logging.info(f'===================== Running: Louvain networkx =======================')
+    start = timer()
+    louvain_communities = louvain(network_obj.G)
+    end = timer()
+    save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
+                  network_obj.real_communities,
+                  new_communities=louvain_communities, algo="Louvain", time=end - start)
+
     logging.info(f'===================== Running: Neumann C =======================')
     start = timer()
     neumann_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
@@ -201,13 +209,6 @@ def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp
     save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                   network_obj.real_communities,
                   new_communities=neumann_communities, algo="Neumann", time=end - start)
-    logging.info(f'===================== Running: Louvain networkx =======================')
-    start = timer()
-    louvain_communities = louvain(network_obj.G)
-    end = timer()
-    save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
-                  network_obj.real_communities,
-                  new_communities=louvain_communities, algo="Louvain", time=end - start)
 
     for lp_critical in lp_criticals:
         logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
