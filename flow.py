@@ -11,7 +11,7 @@ from input_networks import create_graph_from_edge_file, read_communities_file
 from helpers import init_results_folder, _pickle
 from logger import setup_logger
 from output_generator import generate_outputs_for_community_list, save_and_eval
-from algorithms.ilp import ILP
+from algorithms.ilp import ILP, convert_mega_com_to_regular
 from algorithms.Neumann import get_neumann_communities
 from output_generator import save_and_eval, create_data_dict
 from algorithms.ilp import run_ilp_on_neumann, run_ilp_on_louvain
