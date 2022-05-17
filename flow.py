@@ -82,6 +82,8 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
     ilp_results_obj.num_coms_skipped = num_communities_skipped_by_ilp
 
     return ilp_results_obj
+from algorithms.ilp import run_ilp_on_neumann, run_ilp_on_louvain
+from algorithms.Neumann import get_neumann_communities
 
 
 class NetworkObj:
@@ -102,25 +104,43 @@ class NetworkObj:
 def multi_run(lp_critical_values):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        one_run(input_network_folder, path2curr_date_folder, lp_critical_values)
+        # one_run(input_network_folder, path2curr_date_folder, lp_critical_values)
+        for critical in lp_critical_values:
+            run_one_louvain(input_network_folder, path2curr_date_folder, critical)
 
-def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical):
+
+def run_one_louvain(input_network_folder, path2curr_date_folder, louvain_critical):
     # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
-    logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
+    logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
     network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
+
+    logging.info(f'===================== Running: Louvain networkx =======================')
+    start = timer()
+    louvain_communities = louvain(network_obj.G)
+    end = timer()
+    save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
+                  network_obj.real_communities,
+                  new_communities=louvain_communities, algo="Louvain", time=end - start)
+
+
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
     start = timer()
-    inner_partition, mega_graph  = modified_louvain_communities(network_obj.G, num_com_bound=5)
-    mega_communities = run_ilp_on_louvain(mega_graph)
-    print(mega_communities)
+    mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=louvain_critical)
+    logging.warning(f"Number nodes mega_graph: \n{mega_graph.number_of_nodes()}")
+    mega_communities_partition = run_ilp_on_louvain(mega_graph)
+    curr_communities = convert_mega_com_to_regular(mega_graph, mega_communities_partition)
     end = timer()
-
+    print(f"num of final communities: \n{len(curr_communities)}")
+    save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
+                  network_obj.real_communities,
+                  new_communities=curr_communities, algo=f'louvain-ILP-num_com_bound {louvain_critical}', time=end - start)
+    create_outputs(input_network_folder, eval_results_per_network, network_obj)
 
 
 def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
-    ########### define logger output ##############
+    # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
 
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
@@ -182,6 +202,11 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
                       time=end - start)
 
     # Finished
+    create_outputs(input_network_folder, eval_results_per_network, network_obj)
+
+
+def create_outputs(input_network_folder, eval_results_per_network, network_obj):
+    # Finished
     logging.info(f'Finished running algos on input_network_folder= {input_network_folder}')
     # Create df per network
     logging.info(f'Creating DF for this network:')
@@ -195,7 +220,8 @@ def one_run(input_network_folder, path2curr_date_folder, lp_criticals):
 
 if __name__ == '__main__':
     lp_critical_list = [100, 150, 200]
-    multi_run(lp_critical_list)
+    # multi_run(lp_critical_list)
     # one_run("1000_0.6_7")
-    run_one_louvain("1000_0.6_7",init_results_folder(FOLDER2FLOW_RESULTS),50)
+    # run_one_louvain("1000_0.6_7", init_results_folder(FOLDER2FLOW_RESULTS), 200)
+    multi_run(lp_critical_list)
     pass

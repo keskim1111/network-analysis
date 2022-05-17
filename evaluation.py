@@ -76,7 +76,7 @@ def calc_modularity_nx(G, communities):
 
 
 # TODO: make sure it make sense to not normalize (1/m)
-def calc_modularity_manual(G, communities: [[]]):
+def calc_modularity_manual(G, communities: [[]],weight=None):
     """
     :param G: networkx graph
     :param communities: list of lists of communities (nodes)
@@ -86,22 +86,34 @@ def calc_modularity_manual(G, communities: [[]]):
     sum_modularity = 0
     for i in range(len(communities)):
         nodes_list = communities[i]
+        # print("nodes_list: \n",nodes_list)
+        # print("nodes_list: \n",type(nodes_list))
+        # print("nodes_list[0]: \n",nodes_list[0])
+        # print("nodes_list[0]: \n",type(nodes_list[0]))
+        # print(G.nodes(data=True))
+
         num_of_nodes = len(nodes_list)
-        m = G.number_of_edges()
+        m = G.size(weight=weight)
         adj = G.adj
-        print(adj)
+        # print(f'adj: {adj}')
+        # print("dict(dict(adj)[0].items()).get(16)  ",dict(dict(adj)[0].items()).get(16))
         cur_modularity = 0 # [sum_ij] (a_ij - (d_i * d_j)/2m)
         for node_range_1 in range(num_of_nodes):
             for node_range_2 in range(node_range_1):  # i < j
                 j = nodes_list[node_range_1]
                 i = nodes_list[node_range_2]
                 # TODO this is problamatic
-                if dict(adj[i].items()).get(j) is not None:
-                    a_ij = dict(adj[i].items())[j].get("weight", 1)
+                # print(f'i:\n {i}')
+                # print(f'adj:\n {adj}')
+                # print(f'type(adj):\n {type(adj)}')
+                # print(f'adj.get(i):\n {adj.get(i)}')
+                # print(f'adj.get(i).items(j):\n {adj.get(i).get(j)}')
+                if dict(dict(adj)[i].items()).get(j) is not None:
+                    a_ij = dict(dict(adj)[i].items())[j].get("weight", 1)
                 else:
                     a_ij = 0
 
-                cur_modularity += a_ij - (G.degree(i) * G.degree(j)) / (2 * m)
+                cur_modularity += a_ij - (G.degree(i,weight=weight) * G.degree(j,weight=weight)) / (2 * m)
         sum_modularity += cur_modularity
     return sum_modularity
 

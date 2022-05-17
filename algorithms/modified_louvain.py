@@ -116,7 +116,7 @@ def modified_louvain_communities(
 
 @py_random_state("seed")
 def louvain_partitions(
-        G, num_com_bound, weight="weight", resolution=1, threshold=0.0000001, seed=None,
+        G, louvain_critical, weight="weight", resolution=1, threshold=0.0000001, seed=None,
 ):
     """Yields partitions for each level of the Louvain Community Detection Algorithm
 
@@ -186,6 +186,7 @@ def louvain_partitions(
     while improvement:
         # information print
         it += 1
+
         print(f"\n###############iteration {it} #####################\n"
               f"======Partition========: \n{partition}\n"
               f"num of comm: {len(partition)}\n"
@@ -193,7 +194,8 @@ def louvain_partitions(
               f"======Graph======: \n{graph}\n"
               # f"{graph.nodes(data=True)}\n"
               )
-        yield inner_partition, graph
+
+        yield _gen_graph(graph, inner_partition)
         new_mod = modularity(
             graph, inner_partition, resolution=resolution, weight="weight"
         )
@@ -203,7 +205,7 @@ def louvain_partitions(
             return
         mod = new_mod
         graph = _gen_graph(graph, inner_partition)
-        if graph.number_of_nodes() <= num_com_bound:
+        if graph.number_of_nodes() <= louvain_critical:
             return
         partition, inner_partition, improvement = _one_level(
             graph, m, partition, resolution, is_directed, seed
@@ -348,10 +350,9 @@ def _convert_multigraph(G, weight, is_directed):
 
 if __name__ == '__main__':
     G = create_random_network(n=20, min_community=2, max_degree=10, max_community=20, average_degree=2)
-    inner_partition, graph = modified_louvain_communities(G, num_com_bound=5)
+    graph = modified_louvain_communities(G, num_com_bound=5)
     print("---------RESULT---------")
-    new_graph = _gen_graph(graph, inner_partition)
-    print(list(new_graph.nodes(data=True)))
+    print(list(graph.nodes(data=True)))
     # print("communities: \n", communities)
     # print("num of communities: \n", len(communities))
     # print("-------gen graph------")
