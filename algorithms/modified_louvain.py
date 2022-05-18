@@ -1,6 +1,6 @@
 """Function for detecting communities based on Louvain Community Detection
 Algorithm"""
-
+import logging
 from collections import deque, defaultdict
 
 import networkx as nx
@@ -10,6 +10,7 @@ from networkx.utils import py_random_state
 __all__ = ["modified_louvain_communities", "louvain_partitions"]
 
 from input_networks import create_random_network
+from logger import setup_logger
 
 
 @py_random_state("seed")
@@ -166,6 +167,7 @@ def louvain_partitions(
     """
 
     partition = [{u} for u in G.nodes()]
+    logging.info(f"\n========Initial Partition========:\n{partition}\n")
     mod = modularity(G, partition, resolution=resolution, weight=weight)
     is_directed = G.is_directed()
     if G.is_multigraph():
@@ -180,22 +182,12 @@ def louvain_partitions(
         graph, m, partition, resolution, is_directed, seed
     )
     # information print
-    it = 0
-
+    iteration_number = 1
     improvement = True
     while improvement:
+        important_prints(iteration_number, partition, inner_partition,graph)
         # information print
-        it += 1
-
-        print(f"\n###############iteration {it} #####################\n"
-              f"======Partition========: \n{partition}\n"
-              f"num of comm: {len(partition)}\n"
-              f"======Inner_partition======: \n{inner_partition}\n"
-              f"======Graph======: \n{graph}\n"
-              # f"{graph.nodes(data=True)}\n"
-              )
-
-        yield _gen_graph(graph, inner_partition)
+        yield iteration_number, _gen_graph(graph, inner_partition)
         new_mod = modularity(
             graph, inner_partition, resolution=resolution, weight="weight"
         )
@@ -210,6 +202,15 @@ def louvain_partitions(
         partition, inner_partition, improvement = _one_level(
             graph, m, partition, resolution, is_directed, seed
         )
+        iteration_number += 1
+
+
+def important_prints(iteration_number=None, partition=None, inner_partition=None,g=None):
+    logging.info(f"----------------------------- iteration {iteration_number} -----------------------------\n"
+                 f"======Partition-{iteration_number} iteration========: \n{partition}\n"
+                 f"======Inner_partition-{iteration_number}th iteration======: \n{inner_partition}\n"
+                 f"num of communities-{iteration_number}th iteration: {len(partition)}\n"
+                 )
 
 
 def _one_level(G, m, partition, resolution=1, is_directed=False, seed=None):
@@ -349,8 +350,9 @@ def _convert_multigraph(G, weight, is_directed):
 
 
 if __name__ == '__main__':
+    setup_logger()
     G = create_random_network(n=20, min_community=2, max_degree=10, max_community=20, average_degree=2)
-    graph = modified_louvain_communities(G, num_com_bound=5)
+    num_it, graph = modified_louvain_communities(G, num_com_bound=5)
     print("---------RESULT---------")
     print(list(graph.nodes(data=True)))
     # print("communities: \n", communities)

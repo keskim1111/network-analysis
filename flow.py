@@ -24,6 +24,7 @@ class AlgoRes:
         self.num_coms_divided = None
         self.num_coms_skipped = None
         self.runtime = None
+        self.iterations_number = None
 
     def set_runtime(self, runtime):
         self.runtime = runtime
@@ -146,7 +147,7 @@ def multi_run_newman(lp_criticals, lp_timelimit):
 
 def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values):
     # define logger output ##############
-    setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
+    setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=True)
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
     network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
@@ -162,24 +163,26 @@ def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_val
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
     for critical in lp_critical_values:
         start = timer()
-        mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=critical)
+        iterations_number, mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=critical)
         ilp_results_obj = AlgoRes()
-        ilp_results_obj.number_of_mega_nodes = mega_graph.number_of_nodes()
+        number_of_mega_nodes = mega_graph.number_of_nodes()
+        ilp_results_obj.number_of_mega_nodes = number_of_mega_nodes
         ilp_results_obj.critical = critical
-        logging.warning(f"Number nodes mega_graph: \n{mega_graph.number_of_nodes()}")
+        logging.info(f"Number nodes mega_graph: \n{mega_graph.number_of_nodes()}")
         mega_communities_partition = run_ilp_on_louvain(mega_graph)
         curr_communities = convert_mega_com_to_regular(mega_graph, mega_communities_partition)
         end = timer()
         ilp_results_obj.communities = curr_communities
+        ilp_results_obj.iterations_number = iterations_number
         ilp_results_obj.runtime = end - start
-        print(f"num of final communities: \n{len(curr_communities)}")
+        logging.info(f"num of final communities: \n{len(curr_communities)}")
         save_and_eval(
                       network_obj.save_directory_path,
                       eval_results_per_network,
                       network_obj.G,
                       network_obj.real_communities,
                       new_communities=curr_communities,
-                      algo=f'LLP-{critical}',
+                      algo=f'LLP-{critical}-{number_of_mega_nodes}',
                       time=end - start,
                       extra_evals=ilp_results_obj)
     create_outputs(input_network_folder, eval_results_per_network, network_obj)

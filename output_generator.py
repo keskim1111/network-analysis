@@ -10,8 +10,9 @@ from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accu
 from helpers import _pickle
 from input_networks import read_communities_file
 
+
 class AlgoRes:
-    def __init__(self, communities=None,mega_communities=None):
+    def __init__(self, communities=None, mega_communities=None):
         self.communities = communities
         self.mega_communities = mega_communities
         self.number_of_mega_nodes = None
@@ -130,6 +131,7 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     evals["num communities - algo"] = len(new_communities_list)
     return evals
 
+
 # TODO: add run time
 def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, algo, time=None, extra_evals=None):
     logging.info("Saving communities object to folder")
@@ -141,14 +143,17 @@ def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, alg
         eval_dict["num_coms_divided"] = None
         eval_dict["num_coms_skipped"] = None
         eval_dict["number_of_mega_nodes"] = None
+        eval_dict["iterations"] = None
     else:
         eval_dict["num_coms_divided"] = extra_evals.num_coms_divided
         eval_dict["num_coms_skipped"] = extra_evals.num_coms_skipped
         eval_dict["number_of_mega_nodes"] = extra_evals.number_of_mega_nodes
+        eval_dict["iterations"] = extra_evals.iterations_number
 
     eval_dict["time-sec"] = time
 
     evals_list.append(eval_dict)
+
 
 def create_data_dict(evals_list):
     """
@@ -162,6 +167,3 @@ def create_data_dict(evals_list):
                 data_dict[k] = []
             data_dict[k].append(v)
     return data_dict
-
-
-
