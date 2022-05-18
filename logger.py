@@ -47,7 +47,7 @@ class LogFormatter(logging.Formatter):
 
 # Setup logging
 def setup_logging(console_log_output, console_log_level, console_log_color, logfile_file, logfile_log_level,
-                  logfile_log_color, log_line_template):
+                  logfile_log_color, log_line_template, log_to_file=False):
     # Create logger
     # For simplicity, we use the root logger, i.e. call 'logging.getLogger()'
     # without name argument. This way we can simply use module methods for
@@ -84,37 +84,40 @@ def setup_logging(console_log_output, console_log_level, console_log_color, logf
     logger.addHandler(console_handler)
 
     # Create log file handler
-    try:
-        logfile_handler = logging.FileHandler(logfile_file)
-    except Exception as exception:
-        print("Failed to set up log file: %s" % str(exception))
-        return False
+    if log_to_file:
+        try:
 
-    # Set log file log level
-    try:
-        logfile_handler.setLevel(logfile_log_level.upper())  # only accepts uppercase level names
-    except:
-        print("Failed to set log file log level: invalid level: '%s'" % logfile_log_level)
-        return False
+            logfile_handler = logging.FileHandler(logfile_file)
+        except Exception as exception:
+            print("Failed to set up log file: %s" % str(exception))
+            return False
 
-    # Create and set formatter, add log file handler to logger
-    logfile_formatter = LogFormatter(fmt=log_line_template, color=logfile_log_color)
-    logfile_handler.setFormatter(logfile_formatter)
-    logger.addHandler(logfile_handler)
+        # Set log file log level
+        try:
+            logfile_handler.setLevel(logfile_log_level.upper())  # only accepts uppercase level names
+        except:
+            print("Failed to set log file log level: invalid level: '%s'" % logfile_log_level)
+            return False
+
+        # Create and set formatter, add log file handler to logger
+        logfile_formatter = LogFormatter(fmt=log_line_template, color=logfile_log_color)
+        logfile_handler.setFormatter(logfile_formatter)
+        logger.addHandler(logfile_handler)
 
     # Success
     return True
 
 
 # Main function
-def setup_logger(file_name):
+def setup_logger(file_name="default", log_to_file=False):
     # Setup logging
     if (not setup_logging(console_log_output="stdout", console_log_level="debug", console_log_color=True,
-                          logfile_file=file_name + ".log", logfile_log_level="debug", logfile_log_color=False,
-                          log_line_template="%(color_on)s[%(asctime)s] [%(threadName)s] [%(levelname)-8s] %(message)s%(color_off)s")):
+                          logfile_file=file_name + ".log", logfile_log_level="debug", logfile_log_color=False,log_to_file=log_to_file,
+                          log_line_template="%(color_on)s[%(asctime)s] [%(levelname)-1s] %(message)s%(color_off)s")):
         print("Failed to setup logging, aborting.")
         return 1
-    print(f"******logging to {file_name}.log********")
+    if log_to_file:
+        print(f"******logging to {file_name}.log********")
 
 
 # Call main function
