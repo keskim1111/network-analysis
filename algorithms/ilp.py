@@ -22,7 +22,7 @@ import networkx as nx
 
 # @timeout(300) # 5 min
 class ILP:
-    def __init__(self, G, nodes: list, weight=None, IntFeasTol=float(1e-5), TimeLimit=0):
+    def __init__(self, G, nodes: list, weight=None, IntFeasTol=0, TimeLimit=0):
         """
         :param G: networkx graph
         :param nodes:
@@ -33,7 +33,8 @@ class ILP:
         self.weight = weight
         self.model = gp.Model("mip1")
         # params
-        self.model.setParam("IntFeasTol", IntFeasTol)
+        if IntFeasTol > 0:
+            self.model.setParam("IntFeasTol", IntFeasTol)
         if TimeLimit > 0:
             self.model.setParam("TimeLimit", TimeLimit)
         self.run()  # setting objective function and constraints and optimizing
@@ -53,7 +54,6 @@ class ILP:
     @timeit
     def set_objective(self):
         m = self.G.size(weight=self.weight)
-        logging.warning(f'm: {m}')
         adj = self.G.adj
         objective_function = 0
         for node_range_1 in range(self.num_of_nodes):

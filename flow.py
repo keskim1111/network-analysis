@@ -30,20 +30,20 @@ class AlgoRes:
         self.runtime = runtime
 
 
-def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeasTol=float(1e-5), withTimeLimit=False,
+def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, withTimeLimit=False,
                        TimeLimit=0):
     final_communities = []
     num_communities_divided_by_ilp = 0
     num_communities_skipped_by_ilp = 0
     num_to_divide = sum([len(x) <= lp_critical for x in neumann_communities])
-    logging.info(f'num_to_divide: {num_to_divide}')
+    logging.warning(f'num_to_divide: {num_to_divide} groups')
     for i in range(len(neumann_communities)):
         nodes_list = neumann_communities[i]
         num_nodes = len(nodes_list)
-        logging.info(
+        logging.warning(
             f'============== Iteration {i + 1}/{len(neumann_communities)}, subgraph size = {num_nodes} ================')
         if num_nodes > lp_critical:  # This community already reached maximal modularity - no need to divide more
-            logging.info(f'num nodes {num_nodes} > lp_critical {lp_critical}, skipping.')
+            logging.warning(f'num nodes {num_nodes} > lp_critical {lp_critical}, skipping.')
             num_communities_skipped_by_ilp += 1
             curr_communities = [nodes_list]
             final_communities += curr_communities
@@ -51,14 +51,16 @@ def run_ilp_on_neumann(G, neumann_communities: [list], lp_critical: int, IntFeas
 
         curr_modularity = calc_modularity_manual(G, [nodes_list])  # Modularity before dividing more with ILP
         logging.info(f'Modularity of graph before {i + 1}th ILP iteration: {curr_modularity}')
-        logging.info(f'============Trying to run ILP')
+        logging.warning(f'============Trying to run ILP')
         if withTimeLimit:
-            ilp_obj = ILP(G, nodes_list, IntFeasTol, TimeLimit=TimeLimit / num_to_divide)
+            time_per_run = TimeLimit / num_to_divide
+            logging.warning(f'time_per_run: {time_per_run} seconds')
+            ilp_obj = ILP(G, nodes_list, TimeLimit=time_per_run)
         else:
-            ilp_obj = ILP(G, nodes_list, IntFeasTol)
+            ilp_obj = ILP(G, nodes_list)
         new_modularity = calc_modularity_manual(G,
                                                 ilp_obj.communities)  # TODO: make sure this is equal to ilp_obj.model.ObjVal
-        logging.debug("ILP results===================================")
+        logging.warning("ILP results===================================")
         logging.info(f'New modularity of graph after {i + 1}th ILP iteration: {new_modularity}')
         delta_Q = new_modularity - curr_modularity
         logging.info(f'Delta Q modularity is: {delta_Q}')
@@ -139,12 +141,20 @@ def multi_run_louvain(lp_critical_values):
         run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values)
 
 
+# TODO: add column of average subgraph size (that was run by ILP).
 def multi_run_newman(lp_criticals, lp_timelimit):
+    done_dict = {0.4:0, 0.5:0, 0.6:0}
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp_timelimit)
+        if "10000" in input_network_folder:
+            for mu in done_dict.keys():
+                if str(mu) in input_network_folder and done_dict[mu] <= 3: # run up to 3 runs per mu
+                    done_dict[mu] += 1
+                    print(done_dict)
+                    print(input_network_folder)
+                    run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp_timelimit)
 
-
+# add try catch to run ilp .. bc of out of memory
 def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values):
     # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=True)
@@ -211,7 +221,7 @@ def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp
     end = timer()
     save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                   network_obj.real_communities,
-                  new_communities=neumann_communities, algo="Neumann", time=end - start)
+                  new_communities=neumann_communities, algo="Newman", time=end - start)
 
     for lp_critical in lp_criticals:
         logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
@@ -260,9 +270,9 @@ def create_outputs(input_network_folder, eval_results_per_network, network_obj):
 
 if __name__ == '__main__':
     lp_critical_list = [100, 150, 200]
-    time = 60 * 5
-    # multi_run_newman(lp_critical_list, time)
+    time = 40*60
+    multi_run_newman(lp_critical_list, time)
     # run_one_newman("1000_0.6_7")
     # run_one_louvain("1000_0.6_7", init_results_folder(FOLDER2FLOW_RESULTS), 200)
-    multi_run_louvain(lp_critical_list)
+    # multi_run_louvain(lp_critical_list)
     pass
