@@ -47,16 +47,16 @@ class NetworkObj:
 
 # ======================================== Louvain ======================================================
 def multi_run_louvain(timelimit):
-    lp_critical_for_1000 = [100]
+    lp_critical_for_1000 = [100]*10
     lp_critical_for_10000 = [70, 150]
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         if "10000" in input_network_folder:
-            run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_10000, withTimeLimit=True, TimeLimit=timelimit)
-            # continue
-        else: # TODO: add running of 10 times per network - and put results in the same df
+            # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_10000, withTimeLimit=True, TimeLimit=timelimit)
             continue
-            # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_1000)
+        else: # TODO: add running of 10 times per network - and put results in the same df
+            # continue
+            run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_1000)
 
 
 # add try catch to run ilp .. bc of out of memory
