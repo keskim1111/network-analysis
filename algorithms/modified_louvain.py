@@ -167,7 +167,7 @@ def louvain_partitions(
     """
 
     partition = [{u} for u in G.nodes()]
-    logging.info(f"\n========Initial Partition========:\n{partition}\n")
+    #logging.info(f"\n========Initial Partition========:\n{partition}\n")
     mod = modularity(G, partition, resolution=resolution, weight=weight)
     is_directed = G.is_directed()
     if G.is_multigraph():
@@ -203,12 +203,13 @@ def louvain_partitions(
             graph, m, partition, resolution, is_directed, seed
         )
         iteration_number += 1
+    logging.warning(f'[louvain_partitions]: final modularity = {mod}')
 
 
 def important_prints(iteration_number=None, partition=None, inner_partition=None,g=None):
     logging.info(f"----------------------------- iteration {iteration_number} -----------------------------\n"
-                 f"======Partition-{iteration_number} iteration========: \n{partition}\n"
-                 f"======Inner_partition-{iteration_number}th iteration======: \n{inner_partition}\n"
+                 #f"======Partition-{iteration_number} iteration========: \n{partition}\n"
+                 #f"======Inner_partition-{iteration_number}th iteration======: \n{inner_partition}\n"
                  f"num of communities-{iteration_number}th iteration: {len(partition)}\n"
                  )
 
