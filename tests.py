@@ -72,9 +72,11 @@ def read_neuman_binary_files_and_print_evaluations(neuman_res_path, original_res
 
 def create_files_from_networkX_graph(n, mu, graphs_folder):
     # create folder with files
-    input_network_name = f"{n}_{mu}"
-    G = create_random_network(n=50, min_community=10, max_degree=20, max_community=20, average_degree=6)
+    input_network_name = f"{n}_{mu}-{current_time()}"
+    G = create_random_network(n=50, min_community=10, max_degree=20, max_community=20, average_degree=6,mu=mu)
+    logging.info(f"created Graph {G}")
     curr_folder_dir = os.path.join(graphs_folder, f"{input_network_name}")
+    logging.info(f"Folder of graph is:\n {curr_folder_dir}")
     if not os.path.isdir(curr_folder_dir):
         os.mkdir(curr_folder_dir)
     fh = open(os.path.join(graphs_folder, f"{input_network_name}", "network.dat"), "wb")
@@ -82,13 +84,10 @@ def create_files_from_networkX_graph(n, mu, graphs_folder):
     real_communities_sets = {frozenset(G.nodes[v]["community"]) for v in G}
     real_communities = [list(c) for c in real_communities_sets]
     with open(os.path.join(graphs_folder, f"{input_network_name}", "community.dat"), "a") as f:
-        cnt = 1
+        cnt = 0
         for i in range(len(real_communities)):
             for j_node in range(len(real_communities[i])):
-                if i == len(real_communities)-2 and j_node == len(real_communities[i])-2:
-                    f.write(f"{real_communities[i][j_node]}\t{cnt}")
-                else:
-                    f.write(f"{real_communities[i][j_node]}\t{cnt}\n")
+                f.write(f"{real_communities[i][j_node]}\t{cnt}\n")
             cnt+=1
     logging.info(f"Created graph at {input_network_name}")
     return input_network_name
@@ -98,7 +97,17 @@ def one_comparison_run(input_network_folder, path2curr_date_folder):
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=True)
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
-    network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
+    network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=False)
+
+
+    logging.info(f'===================== Running: Neumann C =======================')
+    start = timer()
+    neumann_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
+                                                  network_obj.binary_input_fp, is_shani=False)
+    end = timer()
+    save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
+                  network_obj.real_communities,
+                  new_communities=neumann_communities, algo="Newman", time=end - start)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
     start = timer()
@@ -107,15 +116,6 @@ def one_comparison_run(input_network_folder, path2curr_date_folder):
     save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                   network_obj.real_communities,
                   new_communities=louvain_communities, algo="Louvain", time=end - start)
-    #
-    # logging.info(f'===================== Running: Neumann C =======================')
-    # start = timer()
-    # neumann_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
-    #                                               network_obj.binary_input_fp)
-    # end = timer()
-    # save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
-    #               network_obj.real_communities,
-    #               new_communities=neumann_communities, algo="Newman", time=end - start)
 
     logging.info(f'===================== Running: ILP =======================')
     start = timer()
@@ -204,37 +204,52 @@ def run2(n):
             continue
     return ilp,louvain
 
+def multi_comparison_run(n,num_of_runs):
+    path2curr_date_folder = results_folder(FOLDER2FLOW_RESULTS) # results
+    for mu in [0.2,0.4,0.5,0.6]:
+        for i in range(num_of_runs):
+            try:
+                print(f"Num iteration {i}\n params: n-{n},mu -{mu}")
+                input_path = create_files_from_networkX_graph(n, mu, r"C:\Users\kimke\OneDrive\Documents\4th_year\semeter_B\Biological_networks_sadna\network-analysis\Benchmark\Graphs")
+                one_comparison_run(input_path, path2curr_date_folder)
+            except Exception as e:
+                logging.error(e)
+                continue
+
 
 if __name__ == '__main__':
+    multi_comparison_run(50, 50)
+    #works
     # path2curr_date_folder = results_folder(FOLDER2FLOW_RESULTS) # results
-    # # input_path = create_files_from_networkX_graph(50, 0.4, r"C:\Users\kimke\OneDrive\Documents\4th_year\semeter_B\Biological_networks_sadna\network-analysis\Benchmark\Graphs")
-    # input_path = "50_0.4"
+    # input_path = create_files_from_networkX_graph(50, 0.2, r"C:\Users\kimke\OneDrive\Documents\4th_year\semeter_B\Biological_networks_sadna\network-analysis\Benchmark\Graphs")
+    # # input_path = "50_0.4"
     # one_comparison_run(input_path, path2curr_date_folder)
-    ilp, louvain = run2(50)
-    louvain_mod_avg = statistics.mean([d['modularity - algo'] for d in louvain])
-    louvain_jaccard_avg = statistics.mean([d['jaccard'] for d in louvain])
 
-    louvain_mod_std = statistics.stdev([d['modularity - algo'] for d in louvain])
-    louvain_jaccard_std = statistics.stdev([d['jaccard'] for d in louvain])
-
-
-    ilp_mod_avg = statistics.mean([d['modularity - algo'] for d in ilp])
-    ilp_jaccard_avg = statistics.mean([d['jaccard'] for d in ilp])
-
-    ilp_mod_std = statistics.stdev([d['modularity - algo'] for d in ilp])
-    ilp_jaccard_std = statistics.stdev([d['jaccard'] for d in ilp])
-
-    print(f"----ilp_mod_avg----\n{ilp_mod_avg}")
-    print(f"----ilp_mod_std----\n{ilp_mod_std}")
-
-    print(f"----louvain_mod_avg----\n{louvain_mod_avg}")
-    print(f"----louvain_mod_std----\n{louvain_mod_std}")
-
-    print(f"----ilp_jaccard_avg----\n{ilp_jaccard_avg}")
-    print(f"----ilp_jaccard_std----\n{ilp_jaccard_std}")
-
-    print(f"----louvain_jaccard_avg----\n{louvain_jaccard_avg}")
-    print(f"----louvain_jaccard_std----\n{louvain_jaccard_std}")
+    # ilp, louvain = run2(50)
+    # louvain_mod_avg = statistics.mean([d['modularity - algo'] for d in louvain])
+    # louvain_jaccard_avg = statistics.mean([d['jaccard'] for d in louvain])
+    #
+    # louvain_mod_std = statistics.stdev([d['modularity - algo'] for d in louvain])
+    # louvain_jaccard_std = statistics.stdev([d['jaccard'] for d in louvain])
+    #
+    #
+    # ilp_mod_avg = statistics.mean([d['modularity - algo'] for d in ilp])
+    # ilp_jaccard_avg = statistics.mean([d['jaccard'] for d in ilp])
+    #
+    # ilp_mod_std = statistics.stdev([d['modularity - algo'] for d in ilp])
+    # ilp_jaccard_std = statistics.stdev([d['jaccard'] for d in ilp])
+    #
+    # print(f"----ilp_mod_avg----\n{ilp_mod_avg}")
+    # print(f"----ilp_mod_std----\n{ilp_mod_std}")
+    #
+    # print(f"----louvain_mod_avg----\n{louvain_mod_avg}")
+    # print(f"----louvain_mod_std----\n{louvain_mod_std}")
+    #
+    # print(f"----ilp_jaccard_avg----\n{ilp_jaccard_avg}")
+    # print(f"----ilp_jaccard_std----\n{ilp_jaccard_std}")
+    #
+    # print(f"----louvain_jaccard_avg----\n{louvain_jaccard_avg}")
+    # print(f"----louvain_jaccard_std----\n{louvain_jaccard_std}")
 
 
 

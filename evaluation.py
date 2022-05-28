@@ -80,6 +80,7 @@ def calc_modularity_nx(G, communities, weight=None):
         return mod
     except Exception as e:
         logging.info(e)
+        raise e
 
 
 # TODO: make sure it make sense to not normalize (1/m)
