@@ -5,7 +5,7 @@ dp = dir path
 
 import os
 
-C_CODE = os.path.join(os.getcwd(), 'neuman_with_change')
+C_CODE = os.path.join("C:\\Users\kimke\OneDrive\Documents\\4th_year\semeter_B\Biological_networks_sadna\\network-analysis", 'neuman_with_change')
 
 yeast_path = os.path.join("Benchmark", "Yeast")
 arabidopsis_path = os.path.join("Benchmark", "Arabidopsis")

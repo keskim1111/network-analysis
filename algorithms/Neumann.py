@@ -7,6 +7,7 @@ from binary_files import read_binary_network_output
 
 @timeout(120)
 def run_cmd(command, run_path):
+    print(f"Run path is {run_path}")
     os.chdir(run_path)
     print(f"current path = {os.getcwd()}")
     print(f"current cmd running = {command}")
