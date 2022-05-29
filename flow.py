@@ -8,7 +8,7 @@ from binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, yeast_path
 from evaluation import calc_modularity_manual, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, read_communities_file, create_graph_from_edge_list
-from helpers import init_results_folder, _pickle, prompt_file
+from helpers import init_results_folder, _pickle, prompt_file, current_time
 from logger import setup_logger
 from algorithms.ilp import ILP, convert_mega_com_to_regular
 from output_generator import save_and_eval, create_data_dict
@@ -40,11 +40,11 @@ def multi_run_louvain(timelimit):
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         if "10000" in input_network_folder:
-            run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_10000, withTimeLimit=True, TimeLimit=timelimit)
-            # continue
-        else: # TODO: add running of 10 times per network - and put results in the same df
+            # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_10000, withTimeLimit=True, TimeLimit=timelimit)
             continue
-            # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_1000)
+        else: # TODO: add running of 10 times per network - and put results in the same df
+            # continue
+            run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_1000)
 
 
 # add try catch to run ilp .. bc of out of memory
@@ -53,7 +53,7 @@ def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_val
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=True)
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
-    network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
+    network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=True)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
     start = timer()
@@ -161,7 +161,7 @@ def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp
 
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
-    network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
+    network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=True)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
     start = timer()
@@ -174,7 +174,7 @@ def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp
     logging.info(f'===================== Running: Neumann C =======================')
     start = timer()
     neumann_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
-                                                  network_obj.binary_input_fp)
+                                                  network_obj.binary_input_fp,is_shani=True)
     end = timer()
     save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                   network_obj.real_communities,
@@ -184,7 +184,7 @@ def run_one_newman(input_network_folder, path2curr_date_folder, lp_criticals, lp
         logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
         start = timer()
         neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
-                                                         network_obj.binary_input_fp, lp_critical=lp_critical)
+                                                         network_obj.binary_input_fp, lp_critical=lp_critical,is_shani=True)
         TimeLimit = lp_timelimit  # in seconds
         newman_ilp_results_obj = run_ilp_on_neumann(network_obj.G, neuman_com_partial_run, lp_critical=lp_critical,
                                                     withTimeLimit=True, TimeLimit=TimeLimit)
@@ -335,17 +335,19 @@ def run_on_yeast(withTimeLimit=False, TimeLimit=0):
 
 # ============================== Helper functions
 class NetworkObj:
-    def __init__(self, main_dp, network_name):
+    def __init__(self, main_dp, network_name,is_shanis_file=False):
         self.network_name = network_name
         print("main_dp: ", main_dp)
         print("network_name: ", network_name)
-        self.save_directory_path = init_results_folder(main_dp, network_name)
+        # move back
+        # self.save_directory_path = init_results_folder(main_dp, network_name)
+        self.save_directory_path = init_results_folder(main_dp, f"{network_name}={current_time()}")
         self.network_dp = os.path.join(PATH2SHANIS_GRAPHS, self.network_name)
         self.real_communities = read_communities_file(os.path.join(self.network_dp, "community.dat"))
         _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
         self.G = create_graph_from_edge_file(os.path.join(self.network_dp, "network.dat"))  # creating graph object
         self.binary_input_fp = create_binary_network_file(self.G, self.save_directory_path, title=self.network_name,
-                                                          is_shanis_file=True)  # converting network to binary file
+                                                          is_shanis_file=is_shanis_file)  # converting network to binary file
 
 
 def create_outputs(input_network_folder, eval_results_per_network, network_obj):
