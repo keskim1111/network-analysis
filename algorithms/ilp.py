@@ -120,20 +120,4 @@ class ILP:
         return communities
 
 
-def convert_mega_com_to_regular(G, mega_communities_partition: [list]):
-    final_communities = []
-    attribute_dict = nx.get_node_attributes(G, "nodes")
-    # no partition occurred, every mega node is a community
-    if len(mega_communities_partition) == 1:
-        for mega_node in mega_communities_partition[0]:
-            final_communities.append(attribute_dict.get(mega_node))
-    # partition occurred, some mega nodes are together
-    else:
-        for mega_community in mega_communities_partition:
-            regular_com = []
-            for mega_node in mega_community:
-                regular_com += attribute_dict.get(mega_node)
-            final_communities.append(regular_com)
-        # if len(final_com) == 1:
-        #     return final_com[0]
-    return final_communities
+
