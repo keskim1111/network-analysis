@@ -321,6 +321,7 @@ def _gen_graph(G, partition):
     node2com = {}
     for i, part in enumerate(partition):
         nodes = set()
+        print(f"-------------{part}----------------")
         for node in part:
             node2com[node] = i
             nodes.update(G.nodes[node].get("nodes", {node}))
