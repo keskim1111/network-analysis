@@ -1,7 +1,15 @@
-# network-analysis
+# Network-analysis
 This is a project for a university course that aims to improve existing algorithms for community detection in networks.
+- [Prerequisites](#prerequisites)
+- [Algorithm explained](#algorithm-explained)
+  * [The idea](#the-idea)
+  * [Known algorithms](#known-algorithms)
+    + [Louvain](#louvain)
+    + [Newman](#newman)
 
-## prerequisites
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+## Prerequisites
 - Run:
 
 ```
