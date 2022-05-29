@@ -11,7 +11,7 @@ from helpers import current_time
 from logger import setup_logger
 import  logging
 from algorithms.algorithms import louvain, newman
-from algorithms.ilp import ILP, convert_mega_com_to_regular
+from algorithms.ilp import ILP
 from binary_files import read_binary_network_output
 from input_networks import create_random_network, create_graph_from_edge_file, read_communities_file
 from output_generator import generate_outputs_for_community_list, save_and_eval
