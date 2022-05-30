@@ -4,7 +4,7 @@ import pandas as pd
 import logging
 from algorithms.algorithms import louvain
 from algorithms.modified_louvain import modified_louvain_communities
-from algorithms.utils import convert_mega_nodes_to_communities, random_split_mega_nodes
+from algorithms.utils import convert_mega_nodes_to_communities, split_mega_nodes
 from binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, yeast_path
 from evaluation import calc_modularity_manual, calc_modularity_nx
@@ -35,19 +35,19 @@ class AlgoRes:
 # ======================================== Louvain ======================================================
 def multi_run_louvain(split_mega_nodes=False):
     lp_critical_for_1000 = [100]
-    lp_critical_for_10000 = [70, 150, 550]
+    lp_critical_for_10000 = [100]
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         if "10000" in input_network_folder:
-            # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_10000, withTimeLimit=True, TimeLimit=timelimit)
-            continue
-        else: # TODO: add running of 10 times per network - and put results in the same df
+            run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_10000, is_split_mega_nodes=split_mega_nodes)
             # continue
-            run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_1000, split_mega_nodes=split_mega_nodes)
+        elif "1000" in input_network_folder: # TODO: add running of 10 times per network - and put results in the same df
+            continue
+            # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_for_1000, is_split_mega_nodes=split_mega_nodes)
 
 
 # add try catch to run ilp .. bc of out of memory
-def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values, withTimeLimit=False, TimeLimit=0, split_mega_nodes=False):
+def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values, withTimeLimit=False, TimeLimit=0, is_split_mega_nodes=False):
     # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=True)
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
@@ -74,8 +74,8 @@ def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_val
         try:
             logging.info(f'about to run_ilp_on_louvain')
             # split mega graph
-            if split_mega_nodes:
-                mega_graph = random_split_mega_nodes(network_obj.G, mega_graph, critical)
+            if is_split_mega_nodes:
+                mega_graph = split_mega_nodes(network_obj.G, mega_graph, critical, is_modularity=True)
                 logging.warning(f'Splitted nodes. num of nodes in mega is {mega_graph.number_of_nodes()}')
             # regular run
             number_of_mega_nodes = mega_graph.number_of_nodes()
@@ -100,8 +100,9 @@ def run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_val
             logging.info(f'------ success running ilp on louvain, lp_critical={critical}')
         except Exception as e:
             logging.info(
-                f'run_one_louvain didnt work on {input_network_folder}, lp_critical={critical}, number_of_mega_nodes={number_of_mega_nodes}')
+                f'run_one_louvain didnt work on {input_network_folder}, lp_critical={critical}')
             logging.error(e)
+            raise e
     create_outputs(input_network_folder, eval_results_per_network, network_obj)
     logging.info(f'eval_results_per_network={eval_results_per_network}')
 
@@ -378,10 +379,10 @@ if __name__ == '__main__':
     time = 10 * 60
     # multi_run_newman(lp_critical_list, time)
     multi_run_louvain(split_mega_nodes=True)
-    # one run louvain
+    ## one run louvain
     # path2curr_date_folder = os.path.join('C:\\Users\\kimke\\OneDrive\\Documents\\4th_year\\semeter_B\\Biological_networks_sadna\\network-analysis\\results\\full_flow\\',current_time())
     # input_network_folder = '1000_0.6_9'
     # lp_critical_values = [100]
-    # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values)
+    # run_one_louvain(input_network_folder, path2curr_date_folder, lp_critical_values, is_split_mega_nodes=True)
     # run_on_yeast()
     pass

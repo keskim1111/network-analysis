@@ -75,7 +75,7 @@ def min_cut_split_mega_node(G, mega_node, attribute_dict):
 def modularity_split_mega_node(G, mega_node, attribute_dict):
     community = list(attribute_dict.get(mega_node))
     sub_graph = G.subgraph(community)
-    communities = greedy_modularity_communities(sub_graph)
+    communities = greedy_modularity_communities(sub_graph,n_communities=2)
     return [list(x) for x in communities]
 
 if __name__ == '__main__':
