@@ -5,33 +5,6 @@ from output_generator import *
 from algorithms.ilp import run_ilp_on_neuman_output
 
 
-@timeit
-def create_example( is_networkX=False, edge_list_path= None):
-    n = 1000
-    mu = 0.1
-    tau1 = 3
-    tau2 = 1.5
-    average_degree = 5
-    min_com = 6
-    if is_networkX:
-        G = create_random_network(n, mu, tau1, tau2, average_degree, min_com)
-    else:
-        G = create_graph_from_edge_file(edge_list_path)
-    print(G)
-    algo_dict_partition = run_algos(G)
-    data, index = generate_outputs(G, algo_dict_partition, community_file)
-    df = create_df(data, evaluation_measures, index)
-    params_dict = {"n": n, "original modularity": calc_modularity_nx(G, {frozenset(G.nodes[v]["community"]) for v in G})}
-    directory = f"output_{current_time()}"
-    path = create_output_folder(directory, G)
-    create_pdf(df, f"{path}\\results.pdf", params_dict)
-    print(f"Output file created at {path}")
-    try:
-        create_visual_graphs(G, algo_dict_partition, path)
-    except AttributeError:
-        print(f"There was an Exception with creating visual_graphs:\n {AttributeError} ")
-
-
 # def init_graph_and_folder_yeast(res_path):
 #     with open(os.path.join(yeast_path, "edges.list"), "rb") as f:
 #         edges_list = pickle.load(f)

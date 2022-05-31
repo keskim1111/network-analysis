@@ -60,37 +60,9 @@ def create_output_folder(folder_name, G, edges_name="graph_edges"):
         f.write(str(G.edges))
     return path
 
-
 def create_df(data, columns, index):
     dfObj = pd.DataFrame(data, columns=columns, index=index)
     return dfObj
-
-
-def create_pdf(df, path, params):
-    fig, ax = plt.subplots()
-    # hide axes
-    fig.patch.set_visible(False)
-    ax.axis('off')
-    ax.axis('tight')
-    ax.table(cellText=df.values, colLabels=df.columns, rowLabels=df.index, loc='center')
-    fig.tight_layout()
-    txt = ''.join([f"{val} param was {param}\n" for val, param in params.items()])
-    plt.figtext(0.5, 0.1, txt, wrap=True, horizontalalignment='center', fontsize=9)
-    plt.savefig(path)
-    plt.close(fig)
-
-
-def run_algos(G, with_ilp=False):
-    if with_ilp:
-        algo_dict = {"newman": {"func": newman}, "louvain": {"func": louvain}, "ilp": {"func": run_ilp}}
-    else:
-        algo_dict = {"newman": {"func": newman}, "louvain": {"func": louvain}}
-    for algo in algo_dict.keys():
-        print(f'running {algo}')
-        partition = algo_dict[algo]["func"](G)
-        algo_dict[algo]["partition"] = partition
-        print(f'finished running {algo}')
-    return algo_dict
 
 
 def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None):
