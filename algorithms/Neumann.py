@@ -8,8 +8,8 @@ from binary_files import read_binary_network_output
 @timeout(120)
 def run_cmd(command, run_path):
     print(f"Run path is {run_path}")
-    os.chdir(run_path)
     print(f"current path = {os.getcwd()}")
+    os.chdir(run_path)
     print(f"current cmd running = {command}")
     process = subprocess.Popen(command, shell=True)
     process.communicate()
@@ -41,6 +41,7 @@ def get_neumann_communities(save_dp, network_name, binary_input_fp, lp_critical=
     binary_output_fp = os.path.join(save_dp,
                                     f"{network_name}_{lp_critical}.out")  # defining path to output file
     command = f".\cluster {binary_input_fp} {binary_output_fp} {lp_critical}"  # command for Neumann C code
+    print(f"C_CODE: {C_CODE}")
     run_cmd(command, C_CODE)
     neumann_communities = run_func_after_file_created(binary_output_fp, read_binary_network_output,
                                                       {"fileName": binary_output_fp, "is_shani": is_shani})
