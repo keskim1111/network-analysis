@@ -1,5 +1,7 @@
 import time
 from datetime import datetime
+from pprint import pprint
+
 from consts import arabidopsis_path
 import networkx as nx
 import pickle, os
@@ -89,7 +91,7 @@ def init_results_folder(init_path, folder_name=""):
     return os.path.join(os.getcwd(), curr_res_path)
 
 
-def save_str_graph_in_good_format(graph_path):
+def save_str_graph_in_good_format(graph_path, write_to_files=False):
     '''
     :param graph_path: path to graph built from nodes that are strings
     :return: a networkX graph created from the strings edges file, with
@@ -106,36 +108,39 @@ def save_str_graph_in_good_format(graph_path):
     clusters = {}
     with open(clusters_file) as f:
         while line := f.readline():
-            try:
+                if len( line.rstrip().split("\t")) > 2:
+                    logging("ERROR")
                 node, community = line.rstrip().split("\t")
                 if node not in dict_str_to_num:
                     dict_str_to_num[node] = i
+                    G.add_node(i)
                     i += 1
                 if community not in clusters:
                     clusters[community] = []
                 clusters[community].append(dict_str_to_num[node])
-            except ValueError:
-                print(line)
-                raise ValueError
-    clusters_list = [nodes for nodes in clusters.values()]
 
-    with open(os.path.join(graph_path, "clusters.list"), "wb") as f:
-        pickle.dump(clusters_list, f)
+    clusters_list = [nodes for nodes in clusters.values()]
 
     with open(edges_file) as file:
         while line := file.readline():
-            str_node1, str_node2 = line.rstrip().split("\t")
-            # map str node name to a number
-            num_node1 = dict_str_to_num[str_node1]
-            num_node2 = dict_str_to_num[str_node2]
-            G.add_edge(num_node1, num_node2)
+                str_node1, str_node2 = line.rstrip().split("\t")
+                # map str node name to a number
+                num_node1 = dict_str_to_num[str_node1]
+                num_node2 = dict_str_to_num[str_node2]
+                G.add_edge(num_node1, num_node2)
 
-    # save values
-    with open(os.path.join(graph_path, "edges.list"), "wb") as f:
-        pickle.dump(G.edges, f)
 
-    with open(os.path.join(graph_path, "str_to_num.dict"), "wb") as f:
-        pickle.dump(dict_str_to_num, f)
+    if write_to_files:
+        with open(os.path.join(graph_path, "clusters.list"), "wb") as f:
+            pickle.dump(clusters_list, f)
+
+
+        # save values
+        with open(os.path.join(graph_path, "edges.list"), "wb") as f:
+            pickle.dump(G.edges, f)
+
+        with open(os.path.join(graph_path, "str_to_num.dict"), "wb") as f:
+            pickle.dump(dict_str_to_num, f)
 
     return G, clusters_list, dict_str_to_num
 
@@ -162,4 +167,4 @@ def prompt_file(path):
 
 
 if __name__ == '__main__':
-    print(save_str_graph_in_good_format(arabidopsis_path))
+    pprint(save_str_graph_in_good_format(arabidopsis_path))

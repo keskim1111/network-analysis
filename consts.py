@@ -6,6 +6,7 @@ dp = dir path
 import os
 
 C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'neuman_with_change')
+facebook = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'SNAP\\facebook_combined.txt')
 
 yeast_path = os.path.join("Benchmark", "Yeast")
 arabidopsis_path = os.path.join("Benchmark", "Arabidopsis")

@@ -7,10 +7,10 @@ from algorithms.modified_louvain import modified_louvain_communities
 from algorithms.utils import convert_mega_nodes_to_communities, split_mega_nodes, modularity_split_mega_node, \
     min_cut_split_mega_node, random_split_mega_node
 from binary_files import create_binary_network_file
-from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, yeast_path
+from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, yeast_path, arabidopsis_path
 from evaluation import calc_modularity_manual, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, read_communities_file, create_graph_from_edge_list
-from helpers import init_results_folder, _pickle, prompt_file, current_time
+from helpers import init_results_folder, _pickle, prompt_file, current_time, save_str_graph_in_good_format
 from logger import setup_logger
 from algorithms.ilp import ILP
 from output_generator import save_and_eval, create_data_dict
@@ -215,9 +215,10 @@ def run_ilp_on_neumann(G,
 # ------------------------------- Benchmarks ( yeast and arabidopsis ) -------------------------------
 
 def run_on_benchmark(lp_critical_values,
+                     path,
+                     benchmark_name,
                      withTimeLimit=False,
                      TimeLimit=0,
-                     benchmark_name="yeast",
                      split_method=None,
                      runs=10):
     #TODO more runs
@@ -228,9 +229,23 @@ def run_on_benchmark(lp_critical_values,
 
     setup_logger(os.path.join(path2curr_date_folder, benchmark_name), log_to_file=True)
     logging.info(f'Starting to run algos on {benchmark_name}')
-    edges_list = _pickle(os.path.join(yeast_path, "edges.list"), is_load=True)
-    G = create_graph_from_edge_list(edges_list)
-    real_communities = _pickle(os.path.join(yeast_path, "clusters.list"), is_load=True)
+    logging.error(f"path is {path}!!")
+    G, real_communities, d = save_str_graph_in_good_format(path)
+
+    #add alone nodes
+    nodes_set = set(G.nodes)
+    print(nodes_set)
+    nodes_set2 = set()
+    for c in real_communities:
+        for n in c:
+            nodes_set2.add(n)
+    if nodes_set != nodes_set2:
+        print(f"G nodes:{len(nodes_set)}")
+        print(f"real nodes:{len(nodes_set2)}")
+        print(nodes_set2 - nodes_set)
+
+
+    print(f"G:\n{G},\nreal_communities:\n{real_communities}")
     run_obj = AlgoRun(split_method=split_method)
 
     logging.info(f'===================== Running: Neumann C =======================')
@@ -263,6 +278,58 @@ def run_on_benchmark(lp_critical_values,
     logging.info(f'eval_results_per_network={eval_results_per_network}')
     create_outputs(benchmark_name, eval_results_per_network, save_directory_path)
 
+# ------------------------------- SNAP ( yeast and arabidopsis ) -------------------------------
+
+def run_on_snap(lp_critical_values,
+                     path,
+                     withTimeLimit=False,
+                     TimeLimit=0,
+                     benchmark_name="yeast",
+                     split_method=None,
+                     runs=10):
+    #TODO more runs
+    eval_results_per_network = []  # Save all final results in this list (for creating df later)
+    path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
+    logging.info(f"Benchmark name is: {benchmark_name}")
+    save_directory_path = init_results_folder(path2curr_date_folder, benchmark_name)
+
+    setup_logger(os.path.join(path2curr_date_folder, benchmark_name), log_to_file=True)
+    logging.info(f'Starting to run algos on {benchmark_name}')
+    logging.error(f"path is {path}!!")
+    edges_list = _pickle(os.path.join(path, "edges.list"), is_load=True)
+    G = create_graph_from_edge_list(edges_list)
+    real_communities = _pickle(os.path.join(path, "clusters.list"), is_load=True)
+    run_obj = AlgoRun(split_method=split_method)
+
+    logging.info(f'===================== Running: Neumann C =======================')
+    binary_input_fp = create_binary_network_file(G, save_directory_path,
+                                                 title=benchmark_name)  # converting network to binary file
+    run_newman(eval_results_per_network,
+               lp_critical_values,
+               TimeLimit,
+               save_directory_path,
+               benchmark_name,
+               binary_input_fp,
+               G,
+               real_communities,
+               is_shani=False
+               )
+    logging.info(f'===================== Running: Louvain networkx =======================')
+    run_louvain(save_directory_path, eval_results_per_network, G, real_communities)
+
+    logging.info(f'===================== Running: Louvain Changed networkx =======================')
+    run_louvain_with_change(TimeLimit,
+                            withTimeLimit,
+                            eval_results_per_network,
+                            save_directory_path,
+                            G,
+                            real_communities,
+                            run_obj,
+                            input_network_folder=os.path.join(benchmark_name),
+                            lp_critical_values=lp_critical_values)
+
+    logging.info(f'eval_results_per_network={eval_results_per_network}')
+    create_outputs(benchmark_name, eval_results_per_network, save_directory_path)
 
 # ------------------------------- Helper functions -------------------------------
 class NetworkObj:
@@ -458,6 +525,6 @@ if __name__ == '__main__':
     # run_one_louvain(input_network_folder1, path2curr_date_folder1, lp_critical_list1, is_split_mega_nodes=True)
     # run_one_newman(input_network_folder1, path2curr_date_folder1, lp_critical_values=lp_critical_list1, lp_timelimit=time)
 
-    # run_on_benchmark(lp_critical_list1, benchmark_name="arabidopsis",split_method=None)
-    run_on_benchmark(lp_critical_list1, benchmark_name="yeast",split_method=None)
+    run_on_benchmark(lp_critical_list1,path=arabidopsis_path, benchmark_name="arabidopsis", split_method=None)
+    # run_on_benchmark(lp_critical_list1,path=yeast_path, benchmark_name="yeast",split_method=None)
     pass
