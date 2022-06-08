@@ -117,11 +117,13 @@ def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, alg
         eval_dict["num_coms_skipped"] = None
         eval_dict["number_of_mega_nodes"] = None
         eval_dict["iterations"] = None
+        eval_dict["split_method"] = None
     else:
         eval_dict["num_coms_divided"] = extra_evals.num_coms_divided
         eval_dict["num_coms_skipped"] = extra_evals.num_coms_skipped
         eval_dict["number_of_mega_nodes"] = extra_evals.number_of_mega_nodes
         eval_dict["iterations"] = extra_evals.iterations_number
+        eval_dict["split_method"] = extra_evals.split_method
 
     eval_dict["time-sec"] = time
 
