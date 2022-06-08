@@ -218,7 +218,9 @@ def run_on_benchmark(lp_critical_values,
                      withTimeLimit=False,
                      TimeLimit=0,
                      benchmark_name="yeast",
-                     is_split_mega_nodes=False):
+                     split_method=None,
+                     runs=10):
+    #TODO more runs
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
     logging.info(f"Benchmark name is: {benchmark_name}")
@@ -229,9 +231,7 @@ def run_on_benchmark(lp_critical_values,
     edges_list = _pickle(os.path.join(yeast_path, "edges.list"), is_load=True)
     G = create_graph_from_edge_list(edges_list)
     real_communities = _pickle(os.path.join(yeast_path, "clusters.list"), is_load=True)
-
-    logging.info(f'===================== Running: Louvain networkx =======================')
-    run_louvain(save_directory_path, eval_results_per_network, G, real_communities)
+    run_obj = AlgoRun(split_method=split_method)
 
     logging.info(f'===================== Running: Neumann C =======================')
     binary_input_fp = create_binary_network_file(G, save_directory_path,
@@ -246,6 +246,8 @@ def run_on_benchmark(lp_critical_values,
                real_communities,
                is_shani=False
                )
+    logging.info(f'===================== Running: Louvain networkx =======================')
+    run_louvain(save_directory_path, eval_results_per_network, G, real_communities)
 
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
     run_louvain_with_change(TimeLimit,
@@ -254,7 +256,7 @@ def run_on_benchmark(lp_critical_values,
                             save_directory_path,
                             G,
                             real_communities,
-                            is_split_mega_nodes=is_split_mega_nodes,
+                            run_obj,
                             input_network_folder=os.path.join(benchmark_name),
                             lp_critical_values=lp_critical_values)
 
@@ -445,7 +447,9 @@ if __name__ == '__main__':
     lp_critical_for_10001 = [100]
     lp_critical_for_100001 = [100]
     # multi_run_newman(lp_critical_list1, time)
-    multi_run_louvain(lp_critical_list1,split_method="random", run_on_1000=True)
+
+    # multi_run_louvain(lp_critical_list1,split_method="random", run_on_1000=True)
+
     #### one run louvain
     # path2curr_date_folder1 = os.path.join(
     #     'C:\\Users\\kimke\\OneDrive\\Documents\\4th_year\\semeter_B\\Biological_networks_sadna\\network-analysis\\results\\full_flow\\',
@@ -453,6 +457,7 @@ if __name__ == '__main__':
     # input_network_folder1 = '1000_0.6_9'
     # run_one_louvain(input_network_folder1, path2curr_date_folder1, lp_critical_list1, is_split_mega_nodes=True)
     # run_one_newman(input_network_folder1, path2curr_date_folder1, lp_critical_values=lp_critical_list1, lp_timelimit=time)
-    # run_on_benchmark(lp_critical_list1, benchmark_name="arabidopsis",is_split_mega_nodes=True)
-    # run_on_benchmark(lp_critical_list1, benchmark_name="yeast", is_split_mega_nodes=True)
+
+    # run_on_benchmark(lp_critical_list1, benchmark_name="arabidopsis",split_method=None)
+    run_on_benchmark(lp_critical_list1, benchmark_name="yeast",split_method=None)
     pass
