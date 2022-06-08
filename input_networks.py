@@ -59,8 +59,6 @@ def create_graph_from_edge_list(edges_list):
         G.add_edge(int(node1), int(node2))
     return G
 
-yeast_edges = "C:\\Users\\kimke\\OneDrive\\Documents\\4th year\\semeter B\\Biological networks sadna\\network-analysis\\Benchmarks\\Yeast\\edges.txt"
-
 
 
 # Before running neumann C code - creating graph from LFR benchmark networkx

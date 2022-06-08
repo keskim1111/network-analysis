@@ -97,7 +97,11 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     evals["modularity - algo"] = calc_modularity_nx(G, new_communities_list)
     logging.info(f'modularity of algorithm = {evals["modularity - algo"]}')
     evals["jaccard"] = jaccard(new_communities_list, real_communities_list)
-    evals["graph_conductance"] = graph_conductance(G, new_communities_list)
+    try:
+        evals["graph_conductance"] = graph_conductance(G, new_communities_list)
+    except Exception as e:
+        logging.error("couldnt calc graph_conductance")
+        evals["graph_conductance"] = None
     evals["graph_sensitivity"] = graph_sensitivity(real_communities_list, new_communities_list)
     evals["graph_accuracy"] = graph_accuracy(real_communities_list, new_communities_list)
     evals["num communities - real"] = len(real_communities_list)
