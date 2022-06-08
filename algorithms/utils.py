@@ -4,6 +4,7 @@ import random
 import networkx as nx
 from networkx.algorithms.community import greedy_modularity_communities
 
+from algorithms.algorithms import louvain
 from algorithms.modified_louvain import _gen_graph
 
 
@@ -68,12 +69,20 @@ def min_cut_split_mega_node(G, mega_node, attribute_dict):
     c, partition = nx.minimum_cut(sub_graph,community[0],community[1])
     return partition
 
+
 # --------------------------modularity split----------------------------------
 def modularity_split_mega_node(G, mega_node, attribute_dict):
     community = list(attribute_dict.get(mega_node))
     sub_graph = G.subgraph(community)
     communities = greedy_modularity_communities(sub_graph)
     return [list(x) for x in communities]
+
+# --------------------------louvain split----------------------------------
+def louvain_split_mega_node(G, mega_node, attribute_dict):
+    community = list(attribute_dict.get(mega_node))
+    sub_graph = G.subgraph(community)
+    communities = louvain(sub_graph)
+    return communities
 
 if __name__ == '__main__':
     pass
