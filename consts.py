@@ -26,4 +26,5 @@ msg = "The modularity result of the Algorithm is: "
 RESULTS_FOLDER = 'results'
 
 PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "Benchmark", "Graphs")
+PATH2BENCHMARKS_GRAPHS = os.path.join(os.getcwd(), "Benchmark")
 FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(), RESULTS_FOLDER, "full_flow")

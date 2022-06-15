@@ -6,7 +6,7 @@ from pprint import pprint
 from algorithms.Neumann import get_neumann_communities
 from algorithms.modified_louvain import modified_louvain_communities
 from consts import FOLDER2FLOW_RESULTS
-from flow import NetworkObj, AlgoRun, run_ilp_on_louvain, create_outputs
+from flow import NetworkObj, RunParamInfo, run_ilp_on_louvain, create_outputs
 from helpers import current_time
 from logger import setup_logger
 import  logging
