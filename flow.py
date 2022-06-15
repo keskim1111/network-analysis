@@ -5,7 +5,7 @@ import logging
 from algorithms.algorithms import louvain, newman
 from algorithms.modified_louvain import modified_louvain_communities
 from algorithms.utils import convert_mega_nodes_to_communities, split_mega_nodes, modularity_split_mega_node, \
-    min_cut_split_mega_node, random_split_mega_node
+    min_cut_split_mega_node, random_split_mega_node, newman_split_mega_node
 from binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, yeast_path, arabidopsis_path
 from evaluation import calc_modularity_manual, calc_modularity_nx
@@ -34,7 +34,7 @@ def multi_run_louvain(lp_critical_list, split_method=None, run_on_1000=False, ru
             run_one_louvain(input_network_folder,
                             path2curr_date_folder,
                             lp_critical_list,
-                            run_obj,251)
+                            run_obj)
 
 
 # add try catch to run ilp .. bc of out of memory
@@ -359,6 +359,7 @@ class AlgoRun:
             "mod_greedy": modularity_split_mega_node,
             "min_cut": min_cut_split_mega_node,
             "random": random_split_mega_node,
+            "newman": newman_split_mega_node
         }
 
     def set_runtime(self, runtime):
@@ -515,7 +516,7 @@ if __name__ == '__main__':
     lp_critical_for_100001 = [100]
     # multi_run_newman(lp_critical_list1, time)
 
-    # multi_run_louvain(lp_critical_list1,split_method="random", run_on_1000=True)
+    multi_run_louvain(lp_critical_list1,split_method="newman", run_on_1000=True)
 
     #### one run louvain
     # path2curr_date_folder1 = os.path.join(
@@ -525,6 +526,5 @@ if __name__ == '__main__':
     # run_one_louvain(input_network_folder1, path2curr_date_folder1, lp_critical_list1, is_split_mega_nodes=True)
     # run_one_newman(input_network_folder1, path2curr_date_folder1, lp_critical_values=lp_critical_list1, lp_timelimit=time)
 
-    run_on_benchmark(lp_critical_list1,path=arabidopsis_path, benchmark_name="arabidopsis", split_method=None)
-    # run_on_benchmark(lp_critical_list1,path=yeast_path, benchmark_name="yeast",split_method=None)
+    # run_on_benchmark(lp_critical_list1,path=yeast_path, benchmark_name="yeast", split_method="newman")
     pass
