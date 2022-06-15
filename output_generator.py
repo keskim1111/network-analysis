@@ -10,21 +10,6 @@ from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accu
 from helpers import _pickle
 from input_networks import read_communities_file
 
-
-class AlgoRes:
-    def __init__(self, communities=None, mega_communities=None):
-        self.communities = communities
-        self.mega_communities = mega_communities
-        self.number_of_mega_nodes = None
-        self.lp_critical = None
-        self.num_coms_divided = None
-        self.num_coms_skipped = None
-        self.runtime = None
-
-    def set_runtime(self, runtime):
-        self.runtime = runtime
-
-
 def create_visual_graph(G, partition, output, pos):
     pos = nx.spring_layout(G)
     cmap = cm.get_cmap('viridis', max(partition.values()) + 1)
@@ -110,24 +95,24 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
 
 
 # TODO: add run time
-def save_and_eval(save_dp, evals_list, G, real_communities, new_communities, algo, time=None, extra_evals=None):
+def save_and_eval(save_dp,
+                  evals_list,
+                  algo,
+                  network_obj,
+                  run_obj,
+                  communities,
+                  time=None,
+                  ):
     logging.info("Saving communities object to folder")
     # Saving communities object to folder
-    _pickle(os.path.join(save_dp, f'{algo}.communities'), object=new_communities, is_dump=True)
+    _pickle(os.path.join(save_dp, f'{algo}.communities'), object=communities, is_dump=True)
     # Evaluate results and save to eval_dict
-    eval_dict = generate_outputs_for_community_list(G, real_communities, new_communities, algo=algo)
-    if extra_evals is None:
-        eval_dict["num_coms_divided"] = None
-        eval_dict["num_coms_skipped"] = None
-        eval_dict["number_of_mega_nodes"] = None
-        eval_dict["iterations"] = None
-        eval_dict["split_method"] = None
-    else:
-        eval_dict["num_coms_divided"] = extra_evals.num_coms_divided
-        eval_dict["num_coms_skipped"] = extra_evals.num_coms_skipped
-        eval_dict["number_of_mega_nodes"] = extra_evals.number_of_mega_nodes
-        eval_dict["iterations"] = extra_evals.iterations_number
-        eval_dict["split_method"] = extra_evals.split_method
+    eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, communities, algo=algo)
+    eval_dict["num_coms_divided"] = network_obj.num_coms_divided
+    eval_dict["num_coms_skipped"] = network_obj.num_coms_skipped
+    eval_dict["number_of_mega_nodes"] = network_obj.number_of_mega_nodes
+    eval_dict["iterations"] = network_obj.iterations_number
+    eval_dict["split_method"] = run_obj.split_method
 
     eval_dict["time-sec"] = time
 
