@@ -113,6 +113,8 @@ def save_and_eval(save_dp,
     eval_dict["number_of_mega_nodes"] = network_obj.number_of_mega_nodes
     eval_dict["iterations"] = network_obj.iterations_number
     eval_dict["split_method"] = run_obj.split_method
+    eval_dict["lp"] = run_obj.critical
+    eval_dict["TimeLimit"] = run_obj.TimeLimit
 
     eval_dict["time-sec"] = time
 

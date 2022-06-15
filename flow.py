@@ -208,7 +208,6 @@ def run_with_comparison_benchmark(
                )
     logging.info(f'===================== Running: Louvain networkx =======================')
     run_louvain(eval_results_per_network, network_obj, run_obj)
-    # TODO fix run_louvain_with_change args
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
     run_louvain_with_change(
         eval_results_per_network,
@@ -394,9 +393,9 @@ def run_louvain_with_change(
     logging.info(f'eval_results_per_network={eval_results_per_network}')
 
 
-def run_setup(path2curr_date_folder, input_network_folder):
+def run_setup(path2curr_date_folder, input_network_folder,log_to_file=True):
     # define logger output ##############
-    setup_logger(os.path.join(path2curr_date_folder, input_network_folder))
+    setup_logger(os.path.join(path2curr_date_folder, input_network_folder),log_to_file=log_to_file)
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=True)
@@ -410,10 +409,17 @@ if __name__ == '__main__':
     run_object = RunParamInfo(algorithm="newman",
                               split_method="random",
                               lp_list=lp_critical_list1,
-                              run_on_1000=True,
+                              run_on_10000=True,
                               TimeLimit=time,
-                              benchmark_num_of_runs= 10
                               )
     multi_shani_run(run_object)
-
+    # benchmark
+    # run_object = RunParamInfo(algorithm="newman",
+    #                           split_method="random",
+    #                           lp_list=lp_critical_list1,
+    #                           run_on_1000=True,
+    #                           TimeLimit=time,
+    #                           benchmark_num_of_runs= 10
+    #                           )
+    # multi_benchmark_run(yeast_path,run_object)
     pass
