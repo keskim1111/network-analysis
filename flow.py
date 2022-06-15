@@ -92,7 +92,64 @@ def run_ilp_on_louvain(G, TimeLimit):
     logging.warning(f'Num of curr_mega_communities: {len(curr_mega_communities)}')
     return curr_mega_communities
 
+def run_louvain(eval_results_per_network, network_obj, run_obj):
+    start = timer()
+    louvain_communities = louvain(network_obj.G)
+    end = timer()
+    logging.warning(f'Finished runnning regular Louvain: num communties = {len(louvain_communities)}')
 
+    save_and_eval(
+        network_obj.save_directory_path,
+        eval_results_per_network,
+        "Louvain",
+        network_obj,
+        run_obj,
+        louvain_communities,
+        time=end - start,
+    )
+
+def run_louvain_with_change(
+        eval_results_per_network,
+        network_obj,
+        run_obj,
+):
+    for critical in run_obj.lp_list:
+        logging.warning(f'lp_critical={critical}, timelimit={run_obj.TimeLimit}')
+        start = timer()
+        iterations_number, mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=critical)
+        run_obj.critical = critical
+        logging.warning(f'Finished runnning regular Louvain: num nodes mega graph = {mega_graph.number_of_nodes()}')
+        try:
+            logging.info(f'about to run_ilp_on_louvain')
+            # split mega graph
+            if run_obj.split_method is not None:
+                mega_graph = split_mega_nodes(network_obj.G, mega_graph, critical, run_obj)
+                logging.warning(f'Splitted nodes. num of nodes in mega is {mega_graph.number_of_nodes()}')
+            # regular run
+            number_of_mega_nodes = mega_graph.number_of_nodes()
+            network_obj.number_of_mega_nodes = number_of_mega_nodes
+            mega_communities_partition = run_ilp_on_louvain(mega_graph, run_obj.TimeLimit)
+            curr_communities = convert_mega_nodes_to_communities(mega_graph, mega_communities_partition)
+            end = timer()
+            # run_obj.communities = curr_communities
+            network_obj.iterations_number = iterations_number
+            logging.warning(f"Finished running ILP Louvain: num of final communities: {len(curr_communities)}")
+            save_and_eval(
+                network_obj.save_directory_path,
+                eval_results_per_network,
+                f'LLP-{critical}',
+                network_obj,
+                run_obj,
+                curr_communities,
+                end - start)
+            logging.info(f'------ success running ilp on louvain, lp_critical={critical}')
+        except Exception as e:
+            logging.info(
+                f'run_one_louvain didnt work on {network_obj.network_name}, lp_critical={critical}')
+            logging.error(e)
+            raise e
+    create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
+    logging.info(f'eval_results_per_network={eval_results_per_network}')
 # ------------------------------- Newman -------------------------------
 
 def run_with_comparison_newman(input_network_folder, run_obj):
@@ -180,6 +237,53 @@ def run_ilp_on_neumann(network_obj,
     num_coms_skipped = num_communities_skipped_by_ilp
     return final_communities, num_coms_divided, num_coms_skipped
 
+
+
+
+def run_newman(eval_results_per_network, run_obj, network_obj, is_shani=False):
+    start = timer()
+    neumann_communities = get_neumann_communities(network_obj.save_directory_path,
+                                                  network_obj.network_name,
+                                                  network_obj.binary_input_fp,
+                                                  is_shani=is_shani)
+    end = timer()
+    save_and_eval(network_obj.save_directory_path,
+                  eval_results_per_network,
+                  "Newman",
+                  network_obj,
+                  run_obj,
+                  neumann_communities,
+                  end - start)
+
+
+def run_newman_with_change(eval_results_per_network, run_obj, network_obj,
+                           is_shani=False):
+    for lp_critical in run_obj.lp_list:
+        logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
+        start = timer()
+        neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path,
+                                                         network_obj.network_name,
+                                                         network_obj.binary_input_fp,
+                                                         lp_critical=lp_critical,
+                                                         is_shani=is_shani)
+        TimeLimit = run_obj.TimeLimit  # in seconds
+        final_communities, network_obj.num_coms_divided, network_obj.num_coms_skipped = run_ilp_on_neumann(
+            network_obj,
+            run_obj,
+            neuman_com_partial_run,
+            lp_critical=lp_critical,
+        )
+
+        end = timer()
+        save_and_eval(
+            network_obj.save_directory_path,
+            eval_results_per_network,
+            f'NLP-{lp_critical}-TL-{TimeLimit}',
+            network_obj,
+            run_obj,
+            final_communities,
+            end - start,
+        )
 
 # ------------------------------- Benchmarks ( yeast and arabidopsis ) -------------------------------
 
@@ -284,114 +388,6 @@ def create_outputs(input_network_folder, eval_results_per_network, save_director
     csv_name = f"results_df-{input_network_folder}.csv"
     df.to_csv(os.path.join(save_directory_path, csv_name))
     # prompt_file(os.path.join(network_obj.save_directory_path, csv_name))
-
-
-def run_louvain(eval_results_per_network, network_obj, run_obj):
-    start = timer()
-    louvain_communities = louvain(network_obj.G)
-    end = timer()
-    logging.warning(f'Finished runnning regular Louvain: num communties = {len(louvain_communities)}')
-
-    save_and_eval(
-        network_obj.save_directory_path,
-        eval_results_per_network,
-        "Louvain",
-        network_obj,
-        run_obj,
-        louvain_communities,
-        time=end - start,
-    )
-
-
-def run_newman(eval_results_per_network, run_obj, network_obj, is_shani=False):
-    start = timer()
-    neumann_communities = get_neumann_communities(network_obj.save_directory_path,
-                                                  network_obj.network_name,
-                                                  network_obj.binary_input_fp,
-                                                  is_shani=is_shani)
-    end = timer()
-    save_and_eval(network_obj.save_directory_path,
-                  eval_results_per_network,
-                  "Newman",
-                  network_obj,
-                  run_obj,
-                  neumann_communities,
-                  end - start)
-
-
-def run_newman_with_change(eval_results_per_network, run_obj, network_obj,
-                           is_shani=False):
-    for lp_critical in run_obj.lp_list:
-        logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
-        start = timer()
-        neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path,
-                                                         network_obj.network_name,
-                                                         network_obj.binary_input_fp,
-                                                         lp_critical=lp_critical,
-                                                         is_shani=is_shani)
-        TimeLimit = run_obj.TimeLimit  # in seconds
-        final_communities, network_obj.num_coms_divided, network_obj.num_coms_skipped = run_ilp_on_neumann(
-            network_obj,
-            run_obj,
-            neuman_com_partial_run,
-            lp_critical=lp_critical,
-        )
-
-        end = timer()
-        save_and_eval(
-            network_obj.save_directory_path,
-            eval_results_per_network,
-            f'NLP-{lp_critical}-TL-{TimeLimit}',
-            network_obj,
-            run_obj,
-            final_communities,
-            end - start,
-        )
-
-
-def run_louvain_with_change(
-        eval_results_per_network,
-        network_obj,
-        run_obj,
-):
-    for critical in run_obj.lp_list:
-        logging.warning(f'lp_critical={critical}, timelimit={run_obj.TimeLimit}')
-        start = timer()
-        iterations_number, mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=critical)
-        run_obj.critical = critical
-        logging.warning(f'Finished runnning regular Louvain: num nodes mega graph = {mega_graph.number_of_nodes()}')
-        try:
-            logging.info(f'about to run_ilp_on_louvain')
-            # split mega graph
-            if run_obj.split_method is not None:
-                mega_graph = split_mega_nodes(network_obj.G, mega_graph, critical, run_obj)
-                logging.warning(f'Splitted nodes. num of nodes in mega is {mega_graph.number_of_nodes()}')
-            # regular run
-            number_of_mega_nodes = mega_graph.number_of_nodes()
-            network_obj.number_of_mega_nodes = number_of_mega_nodes
-            mega_communities_partition = run_ilp_on_louvain(mega_graph, run_obj.TimeLimit)
-            curr_communities = convert_mega_nodes_to_communities(mega_graph, mega_communities_partition)
-            end = timer()
-            # run_obj.communities = curr_communities
-            network_obj.iterations_number = iterations_number
-            logging.warning(f"Finished running ILP Louvain: num of final communities: {len(curr_communities)}")
-            save_and_eval(
-                network_obj.save_directory_path,
-                eval_results_per_network,
-                f'LLP-{critical}',
-                network_obj,
-                run_obj,
-                curr_communities,
-                end - start)
-            logging.info(f'------ success running ilp on louvain, lp_critical={critical}')
-        except Exception as e:
-            logging.info(
-                f'run_one_louvain didnt work on {network_obj.network_name}, lp_critical={critical}')
-            logging.error(e)
-            raise e
-    create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
-    logging.info(f'eval_results_per_network={eval_results_per_network}')
-
 
 def run_setup(path2curr_date_folder, input_network_folder,log_to_file=True):
     # define logger output ##############
