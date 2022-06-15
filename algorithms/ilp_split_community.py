@@ -34,7 +34,7 @@ class Newman_ILP:
         self.model.optimize()
 
     """
-    Objective Function: [sum_ij](q_ij * (y_ij + 1 - z_ijj))
+    Objective Function: [sum_ij](q_ij * (y_ij + t_ijj))
     while: q_ij = a_ij - (d_i * d_j)/2m
     """
 
@@ -86,12 +86,12 @@ class Newman_ILP:
     def get_communities(self):
         communities = defaultdict(set)
         for v in self.model.getVars():
-            print(v)
+            # print(v)
 
             if v.VarName.startswith("x"):
                 x, node = v.VarName.split("_")
                 communities[str(abs(v.X))].add(int(node))
-        pprint(communities)
+        # pprint(communities)
         com_sets = communities.values()
         if len(com_sets) > 1:
             return list([list(v) for v in communities.values()])

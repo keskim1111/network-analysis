@@ -38,9 +38,10 @@ def split_mega_nodes(G, mega_graph, n: int, run_obj):
     new_partition = []
     logging.info(f"split method used is {run_obj.split_method}!!")
     for i, mega_node in enumerate(mega_nodes):
+        logging.info(f"Splitting the {i}/{len(mega_nodes)} mega node!")
+        community = list(attribute_dict.get(mega_node))
         if len(new_partition) + (num_original_mega_nodes - i) < n:
-            communities = run_obj.split_methods[run_obj.split_method](G, mega_node,
-                                                                      attribute_dict, mega_nodes=mega_nodes)
+            communities = run_obj.split_methods[run_obj.split_method](G, community)
             new_partition += communities
         else:
             new_partition.append(list(attribute_dict.get(mega_node)))
@@ -54,45 +55,40 @@ def split_mega_nodes(G, mega_graph, n: int, run_obj):
 
 # --------------------------Random split----------------------------------
 
-def random_split_mega_node(G, mega_node, attribute_dict, mega_nodes=None):
-    initial_nodes_partition = list(attribute_dict.get(mega_node))
-    num_of_nodes = len(initial_nodes_partition)
+def random_split_mega_node(G, mega_community_nodes):
+    num_of_nodes = len(mega_community_nodes)
     if num_of_nodes > 1:
-        random.shuffle(initial_nodes_partition)
-        nodes_two_partition = [initial_nodes_partition[:num_of_nodes // 2],
-                               initial_nodes_partition[(num_of_nodes // 2):]]
+        random.shuffle(mega_community_nodes)
+        nodes_two_partition = [mega_community_nodes[:num_of_nodes // 2],
+                               mega_community_nodes[(num_of_nodes // 2):]]
         return nodes_two_partition
-    return initial_nodes_partition
+    return mega_community_nodes
 
 
 # --------------------------min-cut split----------------------------------
-def min_cut_split_mega_node(G, mega_node, attribute_dict, mega_nodes=None):
-    community = list(attribute_dict.get(mega_node))
-    sub_graph = G.subgraph(community)
+def min_cut_split_mega_node(G, mega_community_nodes):
+    sub_graph = G.subgraph(mega_community_nodes)
     nx.set_edge_attributes(sub_graph, 1, "capacity")
-    c, partition = nx.minimum_cut(sub_graph, community[0], community[1])
+    c, partition = nx.minimum_cut(sub_graph, mega_community_nodes[0], mega_community_nodes[1])
     return partition
 
 
 # --------------------------modularity split----------------------------------
-def modularity_split_mega_node(G, mega_node, attribute_dict, mega_nodes=None):
-    community = list(attribute_dict.get(mega_node))
-    sub_graph = G.subgraph(community)
+def modularity_split_mega_node(G, mega_community_nodes):
+    sub_graph = G.subgraph(mega_community_nodes)
     communities = greedy_modularity_communities(sub_graph)
     return [list(x) for x in communities]
 
 
 # --------------------------louvain split----------------------------------
-def louvain_split_mega_node(G, mega_node, attribute_dict, mega_nodes=None):
-    community = list(attribute_dict.get(mega_node))
-    sub_graph = G.subgraph(community)
+def louvain_split_mega_node(G, mega_community_nodes):
+    sub_graph = G.subgraph(mega_community_nodes)
     communities = louvain(sub_graph)
     return communities
 
 # --------------------------Newman split----------------------------------
-def newman_split_mega_node(G, mega_node, attribute_dict, mega_nodes=None):
-    community = list(attribute_dict.get(mega_node))
-    sub_graph = G.subgraph(community)
+def newman_split_mega_node(G, mega_community_nodes):
+    sub_graph = G.subgraph(mega_community_nodes)
     obj = Newman_ILP(sub_graph)
     return obj.communities
 
