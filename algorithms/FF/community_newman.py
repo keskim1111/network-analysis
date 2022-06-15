@@ -3,9 +3,12 @@
 import numpy as np
 import networkx as nx
 from collections import deque
+
+from helpers import timeit
 from . import utils, _divide
 
 
+@timeit
 def partition(network, community_dict=None, one_iteration=False, refine=True):
     '''
     Cluster a network into several modules
@@ -36,9 +39,13 @@ def partition(network, community_dict=None, one_iteration=False, refine=True):
     dict
         A dictionary that saves membership.
         Key: node label; Value: community index
+        :param network:
+        :param refine:
+        :param one_iteration:
+        :param community_dict:
     '''
     ## preprocessing
-    network = nx.convert_node_labels_to_integers(network, first_label=1, label_attribute="node_name")
+    network = nx.convert_node_labels_to_integers(network, first_label=0, label_attribute="node_name")
     node_name = nx.get_node_attributes(network, 'node_name')
 
     ## only support unweighted network 
@@ -48,11 +55,13 @@ def partition(network, community_dict=None, one_iteration=False, refine=True):
 
     ## set flags for divisibility of communities
     ## initial community is divisible
-    divisible_community = deque([0])
+
+    divisible_community = deque(list(set(community_dict.values())))
 
     ## add attributes: all node as one group
     if community_dict == None:
         community_dict = {u: 0 for u in network}
+        divisible_community = deque([0])
 
     ## overall modularity matrix
 
