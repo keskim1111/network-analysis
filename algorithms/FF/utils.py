@@ -137,40 +137,42 @@ def get_mod_matrix(network, comm_nodes=None, B=None):
     np.matrix
         The modularity of `comm_nodes` within `network`
     '''
+    try:
+        if comm_nodes is None:
+            comm_nodes = list(network)
+            return get_base_modularity_matrix(network)
 
-    if comm_nodes is None:
-        comm_nodes = list(network)
-        return get_base_modularity_matrix(network)
+        if B is None:
+            B = get_base_modularity_matrix(network)
 
-    if B is None:
-        B = get_base_modularity_matrix(network)
+        # subset of mod matrix in g
+        indices = [list(network).index(u) for u in comm_nodes]
+        B_g = B[indices, :][:, indices]
+        #print 'Type of `B_g`:', type(B_g)
 
-    # subset of mod matrix in g
-    indices = [list(network).index(u) for u in comm_nodes]
-    B_g = B[indices, :][:, indices]
-    #print 'Type of `B_g`:', type(B_g)
+        # B^g_(i,j) = B_ij - δ_ij * ∑_(k∈g) B_ik
+        # i, j ∈ g
+        B_hat_g = np.zeros((len(comm_nodes), len(comm_nodes)), dtype=float)
 
-    # B^g_(i,j) = B_ij - δ_ij * ∑_(k∈g) B_ik
-    # i, j ∈ g
-    B_hat_g = np.zeros((len(comm_nodes), len(comm_nodes)), dtype=float)
+        # ∑_(k∈g) B_ik
+        B_g_rowsum = np.asarray(B_g.sum(axis=1))[:, 0]
+        if type(network) == nx.Graph:
+            B_g_colsum = np.copy(B_g_rowsum)
+        elif type(network) == nx.DiGraph:
+            B_g_colsum = np.asarray(B_g.sum(axis=0))[0, :]
 
-    # ∑_(k∈g) B_ik
-    B_g_rowsum = np.asarray(B_g.sum(axis=1))[:, 0]
-    if type(network) == nx.Graph:
-        B_g_colsum = np.copy(B_g_rowsum)
-    elif type(network) == nx.DiGraph:
-        B_g_colsum = np.asarray(B_g.sum(axis=0))[0, :]
+        for i in range(B_hat_g.shape[0]):
+            for j in range(B_hat_g.shape[0]):
+                if i == j:
+                    B_hat_g[i,j] = B_g[i,j] - 0.5 * (B_g_rowsum[i] + B_g_colsum[i])
+                else:
+                    B_hat_g[i,j] = B_g[i,j]
 
-    for i in range(B_hat_g.shape[0]):
-        for j in range(B_hat_g.shape[0]):
-            if i == j:
-                B_hat_g[i,j] = B_g[i,j] - 0.5 * (B_g_rowsum[i] + B_g_colsum[i])
-            else:
-                B_hat_g[i,j] = B_g[i,j]
-
-    if type(network) == nx.DiGraph:
-        B_hat_g = B_hat_g + B_hat_g.T
-
+        if type(network) == nx.DiGraph:
+            B_hat_g = B_hat_g + B_hat_g.T
+    except ValueError as e:
+        print(f"Error {e}")
+        raise e
     return sparse.csc_matrix(B_hat_g)
 
 def largest_eig(A):
