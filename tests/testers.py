@@ -1,6 +1,9 @@
 import random
+from pprint import pprint
+
 import networkx as nx
 from algorithms.ilp import ILP
+from algorithms.ilp_split_community import Newman_ILP
 from output_generator import generate_outputs_for_community_list
 
 
@@ -32,11 +35,20 @@ def test_ilp_single(num_cliques, min_nodes_in_clique, max_nodes_in_clique):
     nx.draw(G)
     pass
 
+def test_ilp_single_ilp_split(num_cliques, min_nodes_in_clique, max_nodes_in_clique):
+    G, real_com = create_clique_graph(num_cliques, min_nodes_in_clique, max_nodes_in_clique)
+    ilp = Newman_ILP(G)
+    eval_dict = generate_outputs_for_community_list(G, real_com, ilp.communities)
+    pprint(eval_dict)
+    nx.draw(G)
+    pass
+
 def test_ilp_multi():
     for i in range(2, 10):
         test_ilp_single(num_cliques=i, min_nodes_in_clique=5, max_nodes_in_clique=20)
         print(f'==================test_ilp_single on {i} cliques passed===============')
     print(f'test_ilp_multi passed')
 
+
 if __name__ == "__main__":
-    test_ilp_multi()
+    test_ilp_single_ilp_split(num_cliques=2, min_nodes_in_clique=50, max_nodes_in_clique=100)

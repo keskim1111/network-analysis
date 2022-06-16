@@ -44,7 +44,7 @@ def split_mega_nodes(G, mega_graph, n: int, run_obj):
         logging.info(f"{len(community)} nodes in current mega node")
 
         if len(new_partition) + (num_original_mega_nodes - i) < n:
-            communities = run_obj.split_methods[run_obj.split_method](G, community)
+            communities = run_obj.split_methods[run_obj.split_method](G, community, run_obj)
             if len(communities) > 1:
                 new_partition += communities
             else:
@@ -61,7 +61,7 @@ def split_mega_nodes(G, mega_graph, n: int, run_obj):
 
 # --------------------------Random split----------------------------------
 @timeit
-def random_split_mega_node(G, mega_community_nodes):
+def random_split_mega_node(G, mega_community_nodes,run_obj):
     num_of_nodes = len(mega_community_nodes)
     if num_of_nodes > 1:
         random.shuffle(mega_community_nodes)
@@ -73,7 +73,7 @@ def random_split_mega_node(G, mega_community_nodes):
 
 # --------------------------min-cut split----------------------------------
 @timeit
-def min_cut_split_mega_node(G, mega_community_nodes):
+def min_cut_split_mega_node(G, mega_community_nodes,run_obj):
     sub_graph = G.subgraph(mega_community_nodes)
     nx.set_edge_attributes(sub_graph, 1, "capacity")
     c, partition = nx.minimum_cut(sub_graph, mega_community_nodes[0], mega_community_nodes[1])
@@ -82,7 +82,7 @@ def min_cut_split_mega_node(G, mega_community_nodes):
 
 # --------------------------modularity split----------------------------------
 @timeit
-def modularity_split_mega_node(G, mega_community_nodes):
+def modularity_split_mega_node(G, mega_community_nodes,run_obj):
     sub_graph = G.subgraph(mega_community_nodes)
     communities = greedy_modularity_communities(sub_graph)
     return [list(x) for x in communities]
@@ -90,7 +90,7 @@ def modularity_split_mega_node(G, mega_community_nodes):
 
 # --------------------------louvain split----------------------------------
 @timeit
-def louvain_split_mega_node(G, mega_community_nodes):
+def louvain_split_mega_node(G, mega_community_nodes,run_obj):
     sub_graph = G.subgraph(mega_community_nodes)
     communities = louvain(sub_graph)
     return communities
@@ -98,10 +98,10 @@ def louvain_split_mega_node(G, mega_community_nodes):
 
 # --------------------------Newman split----------------------------------
 @timeit
-def newman_split_mega_node(G, mega_community_nodes, max_number_of_nodes=30):
+def newman_split_mega_node(G, mega_community_nodes, run_obj):
     n = len(mega_community_nodes)
-    if n > max_number_of_nodes:
-        logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {max_number_of_nodes} nodes!")
+    if n > run_obj.max_mega_node_split_size:
+        logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
         return [mega_community_nodes]
     sub_graph = G.subgraph(mega_community_nodes)
     obj = Newman_ILP(sub_graph)
