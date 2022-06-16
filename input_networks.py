@@ -1,6 +1,5 @@
 from networkx.generators.community import LFR_benchmark_graph
 import networkx as nx
-from Benchmark.LFRBenchmark import generate_lfr_benchmarks
 from collections import defaultdict
 import os, pickle
 from helpers import init_results_folder
@@ -32,9 +31,6 @@ def read_communities_file(path):
     return list(community_dict.values())
 
 
-def create_lfr_benchmarks():
-    generate_lfr_benchmarks()
-
 @timeit
 def create_graph_from_edge_file(filename):
     '''
@@ -62,36 +58,36 @@ def create_graph_from_edge_list(edges_list):
 
 
 # Before running neumann C code - creating graph from LFR benchmark networkx
-def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results_folder("res")):
-    '''
-    :param: param_dict - dictionary of parameters to create networkx graph, save_path - path to save results
-    :example: param_dict={"n": 1000, "mu": 0.1, "tau1": 2, "tau2": 1.1, "average_degree": 25, "minimum_community": 50}
-    :return: create pickle file objects in save_path - edges.list, real_communities.dict, params.dict, returns save_path
-    '''
-    n = params_dict["n"]
-    max_degree = int(n / 10)
-    max_community = int(n / 10)
-
-    G = LFR_benchmark_graph(
-        n=n, tau1=params_dict["tau1"], tau2=params_dict["tau2"], mu=params_dict["mu"], average_degree=params_dict["average_degree"],
-        min_community=params_dict["minimum_community"], max_degree=max_degree, max_community=max_community
-    )
-
-    real_communities = {frozenset(G.nodes[v]["community"]) for v in G}
-    real_modularity = nx.algorithms.community.modularity(G, real_communities)
-    print(f'real_modularity: {real_modularity}')
-    # binary_network = create_binary_network_file(G, save_path, title=os.path.basename(save_path))
-
-    # saving results for future use
-    with open(os.path.join(save_path, "edges.list"), "wb") as f:
-        pickle.dump(G.edges, f)
-    with open(os.path.join(save_path, "real_communities.dict"), "wb") as f:
-        pickle.dump(real_communities, f)
-    with open(os.path.join(save_path, "params.dict"), "wb") as f:
-        pickle.dump(params_dict, f)
-    print(f'saved results in {save_path}')
-
-    return save_path
+# def create_networkx_graph_and_save_to_folder(params_dict, save_path=init_results_folder("res")):
+#     '''
+#     :param: param_dict - dictionary of parameters to create networkx graph, save_path - path to save results
+#     :example: param_dict={"n": 1000, "mu": 0.1, "tau1": 2, "tau2": 1.1, "average_degree": 25, "minimum_community": 50}
+#     :return: create pickle file objects in save_path - edges.list, real_communities.dict, params.dict, returns save_path
+#     '''
+#     n = params_dict["n"]
+#     max_degree = int(n / 10)
+#     max_community = int(n / 10)
+#
+#     G = LFR_benchmark_graph(
+#         n=n, tau1=params_dict["tau1"], tau2=params_dict["tau2"], mu=params_dict["mu"], average_degree=params_dict["average_degree"],
+#         min_community=params_dict["minimum_community"], max_degree=max_degree, max_community=max_community
+#     )
+#
+#     real_communities = {frozenset(G.nodes[v]["community"]) for v in G}
+#     real_modularity = nx.algorithms.community.modularity(G, real_communities)
+#     print(f'real_modularity: {real_modularity}')
+#     # binary_network = create_binary_network_file(G, save_path, title=os.path.basename(save_path))
+#
+#     # saving results for future use
+#     with open(os.path.join(save_path, "edges.list"), "wb") as f:
+#         pickle.dump(G.edges, f)
+#     with open(os.path.join(save_path, "real_communities.dict"), "wb") as f:
+#         pickle.dump(real_communities, f)
+#     with open(os.path.join(save_path, "params.dict"), "wb") as f:
+#         pickle.dump(params_dict, f)
+#     print(f'saved results in {save_path}')
+#
+#     return save_path
 
 if __name__ == '__main__':
     pass
