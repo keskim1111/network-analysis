@@ -5,11 +5,12 @@ dp = dir path
 
 import os
 
-C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'neuman_with_change')
-facebook = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'SNAP\\facebook_combined.txt')
+C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/neuman_with_change')
 
-yeast_path = os.path.join("Benchmark", "Yeast")
-arabidopsis_path = os.path.join("Benchmark", "Arabidopsis")
+benchmark_base_path = os.path.join("Graphs" , "Benchmark")
+
+yeast_path = os.path.join(benchmark_base_path, "Yeast")
+arabidopsis_path = os.path.join(benchmark_base_path, "Arabidopsis")
 
 edges_files = [
     os.path.join(yeast_path, "edges.txt"),
@@ -25,6 +26,6 @@ msg = "The modularity result of the Algorithm is: "
 
 RESULTS_FOLDER = 'results'
 
-PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "Benchmark", "Graphs")
-PATH2BENCHMARKS_GRAPHS = os.path.join(os.getcwd(), "Benchmark")
+PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "Graphs", "Shani_graphs")
+PATH2BENCHMARKS_GRAPHS = benchmark_base_path
 FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(), RESULTS_FOLDER, "full_flow")

@@ -92,6 +92,7 @@ def run_ilp_on_louvain(G, TimeLimit):
     logging.warning(f'Num of curr_mega_communities: {len(curr_mega_communities)}')
     return curr_mega_communities
 
+
 def run_louvain(eval_results_per_network, network_obj, run_obj):
     start = timer()
     louvain_communities = louvain(network_obj.G)
@@ -107,6 +108,7 @@ def run_louvain(eval_results_per_network, network_obj, run_obj):
         louvain_communities,
         time=end - start,
     )
+
 
 def run_louvain_with_change(
         eval_results_per_network,
@@ -150,6 +152,8 @@ def run_louvain_with_change(
             raise e
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
     logging.info(f'eval_results_per_network={eval_results_per_network}')
+
+
 # ------------------------------- Newman -------------------------------
 
 def run_with_comparison_newman(input_network_folder, run_obj):
@@ -238,8 +242,6 @@ def run_ilp_on_neumann(network_obj,
     return final_communities, num_coms_divided, num_coms_skipped
 
 
-
-
 def run_newman(eval_results_per_network, run_obj, network_obj, is_shani=False):
     start = timer()
     neumann_communities = get_neumann_communities(network_obj.save_directory_path,
@@ -284,6 +286,7 @@ def run_newman_with_change(eval_results_per_network, run_obj, network_obj,
             final_communities,
             end - start,
         )
+
 
 # ------------------------------- Benchmarks ( yeast and arabidopsis ) -------------------------------
 
@@ -354,7 +357,7 @@ class NetworkObj:
 class RunParamInfo:
     def __init__(self,
                  split_method=None, lp_list=None, run_on_1000=False,
-                 run_on_10000=False, algorithm="louvain", TimeLimit=None,benchmark_num_of_runs=1):
+                 run_on_10000=False, algorithm="louvain", TimeLimit=None, benchmark_num_of_runs=1):
         if lp_list is None:
             lp_list = []
         self.algorithm = algorithm
@@ -389,9 +392,10 @@ def create_outputs(input_network_folder, eval_results_per_network, save_director
     df.to_csv(os.path.join(save_directory_path, csv_name))
     # prompt_file(os.path.join(network_obj.save_directory_path, csv_name))
 
-def run_setup(path2curr_date_folder, input_network_folder,log_to_file=True):
+
+def run_setup(path2curr_date_folder, input_network_folder, log_to_file=True):
     # define logger output ##############
-    setup_logger(os.path.join(path2curr_date_folder, input_network_folder),log_to_file=log_to_file)
+    setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=log_to_file)
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=True)
@@ -402,13 +406,13 @@ if __name__ == '__main__':
     lp_critical_list1 = [100]
     time = 10 * 60
 
-    run_object = RunParamInfo(algorithm="newman",
-                              split_method="random",
-                              lp_list=lp_critical_list1,
-                              run_on_10000=True,
-                              TimeLimit=time,
-                              )
-    multi_shani_run(run_object)
+    newman_run_object = RunParamInfo(algorithm="newman",
+                                     split_method="random",
+                                     lp_list=lp_critical_list1,
+                                     run_on_10000=True,
+                                     TimeLimit=time,
+                                     )
+    multi_shani_run(newman_run_object)
     # benchmark
     # run_object = RunParamInfo(algorithm="newman",
     #                           split_method="random",
