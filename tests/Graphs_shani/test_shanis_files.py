@@ -1,11 +1,7 @@
-import os
-
 from algorithms import newman
-from binary_files import create_binary_network_file
-from consts import RESULTS_FOLDER
-from helpers import current_time, timeit, write_to_file
+from utils.binary_files import create_binary_network_file
+from helpers import current_time, write_to_file
 from input_networks import create_random_network, create_graph_from_edge_file
-from datetime import datetime
 
 run_folder_names = ["run_1", "run_2", "run_3"]
 graphs_folder_names = ["1000_0.4_1", "1000_0.5_4", "1000_0.6_8", "10000_0.4_6", "10000_0.5_2"]

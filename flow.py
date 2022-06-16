@@ -4,14 +4,14 @@ import pandas as pd
 import logging
 from algorithms.algorithms import louvain
 from algorithms.modified_louvain import modified_louvain_communities
-from algorithms.utils import convert_mega_nodes_to_communities, split_mega_nodes, modularity_split_mega_node, \
+from algorithms.mega_nodes_utils import convert_mega_nodes_to_communities, split_mega_nodes, modularity_split_mega_node, \
     min_cut_split_mega_node, random_split_mega_node, newman_split_mega_node
-from binary_files import create_binary_network_file
-from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, yeast_path, arabidopsis_path, PATH2BENCHMARKS_GRAPHS
-from evaluation import calc_modularity_manual, calc_modularity_nx
+from utils.binary_files import create_binary_network_file
+from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, PATH2BENCHMARKS_GRAPHS
+from utils.evaluation import calc_modularity_manual, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, read_communities_file
 from helpers import init_results_folder, _pickle, save_str_graph_in_good_format
-from logger import setup_logger
+from utils.logger import setup_logger
 from algorithms.ilp import ILP
 from output_generator import save_and_eval, create_data_dict
 from algorithms.Neumann import get_neumann_communities
@@ -357,11 +357,11 @@ class NetworkObj:
 class RunParamInfo:
     def __init__(self,
                  split_method=None, lp_list=None, run_on_1000=False,
-                 run_on_10000=False, algorithm="louvain", TimeLimit=None, benchmark_num_of_runs=1):
+                 run_on_10000=False, algorithm="louvain", TimeLimit=None, benchmark_num_of_runs=1, folder_name=""):
         if lp_list is None:
             lp_list = []
         self.algorithm = algorithm
-        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS)
+        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS, folder_name=folder_name)
         self.run_on_1000 = run_on_1000
         self.run_on_10000 = run_on_10000
         self.lp_list = lp_list
@@ -403,23 +403,4 @@ def run_setup(path2curr_date_folder, input_network_folder, log_to_file=True):
 
 
 if __name__ == '__main__':
-    lp_critical_list1 = [100]
-    time = 10 * 60
-
-    newman_run_object = RunParamInfo(algorithm="newman",
-                                     split_method="random",
-                                     lp_list=lp_critical_list1,
-                                     run_on_10000=True,
-                                     TimeLimit=time,
-                                     )
-    multi_shani_run(newman_run_object)
-    # benchmark
-    # run_object = RunParamInfo(algorithm="newman",
-    #                           split_method="random",
-    #                           lp_list=lp_critical_list1,
-    #                           run_on_1000=True,
-    #                           TimeLimit=time,
-    #                           benchmark_num_of_runs= 10
-    #                           )
-    # multi_benchmark_run(yeast_path,run_object)
     pass

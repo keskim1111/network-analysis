@@ -4,22 +4,21 @@ from timeit import default_timer as timer
 from pprint import pprint
 
 from algorithms.Neumann import get_neumann_communities
-from algorithms.modified_louvain import modified_louvain_communities
 from consts import FOLDER2FLOW_RESULTS
-from flow import NetworkObj, RunParamInfo, run_ilp_on_louvain, create_outputs
+from flow import NetworkObj, create_outputs
 from helpers import current_time
-from logger import setup_logger
+from utils.logger import setup_logger
 import  logging
 from algorithms.algorithms import louvain, newman
 from algorithms.ilp import ILP
-from binary_files import read_binary_network_output
+from utils.binary_files import read_binary_network_output
 from input_networks import create_random_network, create_graph_from_edge_file, read_communities_file
 from output_generator import generate_outputs_for_community_list, save_and_eval
 import os.path
 import  networkx as nx
 in_path = "g.in"
 out_path = "g.out"
-import statistics
+
 
 def test_ilp_vs_louvain_small_graph(n=30, min_community=5, max_degree=10, max_community=20, average_degree=2,mu=0.4):
     G = create_random_network(n=n, min_community=min_community, max_degree=max_degree, max_community=max_community, average_degree=average_degree,mu=mu)
