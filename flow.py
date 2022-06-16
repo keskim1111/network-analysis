@@ -10,7 +10,7 @@ from utils.binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, PATH2BENCHMARKS_GRAPHS
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, read_communities_file
-from helpers import init_results_folder, _pickle, save_str_graph_in_good_format
+from helpers import init_results_folder, _pickle, save_str_graph_in_good_format,current_time
 from utils.logger import setup_logger
 from algorithms.ilp import ILP
 from output_generator import save_and_eval, create_data_dict
@@ -43,7 +43,8 @@ def run_with_comparison_louvain(input_network_folder,
                                 run_obj,
                                 ):
     network_obj, eval_results_per_network = run_setup(run_obj.path2curr_date_folder,
-                                                      input_network_folder)
+                                                      input_network_folder,
+                                                      is_shanis_file =run_obj.is_shani_files)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
     run_louvain(eval_results_per_network, network_obj, run_obj)
@@ -157,7 +158,9 @@ def run_louvain_with_change(
 # ------------------------------- Newman -------------------------------
 
 def run_with_comparison_newman(input_network_folder, run_obj):
-    network_obj, eval_results_per_network = run_setup(run_obj.path2curr_date_folder, input_network_folder)
+    network_obj, eval_results_per_network = run_setup(run_obj.path2curr_date_folder,
+                                                      input_network_folder,
+                                                      is_shanis_file =run_obj.is_shani_files)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
     run_louvain(eval_results_per_network, network_obj, run_obj)
@@ -357,11 +360,12 @@ class NetworkObj:
 class RunParamInfo:
     def __init__(self,
                  split_method=None, lp_list=None, run_on_1000=False,
-                 run_on_10000=False, algorithm="louvain", TimeLimit=None, benchmark_num_of_runs=1, folder_name=""):
+                 run_on_10000=False, algorithm="louvain", TimeLimit=None, benchmark_num_of_runs=1,
+                 folder_name="", is_shani_files=False, max_mega_node_split_size = float("inf")):
         if lp_list is None:
             lp_list = []
         self.algorithm = algorithm
-        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS, folder_name=folder_name)
+        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS, folder_name=f"{current_time()}-{folder_name}")
         self.run_on_1000 = run_on_1000
         self.run_on_10000 = run_on_10000
         self.lp_list = lp_list
@@ -374,7 +378,9 @@ class RunParamInfo:
         }
         self.critical = None
         self.TimeLimit = TimeLimit
+        self.is_shani_files = is_shani_files
         self.benchmark_num_of_runs = benchmark_num_of_runs
+        self.max_mega_node_split_size = max_mega_node_split_size
 
 
 # ------------------------------- Helper functions -------------------------------
@@ -393,12 +399,13 @@ def create_outputs(input_network_folder, eval_results_per_network, save_director
     # prompt_file(os.path.join(network_obj.save_directory_path, csv_name))
 
 
-def run_setup(path2curr_date_folder, input_network_folder, log_to_file=True):
+def run_setup(path2curr_date_folder,
+              input_network_folder, log_to_file=True, is_shanis_file = False):
     # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=log_to_file)
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
-    network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=True)
+    network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=is_shanis_file)
     return network_obj, eval_results_per_network
 
 

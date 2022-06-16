@@ -1,23 +1,42 @@
 from pprint import pprint
-
 from flow import RunParamInfo, multi_shani_run
 
 if __name__ == '__main__':
+    # TODO add IntFeasTol to flow
     run_objects = {
-        "newman-random-split-10000": RunParamInfo(algorithm="newman",
-                                            split_method="random",
-                                            lp_list=[100],
-                                            run_on_10000=True,
-                                            TimeLimit=10 * 60,
-                                            folder_name="newman-random-split-10000"
-                                            ),
+        # "newman-random-split-1000": RunParamInfo(algorithm="newman",
+        #                                          split_method="random",
+        #                                          lp_list=[100],
+        #                                          run_on_1000=True,
+        #                                          TimeLimit=10 * 60,
+        #                                          folder_name="newman-random-split-10000"
+        #                                         ,is_shani_files=True
+        #                                          ),
+        "louvain-with-newman-split-1000": RunParamInfo(algorithm="louvain",
+                                                       split_method="newman",
+                                                       lp_list=[100],
+                                                       run_on_1000=True,
+                                                       TimeLimit=10 * 60,
+                                                       folder_name="louvain-with-newman-split-1000",
+                                                       is_shani_files=True,
+                                                       max_mega_node_split_size=30
+
+                                                       ),
+        # "louvain-with-newman-split-10000": RunParamInfo(algorithm="louvain",
+        #                                                 split_method="newman",
+        #                                                 lp_list=[100],
+        #                                                 run_on_10000=True,
+        #                                                 TimeLimit=10 * 60,
+        #                                                 folder_name="louvain-with-newman-split-10000"
+        #                                                 , is_shani_files=True
+        #
+        #                                                 ),
 
     }
     for name, run_obj in run_objects.items():
-        print(f"Running {name} on shanis files with params: ")
+        print(f"Running:\t {name} \n on shanis files with params: ")
         pprint(run_obj)
         multi_shani_run(run_obj)
-
 
     # benchmark
     # benchmark_run_object = RunParamInfo(algorithm="newman",
