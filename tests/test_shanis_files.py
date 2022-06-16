@@ -1,5 +1,5 @@
 from algorithms.algorithms import newman
-from binary_files import create_binary_network_file
+from utils.binary_files import create_binary_network_file
 from helpers import current_time, write_to_file
 from input_networks import create_random_network, create_graph_from_edge_file
 

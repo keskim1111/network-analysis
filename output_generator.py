@@ -4,9 +4,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pandas as pd
-from algorithms.algorithms import newman, louvain, algorithms_partition_for_colors, run_ilp
+from algorithms.algorithms import algorithms_partition_for_colors
 from consts import RESULTS_FOLDER
-from evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, calc_modularity_nx
+from utils.evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, calc_modularity_nx
 from helpers import _pickle
 from input_networks import read_communities_file
 

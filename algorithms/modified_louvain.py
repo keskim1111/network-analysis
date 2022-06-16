@@ -10,7 +10,7 @@ from networkx.utils import py_random_state
 __all__ = ["modified_louvain_communities", "louvain_partitions"]
 
 from input_networks import create_random_network
-from logger import setup_logger
+from utils.logger import setup_logger
 
 
 @py_random_state("seed")

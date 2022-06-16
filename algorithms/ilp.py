@@ -7,7 +7,6 @@ via mathematical programming.
     the objective function in the second divides by 2. (1/2m)
 """
 # TODO: make sure I can deal with inner edges
-from evaluation import calc_modularity_manual
 
 """
 # NEW: i changed the code - in a way that the nodes do NOT have to be continuous.
@@ -15,9 +14,7 @@ from evaluation import calc_modularity_manual
 
 import gurobipy as gp
 from gurobipy import GRB
-from helpers import timeit, timeout
-import logging
-import networkx as nx
+from helpers import timeit
 
 
 # @timeout(300) # 5 min

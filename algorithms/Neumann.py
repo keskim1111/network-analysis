@@ -2,7 +2,7 @@ import os, subprocess
 from helpers import timeit, timeout
 from consts import C_CODE
 import time
-from binary_files import read_binary_network_output
+from utils.binary_files import read_binary_network_output
 
 
 @timeout(120)

@@ -2,7 +2,7 @@ import networkx as nx
 import struct
 
 # from consts import edge_file
-from evaluation import jaccard, graph_accuracy, graph_sensitivity, calc_modularity_nx
+from utils.evaluation import jaccard, graph_accuracy, graph_sensitivity, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, \
     create_random_network
 from helpers import timeit, current_time
@@ -116,14 +116,6 @@ def create_binary_network_file(G, path, title="graph", is_shanis_file=False):
     return os.path.join(path, file_name)
 
 
-# TODO remove after
-def create_for_esty_from_edges_strings(edge_list):
-    print(f"The path is {edge_list}")
-    G = create_graph_from_edge_strings_file(edge_list)
-    print(G)
-    return create_binary_network_file(G)
-
-
 def create_for_esty_from_edges(edge_list):
     print(f"The path is {edge_list}")
     G = create_graph_from_edge_file(edge_list)
@@ -155,7 +147,7 @@ def compare_c_output_to_real(output_path, real_communities_path, real_edges_path
     print(f"diff is {Differences}")
 
 
-def check_binary_from_edges_file():
+def check_binary_from_edges_file(edge_file):
     G = create_graph_from_edge_file(edge_file)
     path = create_binary_network_file(G, "1000_0.4_8_new")
     G2 = read_binary_network_input(path, edge_file)
