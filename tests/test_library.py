@@ -1,11 +1,8 @@
-from pprint import pprint
 from timeit import default_timer as timer
 
-import networkx as nx
-
-from algorithms.algorithms import louvain
-from algorithms.ilp_split_community import Newman_ILP
-from algorithms.ilp_newman_split_gurobi_staff_version import Newman_ILP2
+from algorithms.ilp_split_community.gurobi_staff_version import Newman_ILP2
+from algorithms.ilp_split_community.our_version import Newman_ILP
+from algorithms.ilp_split_community.roded_version import Newman_ILP_RODED
 from helpers import timeit
 from input_networks import create_random_network
 
@@ -32,16 +29,17 @@ def check_split_ilp_newman_capability(n, min_community, max_degree, max_communit
                               max_community=max_community, average_degree=average_degree)
     print(G)
     start = timer()
-    c = Newman_ILP2(G)
+    # c = Newman_ILP2(G)
     # c2 = Newman_ILP(G)
-    print(f"Gurobi:\n {c.communities}")
-    # print(f"Mine:\n {c2.communities}")
+    c3 = Newman_ILP_RODED(G)
+
     end = timer()
     time = end - start
     print(f"split of {G.number_of_nodes()} took {time} sec")
 
-
-    print(c.communities)
+    # print(f"Gurobi:\n {c.communities}")
+    # print(f"Mine:\n {c2.communities}")
+    print(c3.communities)
     return time
 
 
