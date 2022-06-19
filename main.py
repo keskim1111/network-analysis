@@ -19,7 +19,6 @@ if __name__ == '__main__':
                                                        TimeLimit=10 * 60,
                                                        folder_name="louvain-with-newman-split-1000",
                                                        is_shani_files=True,
-                                                       max_mega_node_split_size=30
 
                                                        ),
         # "louvain-with-newman-split-10000": RunParamInfo(algorithm="louvain",
