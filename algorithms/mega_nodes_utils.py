@@ -5,7 +5,7 @@ import networkx as nx
 from networkx.algorithms.community import greedy_modularity_communities
 
 from algorithms.algorithms import louvain
-from algorithms.ilp_split_community import Newman_ILP
+from algorithms.ilp_split_community.our_version import Newman_ILP
 from algorithms.modified_louvain import _gen_graph
 from helpers import timeit
 

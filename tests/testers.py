@@ -2,8 +2,8 @@ import random
 from pprint import pprint
 
 import networkx as nx
-from algorithms.ilp import ILP
-from algorithms.ilp_split_community import Newman_ILP
+from algorithms.ilp_max_mod_union import ILP
+from algorithms.ilp_split_community.our_version import Newman_ILP
 from output_generator import generate_outputs_for_community_list
 
 

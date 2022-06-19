@@ -12,9 +12,9 @@ from utils.evaluation import calc_modularity_manual, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, read_communities_file
 from helpers import init_results_folder, _pickle, save_str_graph_in_good_format,current_time
 from utils.logger import setup_logger
-from algorithms.ilp import ILP
+from algorithms.ilp_max_mod_union import ILP
 from output_generator import save_and_eval, create_data_dict
-from algorithms.Neumann import get_neumann_communities
+from algorithms.neumann_utils import get_neumann_communities
 
 
 def multi_shani_run(run_obj):

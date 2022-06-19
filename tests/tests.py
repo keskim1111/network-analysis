@@ -3,14 +3,14 @@ from timeit import default_timer as timer
 
 from pprint import pprint
 
-from algorithms.Neumann import get_neumann_communities
+from algorithms.neumann_utils import get_neumann_communities
 from consts import FOLDER2FLOW_RESULTS
 from flow import NetworkObj, create_outputs
 from helpers import current_time
 from utils.logger import setup_logger
 import  logging
 from algorithms.algorithms import louvain, newman
-from algorithms.ilp import ILP
+from algorithms.ilp_max_mod_union import ILP
 from utils.binary_files import read_binary_network_output
 from input_networks import create_random_network, create_graph_from_edge_file, read_communities_file
 from output_generator import generate_outputs_for_community_list, save_and_eval
