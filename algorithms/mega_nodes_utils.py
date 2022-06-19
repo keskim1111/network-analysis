@@ -104,7 +104,7 @@ def newman_split_mega_node(G, mega_community_nodes, run_obj):
         logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
         return [mega_community_nodes]
     sub_graph = G.subgraph(mega_community_nodes)
-    obj = Newman_ILP(sub_graph)
+    obj = Newman_ILP(sub_graph,TimeLimit=run_obj.TimeLimit)
     logging.info(f"Split mega node!")
     return obj.communities
 
