@@ -5,6 +5,7 @@ import networkx as nx
 
 from algorithms.algorithms import louvain
 from algorithms.ilp_split_community import Newman_ILP
+from algorithms.ilp_newman_split_gurobi_staff_version import Newman_ILP2
 from helpers import timeit
 from input_networks import create_random_network
 
@@ -31,14 +32,16 @@ def check_split_ilp_newman_capability(n, min_community, max_degree, max_communit
                               max_community=max_community, average_degree=average_degree)
     print(G)
     start = timer()
-    c = Newman_ILP(G)
+    c = Newman_ILP2(G)
+    # c2 = Newman_ILP(G)
+    print(f"Gurobi:\n {c.communities}")
+    # print(f"Mine:\n {c2.communities}")
     end = timer()
     time = end - start
     print(f"split of {G.number_of_nodes()} took {time} sec")
-    # print(c.communities[0])
-    # print(len(c.communities[0]))
-    # print(c.communities[1])
-    # print(len(c.communities[1]))
+
+
+    print(c.communities)
     return time
 
 
@@ -73,7 +76,10 @@ def measure_run_multi_ilp_split(runs_params_obj, num_of_runs):
 
 
 if __name__ == '__main__':
-    obj = {
+    obj1 = {
         "40": RunParamInfo(40, 4, 5, 5, 2),
     }
-    measure_run_multi_ilp_split(obj, 10)
+    obj2 = {
+        "20": RunParamInfo(20, 3, 3, 5, 2),
+    }
+    measure_run_multi_ilp_split(obj1, 10)
