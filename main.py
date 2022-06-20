@@ -15,9 +15,9 @@ if __name__ == '__main__':
         "louvain-with-newman-split-1000": RunParamInfo(algorithm="louvain",
                                                        split_method="newman",
                                                        lp_list=[100],
-                                                       run_on_1000=True,
-                                                       TimeLimit=10 * 60,
-                                                       folder_name="louvain-with-newman-split-1000",
+                                                       run_on_10000=True,
+                                                       TimeLimit=0,
+                                                       folder_name="louvain-with-newman-split-10-000",
                                                        is_shani_files=True,
 
                                                        ),
