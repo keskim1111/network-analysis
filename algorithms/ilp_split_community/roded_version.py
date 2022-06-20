@@ -90,7 +90,7 @@ class Newman_ILP_RODED:
     def get_communities(self):
         communities = defaultdict(set)
         for v in self.model.getVars():
-            print(v)
+            # print(v)
 
             if v.VarName.startswith("x"):
                 x, node = v.VarName.split("_")
