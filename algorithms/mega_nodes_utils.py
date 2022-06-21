@@ -32,6 +32,7 @@ def convert_mega_nodes_to_communities(G, mega_communities_partition: [list]):
 
 def split_mega_nodes(G, mega_graph, n: int, run_obj):
     num_original_mega_nodes = mega_graph.number_of_nodes()
+    logging.info(f"***Number of original mega nodes before split is {num_original_mega_nodes}***")
     mega_nodes = mega_graph.nodes()
     attribute_dict = nx.get_node_attributes(mega_graph, "nodes")
     if num_original_mega_nodes >= n:
@@ -55,7 +56,7 @@ def split_mega_nodes(G, mega_graph, n: int, run_obj):
         graph = G.__class__()
         graph.add_nodes_from(G)
         graph.add_weighted_edges_from(G.edges(data="weight", default=1))
-    logging.info(f"Number of communities after split is {len(new_partition)}")
+    logging.info(f"***Number of communities after split is {len(new_partition)}***")
     new_graph = _gen_graph(graph, new_partition)
     return new_graph
 
