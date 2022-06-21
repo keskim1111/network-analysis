@@ -127,6 +127,7 @@ def run_louvain_with_change(
             logging.info(f'about to run_ilp_on_louvain')
             # split mega graph
             if run_obj.split_method is not None:
+                network_obj.number_of_mega_nodes_before_split = mega_graph.number_of_nodes()
                 mega_graph = split_mega_nodes(network_obj.G, mega_graph, critical, run_obj)
                 logging.warning(f'Splitted nodes. num of nodes in mega is {mega_graph.number_of_nodes()}')
             # regular run
@@ -356,6 +357,7 @@ class NetworkObj:
         self.num_coms_divided = None
         self.num_coms_skipped = None
         self.iterations_number = None
+        self.number_of_mega_nodes_before_split = None
 
 
 class RunParamInfo:

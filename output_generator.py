@@ -110,6 +110,7 @@ def save_and_eval(save_dp,
     eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, communities, algo=algo)
     eval_dict["num_coms_divided"] = network_obj.num_coms_divided
     eval_dict["num_coms_skipped"] = network_obj.num_coms_skipped
+    eval_dict["number_of_mega_nodes_before_split"] = network_obj.number_of_mega_nodes_before_split
     eval_dict["number_of_mega_nodes"] = network_obj.number_of_mega_nodes
     eval_dict["iterations"] = network_obj.iterations_number
     eval_dict["split_method"] = run_obj.split_method
