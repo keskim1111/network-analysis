@@ -9,12 +9,15 @@ import networkx as nx
 
 
 class Newman_ILP_RODED:
-    def __init__(self, G, weight=None, IntFeasTol=0, TimeLimit=0):
+    def __init__(self, G, nodes_list=None, weight=None, IntFeasTol=0, TimeLimit=0):
         """
         :param G: networkx graph
         :param nodes:
         """
-        self.nodes_list = list(G.nodes)
+        if nodes_list is None:
+            self.nodes_list = list(G.nodes)
+        else:
+            self.nodes_list = nodes_list
         self.num_of_nodes = len(self.nodes_list)
         self.G = G
         self.weight = weight
@@ -33,7 +36,6 @@ class Newman_ILP_RODED:
         print("starting to optimize")
         self.model.optimize()
 
-
     """
     Objective Function: [sum_ij](q_ij * (y_ij +  1 - z_ijj))
     while: q_ij = a_ij - (d_i * d_j)/2m
@@ -42,6 +44,7 @@ class Newman_ILP_RODED:
         y_ij >=x_i + x_j -1 
         z_ij == x_i + x_j - y_ijj
     """
+
     @timeit
     def set_objective(self):
         m = self.G.size(weight=self.weight)
@@ -79,11 +82,9 @@ class Newman_ILP_RODED:
                 self.model.addConstr(
                     globals()[f'y_{i}_{j}'] <= globals()[f'x_{j}'])
                 self.model.addConstr(
-                    globals()[f'y_{i}_{j}'] >=  globals()[f'x_{i}'] + globals()[f'x_{j}'] -1 )
+                    globals()[f'y_{i}_{j}'] >= globals()[f'x_{i}'] + globals()[f'x_{j}'] - 1)
                 self.model.addConstr(
-                    globals()[f'z_{i}_{j}'] ==  globals()[f'x_{i}'] + globals()[f'x_{j}'] -globals()[f'y_{i}_{j}'] )
-
-
+                    globals()[f'z_{i}_{j}'] == globals()[f'x_{i}'] + globals()[f'x_{j}'] - globals()[f'y_{i}_{j}'])
 
         logging.info("finished adding constraints")
 

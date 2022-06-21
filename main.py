@@ -13,11 +13,11 @@ if __name__ == '__main__':
         #                                         ,is_shani_files=True
         #                                          ),
         "louvain-with-newman-split-1000": RunParamInfo(algorithm="louvain",
-                                                       split_method="newman",
+                                                       split_method="newman_sub_graph",
                                                        lp_list=[100],
-                                                       run_on_10000=True,
+                                                       run_on_1000=True,
                                                        TimeLimit=0,
-                                                       folder_name="louvain-with-newman-split-10-000",
+                                                       folder_name="louvain-with-newman-split-1-000",
                                                        is_shani_files=True,
 
                                                        ),

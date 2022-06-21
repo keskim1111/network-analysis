@@ -5,7 +5,7 @@ import logging
 from algorithms.algorithms import louvain
 from algorithms.modified_louvain import modified_louvain_communities
 from algorithms.mega_nodes_utils import convert_mega_nodes_to_communities, split_mega_nodes, modularity_split_mega_node, \
-    min_cut_split_mega_node, random_split_mega_node, newman_split_mega_node
+    min_cut_split_mega_node, random_split_mega_node, newman_split_mega_node, newman_split_mega_node_whole_graph
 from utils.binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, PATH2BENCHMARKS_GRAPHS
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
@@ -47,7 +47,8 @@ def run_with_comparison_louvain(input_network_folder,
                                                       is_shanis_file =run_obj.is_shani_files)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
-    run_louvain(eval_results_per_network, network_obj, run_obj)
+    for i in range(run_obj.number_runs_original_louvain):
+        run_louvain(eval_results_per_network, network_obj, run_obj)
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
     run_louvain_with_change(eval_results_per_network,
                             network_obj,
@@ -361,7 +362,7 @@ class RunParamInfo:
     def __init__(self,
                  split_method=None, lp_list=None, run_on_1000=False,
                  run_on_10000=False, algorithm="louvain", TimeLimit=None, benchmark_num_of_runs=1,
-                 folder_name="", is_shani_files=False, max_mega_node_split_size = float("inf")):
+                 folder_name="", is_shani_files=False, max_mega_node_split_size = float("inf"), number_runs_original_louvain=10):
         if lp_list is None:
             lp_list = []
         self.algorithm = algorithm
@@ -374,13 +375,15 @@ class RunParamInfo:
             "mod_greedy": modularity_split_mega_node,
             "min_cut": min_cut_split_mega_node,
             "random": random_split_mega_node,
-            "newman": newman_split_mega_node
+            "newman_sub_graph": newman_split_mega_node,
+            "newman_whole_graph": newman_split_mega_node_whole_graph,
         }
         self.critical = None
         self.TimeLimit = TimeLimit
         self.is_shani_files = is_shani_files
         self.benchmark_num_of_runs = benchmark_num_of_runs
         self.max_mega_node_split_size = max_mega_node_split_size
+        self.number_runs_original_louvain = number_runs_original_louvain
 
 
 # ------------------------------- Helper functions -------------------------------
