@@ -109,6 +109,16 @@ def newman_split_mega_node(G, mega_community_nodes, run_obj):
     logging.info(f"Split mega node!")
     return obj.communities
 
+@timeit
+def newman_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
+    n = len(mega_community_nodes)
+    if n > run_obj.max_mega_node_split_size:
+        logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
+        return [mega_community_nodes]
+    obj = Newman_ILP_RODED(G, nodes_list=mega_community_nodes, TimeLimit=run_obj.TimeLimit)
+    logging.info(f"Split mega node!")
+    return obj.communities
+
 
 if __name__ == '__main__':
     pass
