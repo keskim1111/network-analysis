@@ -1,28 +1,32 @@
 # Network-analysis Project
 
+## Motivation
+
 ---
-### Motivation
 
 This project is as part as a workshop in [Analysis of Biological Networks](http://www.cs.tau.ac.il/~roded/courses/bnet21.html), instructed by Prof. Roded Sharan and Shani Jacobson.    
 The workshop aims to improve existing algorithms for community detection in networks.
 
-### Contents
+## Contents
 
----
-  * [Prerequisites](#prerequisites)
-  * [Usage](#usage)
-  * [Description](#description)
+- [Network-analysis Project](#network-analysis-project)
+    + [Motivation](#motivation)
+    + [Contents](#contents)
+  * [Installation](#installation)
+    + [How to use](#how-to-use)
+      - [1. NetworkX graph as input](#1-networkx-graph-as-input)
+      - [2. Graph file as input](#2-graph-file-as-input)
+    + [Description](#description)
     + [The idea](#the-idea)
     + [Known algorithms](#known-algorithms)
       - [Louvain](#louvain)
       - [Newman](#newman)
-  * [References](#references)
+    + [References](#references)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
-## Installation
 
----
+## Installation
 
 1. Clone the repository
    ```bash
@@ -35,18 +39,17 @@ The workshop aims to improve existing algorithms for community detection in netw
     ```
 
 4. Download [Gurobi][1] to your machine 
-### How to use
+## How to use
 
----
-#### 1. NetworkX graph as input
-#### 2. Graph file as input
+
+### 1. NetworkX graph as input
+### 2. Graph file as input
 
 
 [1]: https://www.gurobi.com/documentation/9.5/quickstart_windows/software_installation_guid.html#section:Installation
 
-### Description
+## Description
 
----
 
 ### The idea 
 1. Run a known algorithm until ILP can run on current results  
@@ -63,9 +66,8 @@ The workshop aims to improve existing algorithms for community detection in netw
 ![image](https://user-images.githubusercontent.com/71821335/170860736-d8004134-64e9-45ab-9de1-95f1e289d2f3.png)
 
 
-### References
+## References
 
----
 
 [1] Newman, M. E. J. (2006). Modularity and community structure in networks. Proceedings of the National Academy of Sciences of the United States of America, 103(23), 8577–82. https://doi.org/10.1073/pnas.0601602103
 
