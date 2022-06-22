@@ -1,8 +1,8 @@
 from timeit import default_timer as timer
 
-from algorithms.ilp_split_community.gurobi_staff_version import Newman_ILP2
-from algorithms.ilp_split_community.our_version import Newman_ILP
-from algorithms.ilp_split_community.roded_version import Newman_ILP_RODED
+from algorithms.split_community.gurobi_staff_version import Newman_ILP2
+from algorithms.split_community.our_version import Newman_ILP
+from algorithms.split_community.roded_version import Newman_ILP_RODED
 from helpers import timeit
 from input_networks import create_random_network
 

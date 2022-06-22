@@ -5,13 +5,15 @@ import networkx as nx
 from networkx.algorithms.community import greedy_modularity_communities
 
 from algorithms.algorithms import louvain
-from algorithms.ilp_split_community.our_version import Newman_ILP
-from algorithms.ilp_split_community.roded_version import Newman_ILP_RODED
+from algorithms.split_community.our_version import Newman_ILP
+from algorithms.split_community.roded_version import Newman_ILP_RODED
 from algorithms.modified_louvain import _gen_graph
 from helpers import timeit
+from algorithms.neumann_utils import split_communities_with_newman
+from utils.binary_files import create_binary_communities_file
 
 
-def convert_mega_nodes_to_communities(G, mega_communities_partition: [list]):
+def unite_mega_nodes_and_convert2communities(G, mega_communities_partition: [list]):
     final_communities = []
     attribute_dict = nx.get_node_attributes(G, "nodes")
     # no partition occurred, every mega node is a community
@@ -100,7 +102,7 @@ def louvain_split_mega_node(G, mega_community_nodes,run_obj):
 
 # --------------------------Newman split----------------------------------
 @timeit
-def newman_split_mega_node(G, mega_community_nodes, run_obj):
+def ilp_split_mega_node(G, mega_community_nodes, run_obj):
     n = len(mega_community_nodes)
     if n > run_obj.max_mega_node_split_size:
         logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
@@ -111,7 +113,7 @@ def newman_split_mega_node(G, mega_community_nodes, run_obj):
     return obj.communities
 
 @timeit
-def newman_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
+def ilp_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
     n = len(mega_community_nodes)
     if n > run_obj.max_mega_node_split_size:
         logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
@@ -120,6 +122,12 @@ def newman_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
     logging.info(f"Split mega node!")
     return obj.communities
 
+
+@timeit
+def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj):
+    new_partition = []
+    communities = unite_mega_nodes_and_convert2communities(mega_graph, [mega_graph.nodes()])
+    split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.binary_graph_input_fp, communities, is_shani=run_obj.is_shani_files)
 
 if __name__ == '__main__':
     pass

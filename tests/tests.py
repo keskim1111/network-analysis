@@ -102,7 +102,7 @@ def one_comparison_run(input_network_folder, path2curr_date_folder):
     logging.info(f'===================== Running: Neumann C =======================')
     start = timer()
     neumann_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
-                                                  network_obj.binary_input_fp, is_shani=False)
+                                                  network_obj.graph_binary_input_fp, is_shani=False)
     end = timer()
     save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                   network_obj.real_communities,
