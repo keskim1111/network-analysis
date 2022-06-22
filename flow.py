@@ -4,8 +4,8 @@ import pandas as pd
 import logging
 from algorithms.algorithms import louvain
 from algorithms.modified_louvain import modified_louvain_communities
-from algorithms.mega_nodes_utils import convert_mega_nodes_to_communities, split_mega_nodes, modularity_split_mega_node, \
-    min_cut_split_mega_node, random_split_mega_node, newman_split_mega_node, newman_split_mega_node_whole_graph
+from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities, split_mega_nodes, modularity_split_mega_node, \
+    min_cut_split_mega_node, random_split_mega_node, ilp_split_mega_node, ilp_split_mega_node_whole_graph, newman_split_mega_nodes_whole_graph
 from utils.binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, PATH2BENCHMARKS_GRAPHS
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
@@ -128,13 +128,18 @@ def run_louvain_with_change(
             # split mega graph
             if run_obj.split_method is not None:
                 network_obj.number_of_mega_nodes_before_split = mega_graph.number_of_nodes()
-                mega_graph = split_mega_nodes(network_obj.G, mega_graph, critical, run_obj)
+
+                if run_obj.split_method == "newman_whole_graph":
+                    mega_graph = newman_split_mega_nodes_whole_graph(network_obj, mega_graph, critical, run_obj)
+                else:
+                    mega_graph = split_mega_nodes(network_obj.G, mega_graph, critical, run_obj)
                 logging.warning(f'Splitted nodes. num of nodes in mega is {mega_graph.number_of_nodes()}')
+
             # regular run
             number_of_mega_nodes = mega_graph.number_of_nodes()
             network_obj.number_of_mega_nodes = number_of_mega_nodes
             mega_communities_partition = run_ilp_on_louvain(mega_graph, run_obj.TimeLimit)
-            curr_communities = convert_mega_nodes_to_communities(mega_graph, mega_communities_partition)
+            curr_communities = unite_mega_nodes_and_convert2communities(mega_graph, mega_communities_partition)
             end = timer()
             # run_obj.communities = curr_communities
             network_obj.iterations_number = iterations_number
@@ -251,7 +256,7 @@ def run_newman(eval_results_per_network, run_obj, network_obj, is_shani=False):
     start = timer()
     neumann_communities = get_neumann_communities(network_obj.save_directory_path,
                                                   network_obj.network_name,
-                                                  network_obj.binary_input_fp,
+                                                  network_obj.graph_binary_input_fp,
                                                   is_shani=is_shani)
     end = timer()
     save_and_eval(network_obj.save_directory_path,
@@ -270,7 +275,7 @@ def run_newman_with_change(eval_results_per_network, run_obj, network_obj,
         start = timer()
         neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path,
                                                          network_obj.network_name,
-                                                         network_obj.binary_input_fp,
+                                                         network_obj.graph_binary_input_fp,
                                                          lp_critical=lp_critical,
                                                          is_shani=is_shani)
         TimeLimit = run_obj.TimeLimit  # in seconds
@@ -312,7 +317,7 @@ def run_with_comparison_benchmark(
     logging.info(f'===================== Running: Neumann C =======================')
     binary_input_fp = create_binary_network_file(network_obj.G, network_obj.save_directory_path,
                                                  title=benchmark_name)  # converting network to binary file
-    network_obj.binary_input_fp = binary_input_fp
+    network_obj.graph_binary_input_fp = binary_input_fp
     run_newman(eval_results_per_network,
                run_obj,
                network_obj,
@@ -347,9 +352,10 @@ class NetworkObj:
             self.network_dp = path
             self.G, self.real_communities, d = save_str_graph_in_good_format(path)
         _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
-        self.binary_input_fp = create_binary_network_file(self.G, self.save_directory_path,
-                                                          title=self.network_name,
-                                                          is_shanis_file=is_shanis_file)  # converting network to binary file
+        self.graph_binary_input_fp = create_binary_network_file(self.G, self.save_directory_path,
+                                                                title=self.network_name,
+                                                                is_shanis_file=is_shanis_file)  # converting network to binary file
+        self.communities_binary_input_fp = None
 
         # moved
         self.mega_communities = None
@@ -377,8 +383,9 @@ class RunParamInfo:
             "mod_greedy": modularity_split_mega_node,
             "min_cut": min_cut_split_mega_node,
             "random": random_split_mega_node,
-            "newman_sub_graph": newman_split_mega_node,
-            "newman_whole_graph": newman_split_mega_node_whole_graph,
+            "ilp_sub_graph": ilp_split_mega_node,
+            "ilp_whole_graph": ilp_split_mega_node_whole_graph,
+            "newman_whole_graph": newman_split_mega_nodes_whole_graph,
         }
         self.critical = None
         self.TimeLimit = TimeLimit

@@ -2,7 +2,7 @@ import os, subprocess
 from helpers import timeit, timeout
 from consts import C_CODE
 import time
-from utils.binary_files import read_binary_network_output
+from utils.binary_files import read_binary_network_output, create_binary_communities_file
 
 
 @timeout(120)
@@ -47,3 +47,18 @@ def get_neumann_communities(save_dp, network_name, binary_input_fp, lp_critical=
                                                       {"fileName": binary_output_fp, "is_shani": is_shani})
 
     return neumann_communities
+
+
+@timeit
+def split_communities_with_newman(save_dp, network_name, binary_graph_input_fp, communities, is_shani=False):
+    binary_output_fp = os.path.join(save_dp,
+                                    f"{network_name}.out")  # defining path to output file
+
+    binary_communities_input_fp = create_binary_communities_file(communities, save_dp, is_shanis_file=is_shani)
+    command = f".\cluster {binary_graph_input_fp} {binary_communities_input_fp} {binary_output_fp}"  # command for Neumann C code
+    print(f"C_CODE: {C_CODE}")
+    run_cmd(command, C_CODE)
+    newman_communities = run_func_after_file_created(binary_output_fp, read_binary_network_output,
+                                                      {"fileName": binary_output_fp, "is_shani": is_shani})
+
+    return newman_communities

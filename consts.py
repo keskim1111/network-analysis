@@ -5,7 +5,7 @@ dp = dir path
 
 import os
 
-C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/neuman_with_change_c')
+C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/newman_lp_critical')
 
 benchmark_base_path = os.path.join("Graphs" , "Benchmark")
 
