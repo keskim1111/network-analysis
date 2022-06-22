@@ -1,13 +1,14 @@
-# Network-analysis
+# Network-analysis Project
 
 ---
+### Motivation
+
 This project is as part as a workshop in [Analysis of Biological Networks](http://www.cs.tau.ac.il/~roded/courses/bnet21.html), instructed by Prof. Roded Sharan and Shani Jacobson.    
 The workshop aims to improve existing algorithms for community detection in networks.
 
-## Contents
+### Contents
 
 ---
-- [Network-analysis](#network-analysis)
   * [Prerequisites](#prerequisites)
   * [Usage](#usage)
   * [Description](#description)
@@ -34,13 +35,16 @@ The workshop aims to improve existing algorithms for community detection in netw
     ```
 
 4. Download [Gurobi][1] to your machine 
-## Usage
+### How to use
 
 ---
+#### 1. NetworkX graph as input
+#### 2. Graph file as input
+
 
 [1]: https://www.gurobi.com/documentation/9.5/quickstart_windows/software_installation_guid.html#section:Installation
 
-## Description
+### Description
 
 ---
 
@@ -58,7 +62,8 @@ The workshop aims to improve existing algorithms for community detection in netw
 
 ![image](https://user-images.githubusercontent.com/71821335/170860736-d8004134-64e9-45ab-9de1-95f1e289d2f3.png)
 
-## References
+
+### References
 
 ---
 
