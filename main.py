@@ -12,7 +12,8 @@ if __name__ == '__main__':
         #                                          folder_name="newman-random-split-10000"
         #                                         ,is_shani_files=True
         #                                          ),
-        "louvain-with-whole-newman-split-1000": RunParamInfo(algorithm="louvain",
+        "louvain-with-whole-newman-split-1000": RunParamInfo(
+                                                        algorithm="louvain",
                                                        split_method="newman_whole_graph",
                                                        lp_list=[100],
                                                        run_on_1000=True,
