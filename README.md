@@ -2,8 +2,6 @@
 
 ## Motivation
 
----
-
 This project is as part as a workshop in [Analysis of Biological Networks](http://www.cs.tau.ac.il/~roded/courses/bnet21.html), instructed by Prof. Roded Sharan and Shani Jacobson.    
 The workshop aims to improve existing algorithms for community detection in networks.
 
