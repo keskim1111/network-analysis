@@ -127,7 +127,7 @@ def ilp_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
 def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj):
     new_partition = []
     communities = unite_mega_nodes_and_convert2communities(mega_graph, [mega_graph.nodes()])
-    split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.binary_graph_input_fp, communities, is_shani=run_obj.is_shani_files)
+    split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities, is_shani=run_obj.is_shani_files)
 
 if __name__ == '__main__':
     pass

@@ -143,8 +143,8 @@ def create_binary_communities_file(communities, path, title="communities", is_sh
             group = communities[i]
             num_of_nodes_in_group = len(group)
             f.write(struct.pack('i', num_of_nodes_in_group))
-            for j in range(num_of_nodes_in_group):
-                node = group[j]
+            for j in group:
+                node = j
                 if is_shanis_file:
                     node -= 1
                 f.write(struct.pack('i', node))
