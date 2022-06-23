@@ -108,29 +108,6 @@ spmat *create_matrix(FILE *in) {
 	return matrix;
 }
 
-/* Initialize the matrix */
-spmat *create_matrix_from_community(node* all_nodes, int current_group_size) {
-	int n, nnz, dim;
-	spmat *matrix;
-	/*if (in == NULL) {
-		print_and_exit(1, "Error: Failed to open matrix.\n");
-	}
-	n = fread(&dim, sizeof(int), 1, in);
-	if (n != 1) {
-		print_and_exit(1, "Error: Failed to read matrix dimension.\n");
-	}
-	if (dim == 0) {
-		print_and_exit(1, "Error: Invalid graph - no vertices.\n");
-	}*/
-	nnz = count_nonzeros(in);
-	if (nnz == 0) {
-		print_and_exit(1, "Error: Invalid graph - no edges.\n");
-	}
-	matrix = spmat_allocate_list(dim, nnz);
-	add_rows_to_matrix(matrix, in);
-	return matrix;
-}
-
 void print_group(node* all_nodes, int group_size) {
     int i;
     for (i=0; i<group_size; i++) {
@@ -140,13 +117,27 @@ void print_group(node* all_nodes, int group_size) {
     printf("\n");
 }
 
-void initialize_P_and_mats(FILE *in_file, group **P, mat_group **mats) {
+void print_mats(mat_group **mats, int num_of_groups) {
+    int i;
+    mat_group* temp_mat = *mats;
+    for (i=0; i<num_of_groups; i++) {
+        printf("group=%d\n", i);
+        printf("temp_mat->head->n=%d\n", temp_mat->head->n);
+        printf("temp_mat->head->norm=%f\n", temp_mat->head->norm);
+        printf("temp_mat->head->k=%d %d %d\n", temp_mat->head->k[0], temp_mat->head->k[1], temp_mat->head->k[2]);
+        printf("temp_mat->head->vertex_numbers[0]=%d\n", temp_mat->head->vertex_numbers[0]);
+        temp_mat = temp_mat->next;
+    }
+}
+
+void initialize_P_and_mats(FILE *in_file, group **P, mat_group **mats, spmat* A) {
     int n, i, j;
     int num_of_groups, current_group_size, current_node;
     node *all_nodes = NULL;
     node* new_node = NULL;
-    group* temp;
-    spmat *A = NULL;
+    /*group* temp_P;
+    mat_group* temp_mat;*/
+    spmat *sub1 = NULL;
 
     n = fread(&num_of_groups, sizeof(int), 1, in_file);
     if (n != 1) {
@@ -163,6 +154,7 @@ void initialize_P_and_mats(FILE *in_file, group **P, mat_group **mats) {
 	    }
 
         all_nodes = NULL;
+        sub1 = spmat_allocate_list(current_group_size, A->M);
 	    for (j=0; j<current_group_size; j++) {
 	        n = fread(&current_node, sizeof(int), 1, in_file);
             /*printf("current_node=%d\n", current_node);*/
@@ -181,25 +173,22 @@ void initialize_P_and_mats(FILE *in_file, group **P, mat_group **mats) {
 	    }
         print_group(all_nodes, current_group_size);
 	    push(P, all_nodes, current_group_size);
-	    A = create_matrix_from_community(all_nodes, current_group_size);
-	    mat_push(mats, A);
+	    spmat_sub(A, sub1, all_nodes);
+	    mat_push(mats, sub1);
     }
-    temp = *P;
-    printf("temp->head->original_col=%d\n", temp->head->original_col);
-    printf("temp->next->head->original_col=%d\n", temp->next->head->original_col);
-    printf("temp->next->next->head->original_col=%d\n", temp->next->next->head->original_col);
-    printf("temp->next->next->head->next->original_col=%d\n", temp->next->next->head->next->original_col);
-
+    print_mats(mats, num_of_groups);
+    free(A);
 }
 
 int main(int argc, char *argv[]) {
 	FILE *in = fopen(argv[1], "rb");
 	FILE *in_communities = fopen(argv[2], "rb");
+	spmat *A = create_matrix(in);
 	mat_group **mats = malloc(sizeof(mat_group*));
 	group **O = malloc(sizeof(group*));
 	group **P = malloc(sizeof(group*));
-	/*node *all_nodes = NULL;
-	int i = A->n - 1;*/
+
+    printf("A->m=%d\n", A->M);
 
 	if (mats == NULL || O == NULL || P == NULL) {
 		print_and_exit(1, "Error: malloc had failed\n");
@@ -209,10 +198,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	*P = NULL;
-	initialize_P_and_mats(in_communities, P, mats);
+	initialize_P_and_mats(in_communities, P, mats, A);
 
 	*O = NULL;
-	/*mat_push(mats, A);*/
 
 	while (*P != NULL) {
 		divide_group(mats, P, O);
@@ -222,6 +210,7 @@ int main(int argc, char *argv[]) {
 	free_group(O);
 	free_group(P);
 	fclose(in);
+	fclose(in_communities);
 	free(mats);
 	return 0;
 }
