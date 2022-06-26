@@ -96,13 +96,13 @@ def one_comparison_run(input_network_folder, path2curr_date_folder):
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=True)
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
     logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
-    network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=False)
+    network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
 
 
     logging.info(f'===================== Running: Neumann C =======================')
     start = timer()
     neumann_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
-                                                  network_obj.graph_binary_input_fp, is_shani=False)
+                                                  network_obj.graph_binary_input_fp)
     end = timer()
     save_and_eval(network_obj.save_directory_path, eval_results_per_network, network_obj.G,
                   network_obj.real_communities,

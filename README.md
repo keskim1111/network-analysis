@@ -40,8 +40,28 @@ The workshop aims to improve existing algorithms for community detection in netw
 ## How to use
 
 
-### 1. NetworkX graph as input
-### 2. Graph file as input
+### Single graph
+
+* communities file
+```
+1 0
+2 0
+3 0
+4 1
+5 1
+6 1
+```
+* network file
+```
+1 2
+2 3
+1 3
+4 5
+4 6 
+5 6
+```
+  
+  
 
 
 [1]: https://www.gurobi.com/documentation/9.5/quickstart_windows/software_installation_guid.html#section:Installation

@@ -2,7 +2,6 @@ from networkx.generators.community import LFR_benchmark_graph
 import networkx as nx
 from collections import defaultdict
 import os, pickle
-from helpers import init_results_folder
 from consts import RESULTS_FOLDER, yeast_path, arabidopsis_path
 
 
