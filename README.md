@@ -41,17 +41,19 @@ The workshop aims to improve existing algorithms for community detection in netw
 
 ### Quick start
 ```python
+from main import kesty_one_graph, kesty_multiple_graphs
+
 # for single graph
 graph_path = "graphs/Shani_graphs/1000_0.4_0"
 graphs_path = "graphs/Shani_graphs"
 communities = kesty_one_graph(graph_path)
 # for multiple graphs
-communities_dictionary = kesty_louvain_multiple_graphs(graphs_path)
+communities_dictionary = kesty_multiple_graphs(graphs_path)
 
 ```
 when these are the formats:
 
-communities file
+communities.dat file
 ```
 1 0
 2 0
@@ -60,7 +62,7 @@ communities file
 5 1
 6 1
 ```
-network file
+network.dat file
 ```
 1 2
 2 3
@@ -69,14 +71,20 @@ network file
 4 6 
 5 6
 ```
-### Adding configurations
+### Adding Run configurations
 You can play with the ............
 ````python
-run_obj = RunParamInfo(
-        algorithm="louvain",
-        split_method="random")
+from main import kesty_one_graph
+from flow import RunParamInfo
 
-communities = kesty_one_graph(graph_path, run_obj)
+yeast_run_obj = RunParamInfo(
+        algorithm="louvain",
+        split_method="random",
+        network_file_name="edges.txt",
+        community_file_name="clusters.txt"
+    )
+graph_path = "graphs\\Benchmark\\Yeast"
+communities = kesty_one_graph(graph_path, yeast_run_obj)
 
 ````
   
