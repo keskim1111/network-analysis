@@ -91,7 +91,7 @@ def init_results_folder(init_path, folder_name=""):
     return os.path.join(os.getcwd(), curr_res_path)
 
 
-def save_str_graph_in_good_format(graph_path, write_to_files=False):
+def read_graph_files(graph_path, run_obj, write_to_files=False):
     '''
     :param graph_path: path to graph built from nodes that are strings
     :return: a networkX graph created from the strings edges file, with
@@ -99,8 +99,8 @@ def save_str_graph_in_good_format(graph_path, write_to_files=False):
     a list of communities with numbers created from the community strings file
     a dict that maps the strings of the nodes to numbers
     '''
-    edges_file = os.path.join(graph_path, "edges.txt")
-    clusters_file = os.path.join(graph_path, "clusters.txt")
+    edges_file = os.path.join(graph_path, run_obj.network_file_name)
+    clusters_file = os.path.join(graph_path, run_obj.community_file_name)
 
     G = nx.Graph()
     dict_str_to_num = dict()
@@ -167,4 +167,4 @@ def prompt_file(path):
 
 
 if __name__ == '__main__':
-    pprint(save_str_graph_in_good_format(arabidopsis_path))
+    pprint(read_graph_files(arabidopsis_path))
