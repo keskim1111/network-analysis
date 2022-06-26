@@ -1,9 +1,19 @@
 import os
 from pprint import pprint
 
-from consts import default_run_obj
-from flow import  NetworkObj, run
+from flow import NetworkObj, run, RunParamInfo
 
+default_run_obj  = RunParamInfo(
+        algorithm="louvain",
+        split_method="random",
+    )
+
+yeast_run_obj = RunParamInfo(
+        algorithm="louvain",
+        split_method="random",
+        network_file_name="edges.txt",
+        community_file_name="clusters.txt"
+    )
 
 # -------------------- API ----------------------------
 
@@ -48,7 +58,9 @@ if __name__ == '__main__':
     shani_folder_paths = os.path.join(
         "C:\\Users\kimke\OneDrive\Documents\\4th_year\semeter_B\Biological_networks_sadna\\network-analysis\graphs\Shani_graphs")
     network_path = os.path.join(shani_folder_paths, "1000_0.4_0")
+    yeast = "graphs\\Benchmark\\Yeast"
 
-    # kesty_one_graph(path1)
-    d = kesty_louvain_multiple_graphs(network_path)
-    pprint(d)
+    c = kesty_one_graph(yeast)
+    print(c)
+    # d = kesty_louvain_multiple_graphs(shani_folder_paths)
+    # pprint(d)
