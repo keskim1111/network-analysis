@@ -54,7 +54,7 @@ def read_binary_network_input(fileName, edgesFile=None):
 
 
 @timeit
-def read_binary_network_output(fileName, is_shani=False):
+def read_binary_network_output(fileName):
     """
     :param: fileName of a binary file of the following format:
             The first value represents the number of groups in the division.
@@ -63,7 +63,6 @@ def read_binary_network_output(fileName, is_shani=False):
             The next value is the number of nodes in the second group, followed by the indices of the
             nodes in group, then the number of nodes and indices of nodes in the third group, and so
             on until the last group
-            is_shani - if True: the nodes from G start at index 1, while the nodes in the binary file need to start from index 0
 
     :return: list of lists (comm)
     """
@@ -79,8 +78,6 @@ def read_binary_network_output(fileName, is_shani=False):
             for j in range(num_of_nodes_in_group):
                 group_member_byte = f.read(4)
                 group_member = struct.unpack('i', group_member_byte)[0]
-                if is_shani:  # nodes from binary file starts at index 0, shani's graph start at index 1
-                    group_member += 1
                 group.append(group_member)
             res.append(group)
     finally:
@@ -91,7 +88,6 @@ def read_binary_network_output(fileName, is_shani=False):
 def create_binary_network_file(G, path, title="graph"):
     """
     :param: G - a networkX graph created based on the binary file
-            is_shanis_file - if True: the nodes from G start at index 1, while the nodes in the binary file need to start from index 0
     :return: A path to a binary file created in the following format:
             The first value represents the number of nodes in the network, n = |V |.
             The second value represents the number of edges of the first node, i.e., k1. It is followed by
@@ -117,11 +113,10 @@ def create_binary_network_file(G, path, title="graph"):
 
 
 @timeit
-def create_binary_communities_file(communities, path, title="communities", is_shanis_file=False):
+def create_binary_communities_file(communities, path, title="communities"):
     """
     :param: communities - list of lists - each list represents a community
             path - to save the created binary file
-            is_shanis_file - if True: the nodes from G start at index 1, while the nodes in the binary file need to start from index 0
     :return: A path to a binary file created in the following format:
             The first value represents the number of groups in the division.
             The second value represents the number of nodes in the first group, followed by the indices
@@ -141,8 +136,6 @@ def create_binary_communities_file(communities, path, title="communities", is_sh
             f.write(struct.pack('i', num_of_nodes_in_group))
             for j in group:
                 node = j
-                if is_shanis_file:
-                    node -= 1
                 f.write(struct.pack('i', node))
     finally:
         f.close()
