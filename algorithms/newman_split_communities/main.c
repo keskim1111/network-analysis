@@ -176,8 +176,9 @@ void initialize_P_and_mats(FILE *in_file, group **P, mat_group **mats, spmat* A)
 	    spmat_sub(A, sub1, all_nodes);
 	    mat_push(mats, sub1);
     }
+    printf("[init function]\n");
     print_mats(mats, num_of_groups);
-    free(A);
+    A->free(A);
 }
 
 int main(int argc, char *argv[]) {
@@ -199,13 +200,15 @@ int main(int argc, char *argv[]) {
 
 	*P = NULL;
 	initialize_P_and_mats(in_communities, P, mats, A);
+	printf("[main]\n");
+    /*print_mats(mats, num_of_groups);*/
 
 	*O = NULL;
 
 	while (*P != NULL) {
 		divide_group(mats, P, O);
 	}
-
+    printf("finished dividing groups.\n");
 	print_groups(O, argv[3]);
 	free_group(O);
 	free_group(P);

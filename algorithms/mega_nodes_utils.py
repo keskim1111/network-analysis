@@ -55,9 +55,9 @@ def split_mega_nodes(G, mega_graph, n: int, run_obj):
                 new_partition.append(community)
         else:
             new_partition.append(list(attribute_dict.get(mega_node)))
-        graph = G.__class__()
-        graph.add_nodes_from(G)
-        graph.add_weighted_edges_from(G.edges(data="weight", default=1))
+    graph = G.__class__()
+    graph.add_nodes_from(G)
+    graph.add_weighted_edges_from(G.edges(data="weight", default=1))
     logging.info(f"***Number of communities after split is {len(new_partition)}***")
     new_graph = _gen_graph(graph, new_partition)
     return new_graph
@@ -125,9 +125,18 @@ def ilp_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
 
 @timeit
 def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj):
-    new_partition = []
     communities = unite_mega_nodes_and_convert2communities(mega_graph, [mega_graph.nodes()])
-    split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities)
+    logging.info(f"***Number of communities after split is {len(communities)}***")
+
+    new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities, is_shani=run_obj.is_shani_files)
+    G = network_obj.G
+    graph = G.__class__()
+    graph.add_nodes_from(G)
+    graph.add_weighted_edges_from(G.edges(data="weight", default=1))
+    logging.info(f"***Number of communities after split is {len(new_communities)}***")
+    new_graph = _gen_graph(graph, new_communities)
+    return new_graph
+
 
 if __name__ == '__main__':
     pass
