@@ -4,19 +4,22 @@ import pandas as pd
 import logging
 from algorithms.algorithms import louvain
 from algorithms.modified_louvain import modified_louvain_communities
-from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities, split_mega_nodes, modularity_split_mega_node, \
-    min_cut_split_mega_node, random_split_mega_node, ilp_split_mega_node, ilp_split_mega_node_whole_graph, newman_split_mega_nodes_whole_graph
+from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities, split_mega_nodes, \
+    modularity_split_mega_node, \
+    min_cut_split_mega_node, random_split_mega_node, ilp_split_mega_node, ilp_split_mega_node_whole_graph, \
+    newman_split_mega_nodes_whole_graph
 from utils.binary_files import create_binary_network_file
 from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, PATH2BENCHMARKS_GRAPHS
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
 from input_networks import create_graph_from_edge_file, read_communities_file
-from helpers import init_results_folder, _pickle, save_str_graph_in_good_format,current_time
+from helpers import init_results_folder, _pickle, read_graph_files, current_time
 from utils.logger import setup_logger
 from algorithms.ilp_max_mod_union import ILP
 from output_generator import save_and_eval, create_data_dict
 from algorithms.neumann_utils import get_neumann_communities
 
 
+# TODO remove
 def multi_shani_run(run_obj):
     for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
         if run_obj.run_on_10000 and "10000" in input_network_folder:
@@ -31,38 +34,44 @@ def multi_shani_run(run_obj):
                 run_with_comparison_newman(input_network_folder, run_obj)
 
 
+# TODO remove
 def multi_benchmark_run(input_network_folder, run_obj):
     for i in range(run_obj.benchmark_num_of_runs):
         run_with_comparison_benchmark(input_network_folder, run_obj)
 
 
+def run(run_obj, network_obj):
+    if run_obj.algorithm == "louvain":
+        run_with_comparison_louvain(network_obj, run_obj)
+    else:  # run_obj.algorithm == "newman":
+        run_with_comparison_newman(network_obj, run_obj)
+
+
 # ------------------------------- Louvain -------------------------------
 
 # add try catch to run ilp .. bc of out of memory
-def run_with_comparison_louvain(input_network_folder,
-                                run_obj,
-                                ):
-    network_obj, eval_results_per_network = run_setup(run_obj.path2curr_date_folder,
-                                                      input_network_folder,
-                                                      is_shanis_file =run_obj.is_shani_files)
+def run_with_comparison_louvain(network_obj, run_obj):
+    eval_results_per_network = []
+    setup_logger(network_obj.save_directory_path, log_to_file=run_obj.log_to_file)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
     for i in range(run_obj.number_runs_original_louvain):
         run_louvain(eval_results_per_network, network_obj, run_obj)
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
-    run_louvain_with_change(eval_results_per_network,
-                            network_obj,
-                            run_obj
-                            )
-    create_outputs(input_network_folder, eval_results_per_network, network_obj.save_directory_path)
+    louvain_change_communities = run_louvain_with_change(eval_results_per_network,
+                                                         network_obj,
+                                                         run_obj
+                                                         )
+    create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
     logging.info(f'eval_results_per_network={eval_results_per_network}')
+    return louvain_change_communities
 
 
 def run_ilp_on_louvain(G, TimeLimit):
     '''
     :param TimeLimit:
     :param G: graph with MEGA nodes
-    :return: communites
+    :return: communities
     '''
     nodes_list = list(G.nodes)
     mod_mega_graph_divided = calc_modularity_nx(G, [[n] for n in nodes_list], weight="weight")
@@ -153,6 +162,7 @@ def run_louvain_with_change(
                 curr_communities,
                 end - start)
             logging.info(f'------ success running ilp on louvain, lp_critical={critical}')
+            return curr_communities
         except Exception as e:
             logging.info(
                 f'run_one_louvain didnt work on {network_obj.network_name}, lp_critical={critical}')
@@ -164,10 +174,9 @@ def run_louvain_with_change(
 
 # ------------------------------- Newman -------------------------------
 
-def run_with_comparison_newman(input_network_folder, run_obj):
-    network_obj, eval_results_per_network = run_setup(run_obj.path2curr_date_folder,
-                                                      input_network_folder,
-                                                      is_shanis_file =run_obj.is_shani_files)
+def run_with_comparison_newman(network_obj, run_obj):
+    eval_results_per_network = []
+    setup_logger(network_obj.save_directory_path, log_to_file=run_obj.log_to_file)
 
     logging.info(f'===================== Running: Louvain networkx =======================')
     run_louvain(eval_results_per_network, network_obj, run_obj)
@@ -186,7 +195,7 @@ def run_with_comparison_newman(input_network_folder, run_obj):
         is_shani=True
     )
     # Finished
-    create_outputs(input_network_folder, eval_results_per_network, network_obj.save_directory_path)
+    create_outputs(network_obj.save_directory_path, eval_results_per_network, network_obj.save_directory_path)
     logging.info(f'eval_results_per_network={eval_results_per_network}')
 
 
@@ -326,7 +335,7 @@ def run_with_comparison_benchmark(
     logging.info(f'===================== Running: Louvain networkx =======================')
     run_louvain(eval_results_per_network, network_obj, run_obj)
     logging.info(f'===================== Running: Louvain Changed networkx =======================')
-    run_louvain_with_change(
+    louvain_change_communities = run_louvain_with_change(
         eval_results_per_network,
         network_obj,
         run_obj,
@@ -338,23 +347,18 @@ def run_with_comparison_benchmark(
 
 # ------------------------------- Helper classes -------------------------------
 class NetworkObj:
-    def __init__(self, main_dp, network_name,
-                 is_shanis_file=False,
-                 is_benchmark=False):
-        self.network_name = network_name
-        self.save_directory_path = init_results_folder(main_dp, f"{network_name}")
-        if is_shanis_file:
-            self.network_dp = os.path.join(PATH2SHANIS_GRAPHS, self.network_name)
-            self.real_communities = read_communities_file(os.path.join(self.network_dp, "community.dat"))
-            self.G = create_graph_from_edge_file(os.path.join(self.network_dp, "network.dat"))  # creating graph object
-        if is_benchmark:
-            path = os.path.join(PATH2BENCHMARKS_GRAPHS, self.network_name)
-            self.network_dp = path
-            self.G, self.real_communities, d = save_str_graph_in_good_format(path)
+    def __init__(self,
+                 main_dp,
+                 network_path,
+                 run_obj
+                 ):
+        self.network_name = os.path.basename(os.path.normpath(network_path))
+        self.save_directory_path = init_results_folder(main_dp, f"{self.network_name}")
+        self.network_dp = network_path
+        self.G, self.real_communities, dictionary = read_graph_files(self.network_dp, run_obj)
         _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
         self.graph_binary_input_fp = create_binary_network_file(self.G, self.save_directory_path,
-                                                                title=self.network_name,
-                                                                is_shanis_file=is_shanis_file)  # converting network to binary file
+                                                                title=self.network_name)  # converting network to binary file
         self.communities_binary_input_fp = None
 
         # moved
@@ -369,12 +373,19 @@ class NetworkObj:
 class RunParamInfo:
     def __init__(self,
                  split_method=None, lp_list=None, run_on_1000=False,
-                 run_on_10000=False, algorithm="louvain", TimeLimit=None, benchmark_num_of_runs=1,
-                 folder_name="", is_shani_files=False, max_mega_node_split_size = float("inf"), number_runs_original_louvain=10):
+                 run_on_10000=False, algorithm="louvain",
+                 TimeLimit=None, benchmark_num_of_runs=1,
+                 folder_name="", is_shani_files=False,
+                 max_mega_node_split_size=float("inf"),
+                 number_runs_original_louvain=10,
+                 community_file_name="community.dat", network_file_name="network.dat",
+                 with_comparison_to_newman_louvain=True, log_to_file=True
+                 ):
         if lp_list is None:
             lp_list = []
         self.algorithm = algorithm
-        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS, folder_name=f"{current_time()}-{folder_name}")
+        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS,
+                                                         folder_name=f"{current_time()}-{folder_name}")
         self.run_on_1000 = run_on_1000
         self.run_on_10000 = run_on_10000
         self.lp_list = lp_list
@@ -393,6 +404,10 @@ class RunParamInfo:
         self.benchmark_num_of_runs = benchmark_num_of_runs
         self.max_mega_node_split_size = max_mega_node_split_size
         self.number_runs_original_louvain = number_runs_original_louvain
+        self.community_file_name = community_file_name
+        self.network_file_name = network_file_name
+        self.with_comparison_to_newman_louvain = with_comparison_to_newman_louvain
+        self.log_to_file = log_to_file
 
 
 # ------------------------------- Helper functions -------------------------------
@@ -409,16 +424,6 @@ def create_outputs(input_network_folder, eval_results_per_network, save_director
     csv_name = f"results_df-{input_network_folder}.csv"
     df.to_csv(os.path.join(save_directory_path, csv_name))
     # prompt_file(os.path.join(network_obj.save_directory_path, csv_name))
-
-
-def run_setup(path2curr_date_folder,
-              input_network_folder, log_to_file=True, is_shanis_file = False):
-    # define logger output ##############
-    setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=log_to_file)
-    logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
-    eval_results_per_network = []  # Save all final results in this list (for creating df later)
-    network_obj = NetworkObj(path2curr_date_folder, input_network_folder, is_shanis_file=is_shanis_file)
-    return network_obj, eval_results_per_network
 
 
 if __name__ == '__main__':

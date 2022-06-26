@@ -88,7 +88,7 @@ def read_binary_network_output(fileName, is_shani=False):
     return res
 
 @timeit
-def create_binary_network_file(G, path, title="graph", is_shanis_file=False):
+def create_binary_network_file(G, path, title="graph"):
     """
     :param: G - a networkX graph created based on the binary file
             is_shanis_file - if True: the nodes from G start at index 1, while the nodes in the binary file need to start from index 0
@@ -107,13 +107,9 @@ def create_binary_network_file(G, path, title="graph", is_shanis_file=False):
         f.write(struct.pack('i', num_of_nodes))
         for node in nodes_list:
             neighbors = sorted(list(G.neighbors(node)))
-            if is_shanis_file:
-                node -= 1
             num_of_neighbors = len(neighbors)
             f.write(struct.pack('i', num_of_neighbors))
             for neighbor in neighbors:
-                if is_shanis_file:
-                    neighbor -= 1
                 f.write(struct.pack('i', int(neighbor)))
     finally:
         f.close()
