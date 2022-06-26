@@ -34,12 +34,11 @@ def multi_shani_run(run_obj):
                 run_with_comparison_newman(input_network_folder, run_obj)
 
 
-
 def run(run_obj, network_obj):
     if run_obj.algorithm == "louvain":
-        run_with_comparison_louvain(network_obj, run_obj)
+        return run_with_comparison_louvain(network_obj, run_obj)
     else:  # run_obj.algorithm == "newman":
-        run_with_comparison_newman(network_obj, run_obj)
+        return run_with_comparison_newman(network_obj, run_obj)
 
 
 # ------------------------------- Louvain -------------------------------
@@ -172,7 +171,6 @@ def run_with_comparison_newman(network_obj, run_obj):
     eval_results_per_network = []
     setup_logger(network_obj.save_directory_path, log_to_file=run_obj.log_to_file)
     if run_obj.with_comparison:
-
         logging.info(f'===================== Running: Louvain networkx =======================')
         run_louvain(eval_results_per_network, network_obj, run_obj)
 
@@ -183,7 +181,7 @@ def run_with_comparison_newman(network_obj, run_obj):
             network_obj)
 
     logging.info(f'===================== Running: Neumann C changed=======================')
-    run_newman_with_change(
+    communities = run_newman_with_change(
         eval_results_per_network,
         run_obj,
         network_obj,
@@ -192,6 +190,7 @@ def run_with_comparison_newman(network_obj, run_obj):
 
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
     logging.info(f'eval_results_per_network={eval_results_per_network}')
+    return communities
 
 
 def run_ilp_on_neumann(network_obj,
@@ -299,8 +298,7 @@ def run_newman_with_change(eval_results_per_network, run_obj, network_obj):
             final_communities,
             end - start,
         )
-
-
+        return final_communities
 
 
 # ------------------------------- Helper classes -------------------------------
@@ -310,7 +308,7 @@ class NetworkObj:
                  run_obj
                  ):
         self.network_name = os.path.basename(os.path.normpath(network_path))
-        self.save_directory_path = init_results_folder(run_obj.path2curr_date_folder,self.network_name)
+        self.save_directory_path = init_results_folder(run_obj.path2curr_date_folder, self.network_name)
         self.network_dp = network_path
         self.G, self.real_communities, dictionary = read_graph_files(self.network_dp, run_obj)
         _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
