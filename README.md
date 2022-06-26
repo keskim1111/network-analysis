@@ -53,7 +53,7 @@ communities_dictionary = kesty_multiple_graphs(graphs_path)
 ```
 when these are the formats:
 
-communities file
+communities.dat file
 ```
 1 0
 2 0
@@ -62,7 +62,7 @@ communities file
 5 1
 6 1
 ```
-network file
+network.dat file
 ```
 1 2
 2 3
@@ -77,11 +77,14 @@ You can play with the ............
 from main import kesty_one_graph
 from flow import RunParamInfo
 
-run_obj = RunParamInfo(
+yeast_run_obj = RunParamInfo(
         algorithm="louvain",
-        split_method="random")
-
-communities = kesty_one_graph(graph_path, run_obj)
+        split_method="random",
+        network_file_name="edges.txt",
+        community_file_name="clusters.txt"
+    )
+graph_path = "graphs\\Benchmark\\Yeast"
+communities = kesty_one_graph(graph_path, yeast_run_obj)
 
 ````
   
