@@ -126,9 +126,14 @@ def ilp_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
 @timeit
 def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj):
     communities = unite_mega_nodes_and_convert2communities(mega_graph, [mega_graph.nodes()])
-    logging.info(f"***Number of communities after split is {len(communities)}***")
+    communities_list_sorted = []
+    for com in communities:
+        com_sorted = list(com)
+        com_sorted.sort(reverse=True)
+        communities_list_sorted.append(com_sorted)
+    logging.info(f"***Number of communities after split is {len(communities_list_sorted)}***")
 
-    new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities, is_shani=run_obj.is_shani_files)
+    new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities_list_sorted, is_shani=run_obj.is_shani_files)
     G = network_obj.G
     graph = G.__class__()
     graph.add_nodes_from(G)
