@@ -39,10 +39,19 @@ The workshop aims to improve existing algorithms for community detection in netw
 4. Download [Gurobi][1] to your machine 
 ## How to use
 
+### Quick start
+```python
+# for single graph
+graph_path = "graphs/Shani_graphs/1000_0.4_0"
+graphs_path = "graphs/Shani_graphs"
+communities = kesty_one_graph(graph_path)
+# for multiple graphs
+communities_dictionary = kesty_louvain_multiple_graphs(graphs_path)
 
-### Single graph
+```
+when these are the formats:
 
-* communities file
+communities file
 ```
 1 0
 2 0
@@ -51,7 +60,7 @@ The workshop aims to improve existing algorithms for community detection in netw
 5 1
 6 1
 ```
-* network file
+network file
 ```
 1 2
 2 3
@@ -60,6 +69,16 @@ The workshop aims to improve existing algorithms for community detection in netw
 4 6 
 5 6
 ```
+### Adding configurations
+You can play with the ............
+````python
+run_obj = RunParamInfo(
+        algorithm="louvain",
+        split_method="random")
+
+communities = kesty_one_graph(graph_path, run_obj)
+
+````
   
   
 

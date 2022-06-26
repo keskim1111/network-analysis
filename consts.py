@@ -5,6 +5,8 @@ dp = dir path
 
 import os
 
+from flow import RunParamInfo
+
 C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/newman_lp_critical')
 
 benchmark_base_path = os.path.join("Graphs" , "Benchmark")
@@ -26,6 +28,11 @@ msg = "The modularity result of the Algorithm is: "
 
 RESULTS_FOLDER = 'results'
 default_lp_list=[100]
+default_run_obj =    \
+    run_obj_default = RunParamInfo(
+        algorithm="louvain",
+        split_method="random",
+    )
 PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "Graphs", "Shani_graphs")
 PATH2BENCHMARKS_GRAPHS = benchmark_base_path
 FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(), RESULTS_FOLDER, "full_flow")
