@@ -33,7 +33,7 @@ def kesty_one_graph(path, run_obj=default_run_obj):
         raise e
 
 
-def kesty_louvain_multiple_graphs(path_of_graphs, run_obj=default_run_obj):
+def kesty_multiple_graphs(path_of_graphs, run_obj=default_run_obj):
     """
     :param path_of_graphs: path to folder with folders of networks and communities files
     :param run_obj: the run configurations
