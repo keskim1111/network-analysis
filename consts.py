@@ -25,7 +25,7 @@ evaluation_measures = ['modularity', 'conductance', 'jaccard', 'sensitivity', 'a
 msg = "The modularity result of the Algorithm is: "
 
 RESULTS_FOLDER = 'results'
-
+default_lp_list=[100]
 PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "Graphs", "Shani_graphs")
 PATH2BENCHMARKS_GRAPHS = benchmark_base_path
 FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(), RESULTS_FOLDER, "full_flow")
