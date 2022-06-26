@@ -9,29 +9,13 @@ from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities
     min_cut_split_mega_node, random_split_mega_node, ilp_split_mega_node, ilp_split_mega_node_whole_graph, \
     newman_split_mega_nodes_whole_graph
 from utils.binary_files import create_binary_network_file
-from consts import PATH2SHANIS_GRAPHS, FOLDER2FLOW_RESULTS, PATH2BENCHMARKS_GRAPHS
+from consts import  FOLDER2FLOW_RESULTS, default_lp_list
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
-from input_networks import create_graph_from_edge_file, read_communities_file
 from helpers import init_results_folder, _pickle, read_graph_files, current_time
 from utils.logger import setup_logger
 from algorithms.ilp_max_mod_union import ILP
 from output_generator import save_and_eval, create_data_dict
 from algorithms.neumann_utils import get_neumann_communities
-
-
-# TODO remove
-def multi_shani_run(run_obj):
-    for input_network_folder in sorted(os.listdir(PATH2SHANIS_GRAPHS), reverse=True):
-        if run_obj.run_on_10000 and "10000" in input_network_folder:
-            if run_obj.algorithm == "louvain":
-                run_with_comparison_louvain(input_network_folder, run_obj)
-            elif run_obj.algorithm == "newman":
-                run_with_comparison_newman(input_network_folder, run_obj)
-        if run_obj.run_on_1000 and "1000_" in input_network_folder:
-            if run_obj.algorithm == "louvain":
-                run_with_comparison_louvain(input_network_folder, run_obj)
-            elif run_obj.algorithm == "newman":
-                run_with_comparison_newman(input_network_folder, run_obj)
 
 
 def run(run_obj, network_obj):
@@ -46,7 +30,8 @@ def run(run_obj, network_obj):
 # add try catch to run ilp .. bc of out of memory
 def run_with_comparison_louvain(network_obj, run_obj):
     eval_results_per_network = []
-    setup_logger(network_obj.save_directory_path, log_to_file=run_obj.log_to_file)
+    setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
+                 log_to_file=run_obj.log_to_file)
     if run_obj.with_comparison:
         logging.info(f'===================== Running: Louvain networkx =======================')
         for i in range(run_obj.number_runs_original_louvain):
@@ -169,7 +154,8 @@ def run_louvain_with_change(
 # ------------------------------- Newman -------------------------------
 def run_with_comparison_newman(network_obj, run_obj):
     eval_results_per_network = []
-    setup_logger(network_obj.save_directory_path, log_to_file=run_obj.log_to_file)
+    setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
+                 log_to_file=run_obj.log_to_file)
     if run_obj.with_comparison:
         logging.info(f'===================== Running: Louvain networkx =======================')
         run_louvain(eval_results_per_network, network_obj, run_obj)
@@ -327,9 +313,10 @@ class NetworkObj:
 
 class RunParamInfo:
     def __init__(self,
-                 split_method=None, lp_list=None,
                  algorithm="louvain",
-                 TimeLimit=None, benchmark_num_of_runs=1,
+                 split_method="newman_whole_graph",
+                 lp_list=default_lp_list,
+                 TimeLimit=None,
                  folder_name="",
                  max_mega_node_split_size=float("inf"),
                  number_runs_original_louvain=1,
@@ -338,8 +325,6 @@ class RunParamInfo:
                  with_comparison_to_newman_louvain=True,
                  log_to_file=True
                  ):
-        if lp_list is None:
-            lp_list = []
         self.algorithm = algorithm
         self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS,
                                                          folder_name=f"{current_time()}-{folder_name}")
@@ -355,7 +340,6 @@ class RunParamInfo:
         }
         self.critical = None
         self.TimeLimit = TimeLimit
-        self.benchmark_num_of_runs = benchmark_num_of_runs
         self.max_mega_node_split_size = max_mega_node_split_size
         self.number_runs_original_louvain = number_runs_original_louvain
         self.community_file_name = community_file_name
@@ -378,7 +362,6 @@ def create_outputs(input_network_folder, eval_results_per_network, save_director
     df.to_pickle(os.path.join(save_directory_path, "results.df"))
     csv_name = f"results_df-{input_network_folder}.csv"
     df.to_csv(os.path.join(save_directory_path, csv_name))
-    # prompt_file(os.path.join(network_obj.save_directory_path, csv_name))
 
 
 if __name__ == '__main__':
