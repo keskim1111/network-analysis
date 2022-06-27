@@ -1,71 +1,65 @@
+import os
 from pprint import pprint
-from flow import RunParamInfo, multi_shani_run
+from consts import PATH2SHANIS_GRAPHS
+
+from flow import NetworkObj, run, RunParamInfo
+
+default_run_obj  = RunParamInfo(
+        algorithm="louvain",
+        split_method="random",
+    )
+
+yeast_run_obj = RunParamInfo(
+        algorithm="louvain",
+        split_method="random",
+        network_file_name="edges.txt",
+        community_file_name="clusters.txt"
+    )
+
+# -------------------- API ----------------------------
+
+def kesty_one_graph(path, run_obj=default_run_obj):
+
+    """
+    :param path: path to folder with network and communities file
+    :param run_obj: the run configurations
+    :return: partition by our algorithm
+    """
+    try:
+        network_obj = NetworkObj(path, run_obj)
+        communities = run(run_obj, network_obj)
+        return communities
+    except Exception as e:
+        print("There is a problem to run the program")
+        raise e
+
+
+def kesty_multiple_graphs(path_of_graphs, run_obj=default_run_obj):
+    """
+    :param path_of_graphs: path to folder with folders of networks and communities files
+    :param run_obj: the run configurations
+    :return: dictionary with network name and its partition
+    """
+    folders_dict = {}
+    try:
+        for input_network_folder in sorted(os.listdir(path_of_graphs), reverse=True):
+            print(f"------- Running {input_network_folder} graph ------------")
+            communities = kesty_one_graph(os.path.join(path_of_graphs, input_network_folder), run_obj)
+            folders_dict[input_network_folder] = communities
+        return folders_dict
+    except Exception as e:
+        print("There is a problem to run the program")
+        raise e
+
 
 if __name__ == '__main__':
-    # TODO add IntFeasTol to flow
-    run_objects = {
-        # "newman-random-split-1000": RunParamInfo(algorithm="newman",
-        #                                          split_method="random",
-        #                                          lp_list=[100],
-        #                                          run_on_1000=True,
-        #                                          TimeLimit=10 * 60,
-        #                                          folder_name="newman-random-split-10000"
-        #                                         ,is_shani_files=True
-        #                                          ),
-        # "louvain-with-whole-ilp-split-1000": RunParamInfo(algorithm="louvain",
-        #                                                split_method="ilp_whole_graph",
-        #                                                lp_list=[100],
-        #                                                run_on_1000=True,
-        #                                                TimeLimit=0,
-        #                                                folder_name="louvain-with-ilp-split-_whole_graph-1-000",
-        #                                                is_shani_files=True,
-        #
-        #                                                ),
-        # "louvain-with-sub-ilp-split-1000": RunParamInfo(algorithm="louvain",
-        #                                                split_method="newman_sub_graph",
-        #                                                lp_list=[100],
-        #                                                run_on_1000=True,
-        #                                                TimeLimit=0,
-        #                                                folder_name="louvain-with-newman-split-_sub_graph-1-000",
-        #                                                is_shani_files=True,
-        #                                                ),
-        "louvain-with-whole-newman-split-10000": RunParamInfo(algorithm="louvain",
-                                                       split_method="newman_whole_graph",
-                                                       lp_list=[100],
-                                                       run_on_10000=True,
-                                                       TimeLimit=None,
-                                                       folder_name="louvain-with-newman-split-10-000",
-                                                       is_shani_files=True,
-                                                       ),
-        # "louvain-with-newman-split-10000": RunParamInfo(algorithm="louvain",
-        #                                                 split_method="newman",
-        #                                                 lp_list=[100],
-        #                                                 run_on_10000=True,
-        #                                                 TimeLimit=10 * 60,
-        #                                                 folder_name="louvain-with-newman-split-10000"
-        #                                                 , is_shani_files=True
-        #
-        #                                                 ),
-
-    }
-    for name, run_obj in run_objects.items():
-        print(f"Running:\t {name} \n on shanis files with params: ")
-        pprint(run_obj)
-        multi_shani_run(run_obj)
-
-    # benchmark
-    # benchmark_run_object = RunParamInfo(algorithm="newman",
-    #                           split_method="random",
-    #                           lp_list=lp_critical_list1,
-    #                           run_on_1000=True,
-    #                           TimeLimit=time,
-    #                           benchmark_num_of_runs= 10
-    #                           )
-    # multi_benchmark_run(yeast_path, benchmark_run_object)
-
-"""
-idea: there are some subgraphs that ilp takes long to finish. run orpaz-neuman partially, 
-but also save the final result. Then - if there is a subgraph that ilp runs for longer
-than X minutes - stop the run for this subgraph and put the neuman result instead
-Another option is - if it runs too long - then just add that full subgraph as 1 community and dont continue to divide it
-"""
+    folder_10_thousand = os.path.join(PATH2SHANIS_GRAPHS, "10_000")
+    run_obj = RunParamInfo(
+        algorithm="louvain",
+        split_method="ilp_whole_graph",
+        folder_name = "10-000 whole"
+    )
+    # c = kesty_one_graph(network_path2, run_obj )
+    # print(c)
+    d = kesty_multiple_graphs(folder_10_thousand)
+    pprint(d)
