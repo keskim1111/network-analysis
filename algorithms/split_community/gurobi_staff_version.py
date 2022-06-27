@@ -13,7 +13,7 @@ Implementation according to
 https://support.gurobi.com/hc/en-us/community/posts/6863277481233-Newman-iteration-foamalation
 '''
 class Newman_ILP2:
-    def __init__(self, G, weight=None, IntFeasTol=0, TimeLimit=0):
+    def __init__(self, G, weight=None, IntFeasTol=None, TimeLimit=None):
         """
         :param G: networkx graph
         :param nodes:
@@ -24,9 +24,9 @@ class Newman_ILP2:
         self.weight = weight
         self.model = gp.Model("modularity")
         # params
-        if IntFeasTol > 0:
+        if IntFeasTol is not None:
             self.model.setParam("IntFeasTol", IntFeasTol)
-        if TimeLimit > 0:
+        if TimeLimit is not None:
             self.model.setParam("TimeLimit", TimeLimit)
         self.set_ilp()  # setting objective function and constraints and optimizing
         self.communities = self.get_communities()

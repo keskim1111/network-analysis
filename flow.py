@@ -316,7 +316,7 @@ class RunParamInfo:
                  algorithm="louvain",
                  split_method="newman_whole_graph",
                  lp_list=default_lp_list,
-                 TimeLimit=0,
+                 TimeLimit=None,
                  folder_name="",
                  max_mega_node_split_size=float("inf"),
                  number_runs_original_louvain=1,
