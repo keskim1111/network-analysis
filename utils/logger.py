@@ -113,7 +113,7 @@ def setup_logging(console_log_output, console_log_level, console_log_color, logf
 
 
 # Main function
-def setup_logger(file_name="default", log_to_file=False,console_log_level="warning"):
+def setup_logger(file_name="default", log_to_file=False,console_log_level="info"):
     # Setup logging
     if (not setup_logging(console_log_output="stdout", console_log_level=console_log_level, console_log_color=True,
                           logfile_file=file_name + ".log", logfile_log_level="debug", logfile_log_color=False,log_to_file=log_to_file,
@@ -121,7 +121,7 @@ def setup_logger(file_name="default", log_to_file=False,console_log_level="warni
         print("Failed to setup logging, aborting.")
         return 1
     if log_to_file:
-        print(f"******logging to {file_name}.log********")
+        print(f"All detailed logs of this Run can be found at: \n{file_name}")
 
 
 # Call main function

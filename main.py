@@ -1,3 +1,4 @@
+import logging
 import os
 from pprint import pprint
 
@@ -5,8 +6,7 @@ from flow import NetworkObj, run, RunParamInfo
 
 default_run_obj = RunParamInfo(
     algorithm="louvain",
-    split_method="random",
-    console_log_level= "info"
+    split_method="newman_whole_graph",
 )
 
 yeast_run_obj = RunParamInfo(
@@ -15,8 +15,8 @@ yeast_run_obj = RunParamInfo(
     TimeLimit=60,
     network_file_name="edges.txt",
     community_file_name="clusters.txt",
-    console_log_level = "debug",
-    folder_name="ddd"
+    # console_log_level = "debug",
+    folder_name="ara"
 
 )
 
@@ -42,6 +42,7 @@ def kesty_one_graph(path, run_obj=default_run_obj):
     try:
         run_obj.init_results_folder()
         network_obj = NetworkObj(path, run_obj)
+        logging.info(f"Running changed {run_obj.algorithm} algo on {network_obj.network_name}")
         communities = run(run_obj, network_obj)
         original_nodes_communities = convert_to_original_nodes(communities, network_obj)
         return original_nodes_communities
@@ -82,8 +83,8 @@ if __name__ == '__main__':
         folder_name="10-000 whole"
     )
     # c = kesty_one_graph(yeast, yeast_run_obj)
-    c = kesty_one_graph(Arabidopsis, yeast_run_obj)
-    # c = kesty_one_graph(network_path2, default_run_obj)
+    # c = kesty_one_graph(Arabidopsis, yeast_run_obj)
+    c = kesty_one_graph(network_path2, default_run_obj)
     print(c)
     # d = kesty_louvain_multiple_graphs(shani_folder_paths)
     # pprint(d)

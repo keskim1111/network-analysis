@@ -202,7 +202,7 @@ def louvain_partitions(
             graph, m, partition, resolution, is_directed, seed
         )
         iteration_number += 1
-    logging.warning(f'[louvain_partitions]: final modularity = {mod}')
+    logging.debug(f'[louvain_partitions]: final modularity = {mod}')
 
 
 def important_prints(iteration_number=None, partition=None, inner_partition=None,g=None):
