@@ -1,24 +1,19 @@
 import os
 from pprint import pprint
-from consts import PATH2SHANIS_GRAPHS
+from consts import PATH2SHANIS_GRAPHS, yeast_path
 
 from flow import NetworkObj, run, RunParamInfo
 
-default_run_obj  = RunParamInfo(
-        algorithm="louvain",
-        split_method="random",
-    )
+# default_run_obj  = RunParamInfo(
+#         algorithm="louvain",
+#         split_method="random",
+#     )
+#
 
-yeast_run_obj = RunParamInfo(
-        algorithm="louvain",
-        split_method="random",
-        network_file_name="edges.txt",
-        community_file_name="clusters.txt"
-    )
 
 # -------------------- API ----------------------------
 
-def kesty_one_graph(path, run_obj=default_run_obj):
+def kesty_one_graph(path, run_obj):
 
     """
     :param path: path to folder with network and communities file
@@ -34,7 +29,7 @@ def kesty_one_graph(path, run_obj=default_run_obj):
         raise e
 
 
-def kesty_multiple_graphs(path_of_graphs, run_obj=default_run_obj):
+def kesty_multiple_graphs(path_of_graphs, run_obj):
     """
     :param path_of_graphs: path to folder with folders of networks and communities files
     :param run_obj: the run configurations
@@ -54,12 +49,21 @@ def kesty_multiple_graphs(path_of_graphs, run_obj=default_run_obj):
 
 if __name__ == '__main__':
     folder_10_thousand = os.path.join(PATH2SHANIS_GRAPHS, "10_000")
+    folder_1_thousand = os.path.join(PATH2SHANIS_GRAPHS, "1000")
     run_obj = RunParamInfo(
+        lp_list=[100],
         algorithm="louvain",
-        split_method="ilp_whole_graph",
-        folder_name = "10-000 whole"
+        split_method="newman_sub_graph",
+        folder_name = "newman-split_subgraph-1000"
     )
-    # c = kesty_one_graph(network_path2, run_obj )
+    # yeast_run_obj = RunParamInfo(
+    #         algorithm="louvain",
+    #         split_method="newman_whole_graph",
+    #         network_file_name="edges.txt",
+    #         community_file_name="clusters.txt",
+    #         folder_name="newman-split-yeast"
+    # )
+    # c = kesty_one_graph(yeast_path, yeast_run_obj)
     # print(c)
-    d = kesty_multiple_graphs(folder_10_thousand)
+    d = kesty_multiple_graphs(folder_1_thousand, run_obj)
     pprint(d)

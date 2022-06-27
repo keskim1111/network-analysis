@@ -278,7 +278,6 @@ void spmat_sub(const spmat *A, spmat *sub, node *sub_vertexes) {
 		}
 		free(new_row);
 	}
-	print_k2(sub->k, sub->n);
 	compute_norm(sub);
 	compute_fig(sub);
 }

@@ -7,7 +7,7 @@ from algorithms.modified_louvain import modified_louvain_communities
 from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities, split_mega_nodes, \
     modularity_split_mega_node, \
     min_cut_split_mega_node, random_split_mega_node, ilp_split_mega_node, ilp_split_mega_node_whole_graph, \
-    newman_split_mega_nodes_whole_graph
+    newman_split_mega_nodes_whole_graph, newman_split_mega_nodes_sub_graph
 from utils.binary_files import create_binary_network_file
 from consts import FOLDER2FLOW_RESULTS, default_lp_list
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
@@ -117,7 +117,9 @@ def run_louvain_with_change(
             if run_obj.split_method is not None:
 
                 if run_obj.split_method == "newman_whole_graph":
-                    mega_graph = newman_split_mega_nodes_whole_graph(network_obj, mega_graph, critical, run_obj)
+                    mega_graph = newman_split_mega_nodes_whole_graph(network_obj, mega_graph)
+                elif run_obj.split_method == "newman_sub_graph":
+                    mega_graph = newman_split_mega_nodes_sub_graph(network_obj, mega_graph)
                 else:
                     mega_graph = split_mega_nodes(network_obj.G, mega_graph, critical, run_obj)
                 logging.warning(f'Splitted nodes. num of nodes in mega is {mega_graph.number_of_nodes()}')
@@ -344,6 +346,7 @@ class RunParamInfo:
             "ilp_sub_graph": ilp_split_mega_node,
             "ilp_whole_graph": ilp_split_mega_node_whole_graph,
             "newman_whole_graph": newman_split_mega_nodes_whole_graph,
+            "newman_sub_graph": newman_split_mega_nodes_sub_graph,
         }
         self.critical = None
         self.TimeLimit = TimeLimit

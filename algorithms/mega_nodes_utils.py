@@ -1,5 +1,5 @@
 import logging
-import random
+import random, os
 
 import networkx as nx
 from networkx.algorithms.community import greedy_modularity_communities
@@ -9,8 +9,8 @@ from algorithms.split_community.our_version import Newman_ILP
 from algorithms.split_community.roded_version import Newman_ILP_RODED
 from algorithms.modified_louvain import _gen_graph
 from helpers import timeit
-from algorithms.neumann_utils import split_communities_with_newman
-from utils.binary_files import create_binary_communities_file
+from algorithms.neumann_utils import split_communities_with_newman, get_neumann_communities
+from utils.binary_files import create_binary_communities_file, create_binary_network_file
 
 
 def unite_mega_nodes_and_convert2communities(G, mega_communities_partition: [list]):
@@ -127,14 +127,14 @@ def ilp_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
 
 
 @timeit
-def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj):
+def newman_split_mega_nodes_whole_graph(network_obj, mega_graph):
     communities = unite_mega_nodes_and_convert2communities(mega_graph, [mega_graph.nodes()])
     communities_list_sorted = []
     for com in communities:
         com_sorted = list(com)
         com_sorted.sort(reverse=True)
         communities_list_sorted.append(com_sorted)
-    logging.debug(f"***Number of communities after split is {len(communities_list_sorted)}***")
+    logging.debug(f"***Number of communities before split is {len(communities_list_sorted)}***")
 
     new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities_list_sorted)
     G = network_obj.G
@@ -143,6 +143,48 @@ def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj
     graph.add_weighted_edges_from(G.edges(data="weight", default=1))
     logging.debug(f"***Number of communities after split is {len(new_communities)}***")
     new_graph = _gen_graph(graph, new_communities)
+    return new_graph
+
+def create_mapping_nodes(community):
+    n = len(community)
+    node_to_int_mapping = {}
+    int_to_node_mapping = {}
+    for i in range(len(community)):
+        node = community[i]
+        node_to_int_mapping[node] = i
+        int_to_node_mapping[i] = node
+    return node_to_int_mapping, int_to_node_mapping
+
+
+
+def newman_split_mega_nodes_sub_graph(network_obj, mega_graph):
+    G = network_obj.G
+    communities = unite_mega_nodes_and_convert2communities(mega_graph, [mega_graph.nodes()])
+    logging.info(f"***Number of communities before split is {len(communities)}***")
+    communities_after_split = []
+    for i in range(len(communities)):
+        com = list(communities[i])
+        # com.sort(reverse=True) # not sure it needs to be sorted ?
+        node_to_int_mapping, int_to_node_mapping = create_mapping_nodes(com)
+        sub_graph = G.subgraph(list(int_to_node_mapping.keys()))
+
+        cur_binary_file_name = f'{network_obj.network_name}-{i}'
+        create_binary_network_file(sub_graph, network_obj.save_directory_path, title=cur_binary_file_name)
+        cur_binary_fp = os.path.join(network_obj.save_directory_path, cur_binary_file_name)
+
+        # new_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name, binary_input_fp=f'{cur_binary_fp}.in', binary_output_fp=f'{cur_binary_fp}.out')
+        new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name,
+                                                        f'{cur_binary_fp}.in', [list(int_to_node_mapping.keys())])
+
+        communities_after_split+=new_communities
+
+    # new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name,
+    #                                                 network_obj.graph_binary_input_fp, communities_list_sorted)
+    logging.info(f"***Number of communities after split is {len(communities_after_split)}***")
+    graph = G.__class__()
+    graph.add_nodes_from(G)
+    graph.add_weighted_edges_from(G.edges(data="weight", default=1))
+    new_graph = _gen_graph(graph, communities_after_split)
     return new_graph
 
 
