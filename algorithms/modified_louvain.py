@@ -202,7 +202,7 @@ def louvain_partitions(
             graph, m, partition, resolution, is_directed, seed
         )
         iteration_number += 1
-    logging.warning(f'[louvain_partitions]: final modularity = {mod}')
+    logging.debug(f'[louvain_partitions]: final modularity = {mod}')
 
 
 def important_prints(iteration_number=None, partition=None, inner_partition=None,g=None):
@@ -353,8 +353,8 @@ if __name__ == '__main__':
     setup_logger()
     G = create_random_network(n=20, min_community=2, max_degree=10, max_community=20, average_degree=2)
     num_it, graph = modified_louvain_communities(G, num_com_bound=5)
-    print("---------RESULT---------")
-    print(list(graph.nodes(data=True)))
+    logging.debug("---------RESULT---------")
+    logging.debug(list(graph.nodes(data=True)))
     # print("communities: \n", communities)
     # print("num of communities: \n", len(communities))
     # print("-------gen graph------")

@@ -32,7 +32,9 @@ The workshop aims to improve existing algorithms for community detection in netw
    ```
 2. Make sure to have a C compiler on your computer 
     ```bash
-    cd algorithms/neuman_with_change_c
+    cd algorithms/newman_lp_critical
+    make
+    cd algorithms/newman_split
     make
     ```
 

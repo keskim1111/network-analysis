@@ -1,3 +1,5 @@
+import logging
+
 import networkx as nx
 import struct
 
@@ -143,34 +145,9 @@ def create_binary_communities_file(communities, path, title="communities"):
 
 
 def create_for_esty_from_edges(edge_list):
-    print(f"The path is {edge_list}")
+    logging.debug(f"The path is {edge_list}")
     G = create_graph_from_edge_file(edge_list)
     return create_binary_network_file(G)
-
-
-def compare_c_output_to_real(output_path, real_communities_path, real_edges_path):
-    our_communities = read_binary_network_output(output_path)
-    G = read_binary_network_input(real_edges_path)
-    # real_communities = read_communities_file(real_communities_path)
-    real_communities = real_communities_path
-    # G = create_graph_from_edge_list(real_edges_path)
-    print("###### Results ##########")
-    print(f"num of our communities is: {len(our_communities)}")
-    print(f"min size of a community (from ours): {min([len(group) for group in our_communities])}")
-    print(f"max size of a community (from ours): {max([len(group) for group in our_communities])}")
-    print(our_communities)
-    print(f"num of  real communities is: {len(real_communities)}")
-    print(real_communities)
-    print("modularity is")
-    print(calc_modularity_nx(G, our_communities))
-    print("jaccard is")
-    print(jaccard(our_communities, real_communities))
-    print("graph_sensitivity is")
-    print(graph_sensitivity(real_communities, our_communities))
-    print("graph_accuracy is")
-    print(graph_accuracy(real_communities, our_communities))
-    Differences = [list(j) for j in {tuple(i) for i in real_communities} ^ {tuple(i) for i in our_communities}]
-    print(f"diff is {Differences}")
 
 
 def check_binary_from_edges_file(edge_file):

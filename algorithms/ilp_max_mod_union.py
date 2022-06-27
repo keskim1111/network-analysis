@@ -34,6 +34,7 @@ class ILP:
             self.model.setParam("IntFeasTol", IntFeasTol)
         if TimeLimit is not None:
             self.model.setParam("TimeLimit", TimeLimit)
+        self.model.setParam("LogToConsole",0)
         self.run()  # setting objective function and constraints and optimizing
         self.communities = self.get_communities()
 
