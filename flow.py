@@ -30,8 +30,6 @@ def run(run_obj, network_obj):
 # add try catch to run ilp .. bc of out of memory
 def run_with_comparison_louvain(network_obj, run_obj):
     eval_results_per_network = []
-    setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
-                 log_to_file=run_obj.log_to_file, console_log_level=run_obj.console_log_level)
     if run_obj.with_comparison:
         logging.debug(f'===================== Running: Louvain networkx =======================')
         logging.info(f"Running original Louvain for comparison")
@@ -163,8 +161,6 @@ def run_louvain_with_change(
 # ------------------------------- Newman -------------------------------
 def run_with_comparison_newman(network_obj, run_obj):
     eval_results_per_network = []
-    setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
-                 log_to_file=run_obj.log_to_file, console_log_level=run_obj.console_log_level)
     if run_obj.with_comparison:
         logging.debug(f'===================== Running: Louvain networkx =======================')
         run_louvain(eval_results_per_network, network_obj, run_obj)
@@ -325,7 +321,7 @@ class RunParamInfo:
                  algorithm="louvain",
                  split_method="newman_whole_graph",
                  lp_list=default_lp_list,
-                 TimeLimit=None,
+                 TimeLimit=60*10,
                  folder_name="",
                  max_mega_node_split_size=float("inf"),
                  number_runs_original_louvain=1,
@@ -370,7 +366,7 @@ class RunParamInfo:
 def create_outputs(input_network_folder, eval_results_per_network, save_directory_path):
     # Finished
     logging.info(
-        f'Finished running algo. your output is here:\n {save_directory_path}')
+        f'Finished running algo. your output is here:\t {save_directory_path}')
     # Create df per network
     logging.debug(f'Creating DF for this network')
     data_dict = create_data_dict(eval_results_per_network)
