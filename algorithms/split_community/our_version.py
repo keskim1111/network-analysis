@@ -81,7 +81,7 @@ class Newman_ILP:
                 self.model.addGenConstrAnd(globals()[f't_{i}_{j}'], [globals()[f't_{i}'], globals()[f't_{j}']],
                                            name="andconstr")
 
-        logging.info("finished adding constraints")
+        logging.debug("finished adding constraints")
 
     def get_communities(self):
         communities = defaultdict(set)

@@ -86,7 +86,7 @@ class Newman_ILP_RODED:
                 self.model.addConstr(
                     globals()[f'z_{i}_{j}'] == globals()[f'x_{i}'] + globals()[f'x_{j}'] - globals()[f'y_{i}_{j}'])
 
-        logging.info("finished adding constraints")
+        logging.debug("finished adding constraints")
 
     def get_communities(self):
         communities = defaultdict(set)

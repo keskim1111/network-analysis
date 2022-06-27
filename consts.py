@@ -2,9 +2,14 @@
 fp = file path
 dp = dir path
 """
-
+import logging
 import os
-
+level_dict = {
+    "warning": logging.WARNING,
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "error": logging.ERROR
+}
 
 C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/newman_lp_critical')
 C_CODE_SPLIT = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/newman_split_new')

@@ -46,7 +46,7 @@ def timeit(func):
         start_time = time.time()
         result = func(*args, **kwargs)
         elapsed_time = time.time() - start_time
-        logging.info('function [{}] finished in {} ms'.format(
+        logging.debug('function [{}] finished in {} ms'.format(
             func.__name__, int(elapsed_time * 1_000)))
         return result
 

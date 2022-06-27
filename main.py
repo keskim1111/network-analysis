@@ -6,11 +6,13 @@ from flow import NetworkObj, run, RunParamInfo
 default_run_obj = RunParamInfo(
     algorithm="louvain",
     split_method="random",
+    console_log_level= "info"
 )
 
 yeast_run_obj = RunParamInfo(
     algorithm="louvain",
-    split_method="random",
+    split_method="ilp_whole_graph",
+    TimeLimit=60,
     network_file_name="edges.txt",
     community_file_name="clusters.txt"
 )
@@ -74,7 +76,8 @@ if __name__ == '__main__':
         split_method="ilp_whole_graph",
         folder_name="10-000 whole"
     )
-    c = kesty_one_graph(yeast, yeast_run_obj)
+    # c = kesty_one_graph(yeast, yeast_run_obj)
+    c = kesty_one_graph(network_path2, default_run_obj)
     print(c)
     # d = kesty_louvain_multiple_graphs(shani_folder_paths)
     # pprint(d)

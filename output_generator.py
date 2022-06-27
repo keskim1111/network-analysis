@@ -80,7 +80,7 @@ def generate_outputs_for_community_list(G, real_communities_list, new_communitie
     evals["algo"] = algo
     evals["modularity - real"] = calc_modularity_nx(G, real_communities_list)
     evals["modularity - algo"] = calc_modularity_nx(G, new_communities_list)
-    logging.info(f'modularity of algorithm = {evals["modularity - algo"]}')
+    logging.debug(f'modularity of algorithm = {evals["modularity - algo"]}')
     evals["jaccard"] = jaccard(new_communities_list, real_communities_list)
     try:
         evals["graph_conductance"] = graph_conductance(G, new_communities_list)
@@ -103,7 +103,7 @@ def save_and_eval(save_dp,
                   communities,
                   time=None,
                   ):
-    logging.info("Saving communities object to folder")
+    logging.debug("Saving communities object to folder")
     # Saving communities object to folder
     _pickle(os.path.join(save_dp, f'{algo}.communities'), object=communities, is_dump=True)
     # Evaluate results and save to eval_dict

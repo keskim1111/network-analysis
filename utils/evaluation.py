@@ -76,10 +76,10 @@ def create_clusters_dict(communities_list):
 def calc_modularity_nx(G, communities, weight=None):
     try:
         mod = nx.algorithms.community.modularity(G, communities, weight=weight)
-        logging.info(f"Running NetworkX modularity function on: {G}, modularity={mod}")
+        logging.debug(f"Running NetworkX modularity function on: {G}, modularity={mod}")
         return mod
     except Exception as e:
-        logging.info(e)
+        logging.error(e)
         raise e
 
 
