@@ -145,8 +145,8 @@ def newman_split_mega_nodes_whole_graph(network_obj, mega_graph):
     new_graph = _gen_graph(graph, new_communities)
     return new_graph
 
+
 def create_mapping_nodes(community):
-    n = len(community)
     node_to_int_mapping = {}
     int_to_node_mapping = {}
     for i in range(len(community)):
@@ -154,7 +154,6 @@ def create_mapping_nodes(community):
         node_to_int_mapping[node] = i
         int_to_node_mapping[i] = node
     return node_to_int_mapping, int_to_node_mapping
-
 
 
 def newman_split_mega_nodes_sub_graph(network_obj, mega_graph):
