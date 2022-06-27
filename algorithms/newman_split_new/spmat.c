@@ -34,14 +34,9 @@ void compute_norm(spmat *A) {
 	double sum_rows = 0, fi = 0, max_row = 0, kij;
 	node **private = A->private;
 	node *row = NULL;
-    printf("n=%d\n", n);
 	for (i = 0; i < n; ++i, sum_rows = 0, fi = 0) {
 		for (j = 0, row = private[i]; j < n; ++j) {
 			kij = (k[i] * k[j] / (double)M);
-
-			/*if (n<1000){
-			    printf("i=%d, j=%d, k[i]=%d, k[j]=%d, M=%d\n", i, j, k[i], k[j], M);
-			}*/
 
 			if (row == NULL || j < row->col_cur) {
 				fi -= kij;
@@ -242,11 +237,8 @@ void spmat_sub(const spmat *A, spmat *sub, node *sub_vertexes) {
 		if (new_row == NULL) {
 			print_and_exit(1, "Error: Failed to create new row.\n");
 		}
-		/*printf("index=%d, (A->vertex_numbers)[index]=%d, vertexes_head->original_col=%d\n", index, (A->vertex_numbers)[index], vertexes_head->original_col);*/
 		if (vertexes_head != NULL && (A->vertex_numbers)[index] == vertexes_head->original_col) {
-		printf("vertexes_head != NULL && (A->vertex_numbers)[index]=%d == vertexes_head->original_col=%d\n", (A->vertex_numbers)[index], vertexes_head->original_col);
 			while (vertexes_curr != NULL && mat_row != NULL) {
-			    /*printf("vertexes_curr->original_col=%d, mat_row->original_col=%d\n", vertexes_curr->original_col, mat_row->original_col);*/
 				if (vertexes_curr->original_col == mat_row->original_col) {
 					new_row->original_col = mat_row->original_col;
 					new_row->col_cur = col_index;
@@ -279,7 +271,6 @@ void spmat_sub(const spmat *A, spmat *sub, node *sub_vertexes) {
 				(sub->private)[i] = NULL;
 			}
 			(sub->k)[i] = (A->k)[index];
-			printf("i=%d, index=%d, (sub->k)[i]=%d, (A->k)[index]=%d\n", i, index, (sub->k)[i], (A->k)[index]);
 			(sub->vertex_numbers)[i] = (A->vertex_numbers)[index];
 			vertexes_head = vertexes_head ->next;
 			i++;
