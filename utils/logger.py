@@ -62,7 +62,7 @@ def setup_logging(console_log_output, console_log_level, console_log_color, logf
 
     # Set global log level to 'debug' (required for handler levels to work)
 
-    logger.setLevel(level_dict[console_log_level])
+    logger.setLevel(level_dict["debug"])
 
     # Create console handler
     console_log_output = console_log_output.lower()
