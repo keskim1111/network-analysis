@@ -34,22 +34,25 @@ def unite_mega_nodes_and_convert2communities(G, mega_communities_partition: [lis
 
 def split_mega_nodes(G, mega_graph, n: int, run_obj):
     num_original_mega_nodes = mega_graph.number_of_nodes()
-    logging.info(f"***Number of original mega nodes before split is {num_original_mega_nodes}***")
+    logging.debug(f"***Number of original mega nodes before split is {num_original_mega_nodes}***")
     mega_nodes = mega_graph.nodes()
     attribute_dict = nx.get_node_attributes(mega_graph, "nodes")
     if num_original_mega_nodes >= n:
-        logging.info("Didnt split mega_nodes")
+        logging.debug("Didnt split mega_nodes")
         return mega_graph
     new_partition = []
-    logging.info(f"split method used is {run_obj.split_method}!!")
+    logging.debug(f"split method used is {run_obj.split_method}!!")
     for i, mega_node in enumerate(mega_nodes):
         community = list(attribute_dict.get(mega_node))
-        logging.info(f"Trying splitting the {i}/{len(mega_nodes)} mega node!")
-        logging.info(f"{len(community)} nodes in current mega node")
+        logging.debug(f"Trying splitting the {i}/{len(mega_nodes)} mega node!")
+        logging.debug(f"{len(community)} nodes in current mega node")
 
         if len(new_partition) + (num_original_mega_nodes - i) < n:
             communities = run_obj.split_methods[run_obj.split_method](G, community, run_obj)
             if len(communities) > 1:
+                logging.debug(f"splitted current node")
+                for i in range(len(communities)):
+                    logging.debug(f"{len(communities[i])} nodes in current {i}/{len(communities)}")
                 new_partition += communities
             else:
                 new_partition.append(community)
@@ -58,7 +61,7 @@ def split_mega_nodes(G, mega_graph, n: int, run_obj):
     graph = G.__class__()
     graph.add_nodes_from(G)
     graph.add_weighted_edges_from(G.edges(data="weight", default=1))
-    logging.info(f"***Number of communities after split is {len(new_partition)}***")
+    logging.debug(f"***Number of communities after split is {len(new_partition)}***")
     new_graph = _gen_graph(graph, new_partition)
     return new_graph
 
@@ -105,21 +108,21 @@ def louvain_split_mega_node(G, mega_community_nodes,run_obj):
 def ilp_split_mega_node(G, mega_community_nodes, run_obj):
     n = len(mega_community_nodes)
     if n > run_obj.max_mega_node_split_size:
-        logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
+        logging.debug(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
         return [mega_community_nodes]
     sub_graph = G.subgraph(mega_community_nodes)
     obj = Newman_ILP_RODED(sub_graph,TimeLimit=run_obj.TimeLimit)
-    logging.info(f"Split mega node!")
+    logging.debug(f"Split mega node!")
     return obj.communities
 
 @timeit
 def ilp_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
     n = len(mega_community_nodes)
     if n > run_obj.max_mega_node_split_size:
-        logging.info(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
+        logging.debug(f"Skipped dividing mega nodes, too big: {n} nodes> {run_obj.max_mega_node_split_size} nodes!")
         return [mega_community_nodes]
     obj = Newman_ILP_RODED(G, nodes_list=mega_community_nodes, TimeLimit=run_obj.TimeLimit)
-    logging.info(f"Split mega node!")
+    logging.debug(f"Split mega node!")
     return obj.communities
 
 
@@ -131,14 +134,14 @@ def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj
         com_sorted = list(com)
         com_sorted.sort(reverse=True)
         communities_list_sorted.append(com_sorted)
-    logging.info(f"***Number of communities after split is {len(communities_list_sorted)}***")
+    logging.debug(f"***Number of communities after split is {len(communities_list_sorted)}***")
 
     new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities_list_sorted, is_shani=run_obj.is_shani_files)
     G = network_obj.G
     graph = G.__class__()
     graph.add_nodes_from(G)
     graph.add_weighted_edges_from(G.edges(data="weight", default=1))
-    logging.info(f"***Number of communities after split is {len(new_communities)}***")
+    logging.debug(f"***Number of communities after split is {len(new_communities)}***")
     new_graph = _gen_graph(graph, new_communities)
     return new_graph
 

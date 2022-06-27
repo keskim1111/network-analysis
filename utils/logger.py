@@ -20,6 +20,9 @@ import logging
 
 
 # Logging formatter supporting colorized output
+from consts import level_dict
+
+
 class LogFormatter(logging.Formatter):
     COLOR_CODES = {
         logging.CRITICAL: "\033[1;35m",  # bright/bold magenta
@@ -58,7 +61,8 @@ def setup_logging(console_log_output, console_log_level, console_log_color, logf
         logger.removeHandler(logger.handlers[0])
 
     # Set global log level to 'debug' (required for handler levels to work)
-    logger.setLevel(logging.DEBUG)
+
+    logger.setLevel(level_dict[console_log_level])
 
     # Create console handler
     console_log_output = console_log_output.lower()
@@ -109,9 +113,9 @@ def setup_logging(console_log_output, console_log_level, console_log_color, logf
 
 
 # Main function
-def setup_logger(file_name="default", log_to_file=False):
+def setup_logger(file_name="default", log_to_file=False,console_log_level="warning"):
     # Setup logging
-    if (not setup_logging(console_log_output="stdout", console_log_level="debug", console_log_color=True,
+    if (not setup_logging(console_log_output="stdout", console_log_level=console_log_level, console_log_color=True,
                           logfile_file=file_name + ".log", logfile_log_level="debug", logfile_log_color=False,log_to_file=log_to_file,
                           log_line_template="%(color_on)s[%(asctime)s] [%(levelname)-1s] %(message)s%(color_off)s")):
         print("Failed to setup logging, aborting.")

@@ -9,7 +9,7 @@ import networkx as nx
 
 
 class Newman_ILP_RODED:
-    def __init__(self, G, nodes_list=None, weight=None, IntFeasTol=0, TimeLimit=0):
+    def __init__(self, G, nodes_list=None, weight=None, IntFeasTol=None, TimeLimit=None):
         """
         :param G: networkx graph
         :param nodes:
@@ -23,9 +23,9 @@ class Newman_ILP_RODED:
         self.weight = weight
         self.model = gp.Model("mip1")
         # params
-        if IntFeasTol > 0:
+        if IntFeasTol is not None:
             self.model.setParam("IntFeasTol", IntFeasTol)
-        if TimeLimit > 0:
+        if TimeLimit is not None:
             self.model.setParam("TimeLimit", TimeLimit)
         self.run()  # setting objective function and constraints and optimizing
         self.communities = self.get_communities()
@@ -86,7 +86,7 @@ class Newman_ILP_RODED:
                 self.model.addConstr(
                     globals()[f'z_{i}_{j}'] == globals()[f'x_{i}'] + globals()[f'x_{j}'] - globals()[f'y_{i}_{j}'])
 
-        logging.info("finished adding constraints")
+        logging.debug("finished adding constraints")
 
     def get_communities(self):
         communities = defaultdict(set)

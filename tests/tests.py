@@ -73,9 +73,9 @@ def create_files_from_networkX_graph(n, mu, graphs_folder):
     # create folder with files
     input_network_name = f"{n}_{mu}-{current_time()}"
     G = create_random_network(n=50, min_community=10, max_degree=20, max_community=20, average_degree=6,mu=mu)
-    logging.info(f"created Graph {G}")
+    logging.debug(f"created Graph {G}")
     curr_folder_dir = os.path.join(graphs_folder, f"{input_network_name}")
-    logging.info(f"Folder of graph is:\n {curr_folder_dir}")
+    logging.debug(f"Folder of graph is:\n {curr_folder_dir}")
     if not os.path.isdir(curr_folder_dir):
         os.mkdir(curr_folder_dir)
     fh = open(os.path.join(graphs_folder, f"{input_network_name}", "network.dat"), "wb")
@@ -88,18 +88,18 @@ def create_files_from_networkX_graph(n, mu, graphs_folder):
             for j_node in range(len(real_communities[i])):
                 f.write(f"{real_communities[i][j_node]}\t{cnt}\n")
             cnt+=1
-    logging.info(f"Created graph at {input_network_name}")
+    logging.debug(f"Created graph at {input_network_name}")
     return input_network_name
 
 def one_comparison_run(input_network_folder, path2curr_date_folder):
     # define logger output ##############
     setup_logger(os.path.join(path2curr_date_folder, input_network_folder), log_to_file=True)
     eval_results_per_network = []  # Save all final results in this list (for creating df later)
-    logging.info(f'Starting to run algos on input_network_folder= {input_network_folder}')
+    logging.debug(f'Starting to run algos on input_network_folder= {input_network_folder}')
     network_obj = NetworkObj(path2curr_date_folder, input_network_folder)
 
 
-    logging.info(f'===================== Running: Neumann C =======================')
+    logging.debug(f'===================== Running: Neumann C =======================')
     start = timer()
     neumann_communities = get_neumann_communities(network_obj.save_directory_path, network_obj.network_name,
                                                   network_obj.graph_binary_input_fp)
@@ -108,7 +108,7 @@ def one_comparison_run(input_network_folder, path2curr_date_folder):
                   network_obj.real_communities,
                   new_communities=neumann_communities, algo="Newman", time=end - start)
 
-    logging.info(f'===================== Running: Louvain networkx =======================')
+    logging.debug(f'===================== Running: Louvain networkx =======================')
     start = timer()
     louvain_communities = louvain(network_obj.G)
     end = timer()
@@ -116,7 +116,7 @@ def one_comparison_run(input_network_folder, path2curr_date_folder):
                   network_obj.real_communities,
                   new_communities=louvain_communities, algo="Louvain", time=end - start)
 
-    logging.info(f'===================== Running: ILP =======================')
+    logging.debug(f'===================== Running: ILP =======================')
     start = timer()
     nodes_list = list(network_obj.G.nodes)
     ilp_obj = ILP(network_obj.G, nodes_list)

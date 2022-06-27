@@ -9,7 +9,7 @@ from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities
     min_cut_split_mega_node, random_split_mega_node, ilp_split_mega_node, ilp_split_mega_node_whole_graph, \
     newman_split_mega_nodes_whole_graph
 from utils.binary_files import create_binary_network_file
-from consts import  FOLDER2FLOW_RESULTS, default_lp_list
+from consts import FOLDER2FLOW_RESULTS, default_lp_list
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
 from helpers import init_results_folder, _pickle, read_graph_files, current_time
 from utils.logger import setup_logger
@@ -31,18 +31,18 @@ def run(run_obj, network_obj):
 def run_with_comparison_louvain(network_obj, run_obj):
     eval_results_per_network = []
     setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
-                 log_to_file=run_obj.log_to_file)
+                 log_to_file=run_obj.log_to_file, console_log_level=run_obj.console_log_level)
     if run_obj.with_comparison:
-        logging.info(f'===================== Running: Louvain networkx =======================')
+        logging.debug(f'===================== Running: Louvain networkx =======================')
         for i in range(run_obj.number_runs_original_louvain):
             run_louvain(eval_results_per_network, network_obj, run_obj)
-    logging.info(f'===================== Running: Louvain Changed networkx =======================')
+    logging.debug(f'===================== Running: Louvain Changed networkx =======================')
     louvain_change_communities = run_louvain_with_change(eval_results_per_network,
                                                          network_obj,
                                                          run_obj
                                                          )
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
-    logging.info(f'eval_results_per_network={eval_results_per_network}')
+    logging.debug(f'eval_results_per_network={eval_results_per_network}')
     return louvain_change_communities
 
 
@@ -55,7 +55,7 @@ def run_ilp_on_louvain(G, TimeLimit):
     nodes_list = list(G.nodes)
     mod_mega_graph_divided = calc_modularity_nx(G, [[n] for n in nodes_list], weight="weight")
     mod_mega_graph_full = calc_modularity_nx(G, [nodes_list], weight="weight")
-    logging.info(f'============Trying to run ILP============')
+    logging.debug(f'============Trying to run ILP============')
     if TimeLimit is not None:
         ilp_obj = ILP(G, nodes_list, TimeLimit=TimeLimit, weight="weight")
     else:
@@ -70,7 +70,7 @@ def run_ilp_on_louvain(G, TimeLimit):
     logging.warning(f'New modularity of graph after ILP iteration: {mod_new}\n')
 
     delta_Q = mod_new - mod_mega_graph_divided
-    logging.info(f'Delta Q modularity is: {delta_Q}')
+    logging.debug(f'Delta Q modularity is: {delta_Q}')
 
     if delta_Q > 0 and len(ilp_obj.communities) > 1:
         logging.warning(
@@ -112,10 +112,9 @@ def run_louvain_with_change(
         run_obj.critical = critical
         logging.warning(f'Finished runnning regular Louvain: num nodes mega graph = {mega_graph.number_of_nodes()}')
         try:
-            logging.info(f'about to run_ilp_on_louvain')
+            network_obj.number_of_mega_nodes_before_split = mega_graph.number_of_nodes()
             # split mega graph
             if run_obj.split_method is not None:
-                network_obj.number_of_mega_nodes_before_split = mega_graph.number_of_nodes()
 
                 if run_obj.split_method == "newman_whole_graph":
                     mega_graph = newman_split_mega_nodes_whole_graph(network_obj, mega_graph, critical, run_obj)
@@ -126,7 +125,13 @@ def run_louvain_with_change(
             # regular run
             number_of_mega_nodes = mega_graph.number_of_nodes()
             network_obj.number_of_mega_nodes = number_of_mega_nodes
-            mega_communities_partition = run_ilp_on_louvain(mega_graph, run_obj.TimeLimit)
+            if network_obj.number_of_mega_nodes_before_split <= critical:
+                logging.warning(f"Running run_ilp_on_louvain")
+                mega_communities_partition = run_ilp_on_louvain(mega_graph, run_obj.TimeLimit)
+            else:
+                logging.warning(
+                    f"Not running run_ilp_on_louvain because num of mega nodes- {network_obj.number_of_mega_nodes_before_split} > lp_critical - {critical}")
+                mega_communities_partition = [mega_graph.nodes]
             curr_communities = unite_mega_nodes_and_convert2communities(mega_graph, mega_communities_partition)
             end = timer()
             # run_obj.communities = curr_communities
@@ -140,33 +145,33 @@ def run_louvain_with_change(
                 run_obj,
                 curr_communities,
                 end - start)
-            logging.info(f'------ success running ilp on louvain, lp_critical={critical}')
+            logging.debug(f'------ success running ilp on louvain, lp_critical={critical}')
             return curr_communities
         except Exception as e:
-            logging.info(
+            logging.debug(
                 f'run_one_louvain didnt work on {network_obj.network_name}, lp_critical={critical}')
             logging.error(e)
             raise e
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
-    logging.info(f'eval_results_per_network={eval_results_per_network}')
+    logging.debug(f'eval_results_per_network={eval_results_per_network}')
 
 
 # ------------------------------- Newman -------------------------------
 def run_with_comparison_newman(network_obj, run_obj):
     eval_results_per_network = []
     setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
-                 log_to_file=run_obj.log_to_file)
+                 log_to_file=run_obj.log_to_file, console_log_level=run_obj.console_log_level)
     if run_obj.with_comparison:
-        logging.info(f'===================== Running: Louvain networkx =======================')
+        logging.debug(f'===================== Running: Louvain networkx =======================')
         run_louvain(eval_results_per_network, network_obj, run_obj)
 
-        logging.info(f'===================== Running: Neumann C =======================')
+        logging.debug(f'===================== Running: Neumann C =======================')
         run_newman(
             eval_results_per_network,
             run_obj,
             network_obj)
 
-    logging.info(f'===================== Running: Neumann C changed=======================')
+    logging.debug(f'===================== Running: Neumann C changed=======================')
     communities = run_newman_with_change(
         eval_results_per_network,
         run_obj,
@@ -175,7 +180,7 @@ def run_with_comparison_newman(network_obj, run_obj):
     # Finished
 
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
-    logging.info(f'eval_results_per_network={eval_results_per_network}')
+    logging.debug(f'eval_results_per_network={eval_results_per_network}')
     return communities
 
 
@@ -203,7 +208,7 @@ def run_ilp_on_neumann(network_obj,
 
         curr_modularity = calc_modularity_manual(network_obj.G,
                                                  [nodes_list])  # Modularity before dividing more with ILP
-        logging.info(f'Modularity of graph before {i + 1}th ILP iteration: {curr_modularity}')
+        logging.debug(f'Modularity of graph before {i + 1}th ILP iteration: {curr_modularity}')
         logging.warning(f'============Trying to run ILP')
         if run_obj.TimeLimit is not None:
             time_per_run = run_obj.TimeLimit / num_to_divide
@@ -214,26 +219,26 @@ def run_ilp_on_neumann(network_obj,
         new_modularity = calc_modularity_manual(network_obj.G,
                                                 ilp_obj.communities)  # TODO: make sure this is equal to ilp_obj.model.ObjVal
         logging.warning("ILP results===================================")
-        logging.info(f'New modularity of graph after {i + 1}th ILP iteration: {new_modularity}')
+        logging.debug(f'New modularity of graph after {i + 1}th ILP iteration: {new_modularity}')
         delta_Q = new_modularity - curr_modularity
-        logging.info(f'Delta Q modularity is: {delta_Q}')
+        logging.debug(f'Delta Q modularity is: {delta_Q}')
         assert delta_Q >= 0, "delta Q should be none-negative (best is trivial division)"
         if delta_Q > 0 and len(ilp_obj.communities) > 1:
             num_communities_divided_by_ilp += 1
-            logging.info(
+            logging.debug(
                 f'Delta Q modularity is ++positive++: {delta_Q}. Adding ILP division to {len(ilp_obj.communities)} communities.')
             curr_communities = ilp_obj.communities  # New division
         else:
             assert (delta_Q == 0)
-            logging.info(f'Delta Q modularity is Zero: {delta_Q}. Not adding ILP division.')
+            logging.debug(f'Delta Q modularity is Zero: {delta_Q}. Not adding ILP division.')
             curr_communities = [nodes_list]  # Initial division
 
-        logging.info(f'Num of curr_communities: {len(curr_communities)}')
+        logging.debug(f'Num of curr_communities: {len(curr_communities)}')
         final_communities += curr_communities
-    logging.info(
+    logging.debug(
         f"Num of communities skipped by ILP (len(comm))> lp_critical) algo is {num_communities_skipped_by_ilp}/{len(neumann_communities)}"
     )
-    logging.info(
+    logging.debug(
         f"Num of communities changed by ILP algo is {num_communities_divided_by_ilp}/{len(neumann_communities)}"
     )
     num_coms_divided = num_communities_divided_by_ilp
@@ -259,7 +264,7 @@ def run_newman(eval_results_per_network, run_obj, network_obj):
 
 def run_newman_with_change(eval_results_per_network, run_obj, network_obj):
     for lp_critical in run_obj.lp_list:
-        logging.info(f'=================== LP_critical={lp_critical} -Time limit ===============')
+        logging.debug(f'=================== LP_critical={lp_critical} -Time limit ===============')
         start = timer()
         neuman_com_partial_run = get_neumann_communities(network_obj.save_directory_path,
                                                          network_obj.network_name,
@@ -296,7 +301,7 @@ class NetworkObj:
         self.network_name = os.path.basename(os.path.normpath(network_path))
         self.save_directory_path = init_results_folder(run_obj.path2curr_date_folder, self.network_name)
         self.network_dp = network_path
-        self.G, self.real_communities, dictionary = read_graph_files(self.network_dp, run_obj)
+        self.G, self.real_communities, self.network_dictionary = read_graph_files(self.network_dp, run_obj)
         _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
         self.graph_binary_input_fp = create_binary_network_file(self.G, self.save_directory_path,
                                                                 title=self.network_name)  # converting network to binary file
@@ -316,18 +321,20 @@ class RunParamInfo:
                  algorithm="louvain",
                  split_method="newman_whole_graph",
                  lp_list=default_lp_list,
-                 TimeLimit=0,
+                 TimeLimit=None,
                  folder_name="",
                  max_mega_node_split_size=float("inf"),
                  number_runs_original_louvain=1,
                  community_file_name="community.dat",
                  network_file_name="network.dat",
                  with_comparison_to_newman_louvain=True,
-                 log_to_file=True
+                 log_to_file=True,
+                 console_log_level="warning"
+
                  ):
+        self.folder_name = f"{current_time()}-{folder_name}"
         self.algorithm = algorithm
-        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS,
-                                                         folder_name=f"{current_time()}-{folder_name}")
+        self.path2curr_date_folder = None
         self.lp_list = lp_list
         self.split_method = split_method
         self.split_methods = {
@@ -346,17 +353,21 @@ class RunParamInfo:
         self.network_file_name = network_file_name
         self.with_comparison = with_comparison_to_newman_louvain
         self.log_to_file = log_to_file
-        self.folder_name = folder_name
+        self.console_log_level = console_log_level
+
+    def init_results_folder(self):
+        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS,
+                                                         folder_name=self.folder_name)
 
 
 # ------------------------------- Helper functions -------------------------------
 
 def create_outputs(input_network_folder, eval_results_per_network, save_directory_path):
     # Finished
-    logging.info(
+    logging.debug(
         f'Finished running algos on input_network_folder= {os.path.join(save_directory_path, input_network_folder)}')
     # Create df per network
-    logging.info(f'Creating DF for this network')
+    logging.debug(f'Creating DF for this network')
     data_dict = create_data_dict(eval_results_per_network)
     df = pd.DataFrame(data_dict)
     df.to_pickle(os.path.join(save_directory_path, "results.df"))
