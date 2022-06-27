@@ -34,10 +34,10 @@ void compute_norm(spmat *A) {
 	double sum_rows = 0, fi = 0, max_row = 0, kij;
 	node **private = A->private;
 	node *row = NULL;
-
 	for (i = 0; i < n; ++i, sum_rows = 0, fi = 0) {
 		for (j = 0, row = private[i]; j < n; ++j) {
 			kij = (k[i] * k[j] / (double)M);
+
 			if (row == NULL || j < row->col_cur) {
 				fi -= kij;
 				if (i != j) {
@@ -188,7 +188,7 @@ spmat *spmat_allocate_list(int n, int M){
 	mat->M = M;
 	mat->norm = 0;
 
-	mat->k = malloc(n * sizeof(int));
+	mat->k = calloc(sizeof(int), n);
 	if (mat->k == NULL) {
 		print_and_exit(1, "Error: Failed to create new matrix.\n");
 	}
@@ -216,6 +216,14 @@ spmat *spmat_allocate_list(int n, int M){
 	return mat;
 }
 
+void print_k2(int* k, int n) {
+    int i;
+    for (i=0; i<n; i++) {
+        printf("(i=%d, k=%d) ", i, k[i]);
+    }
+    printf("\n");
+}
+
 /* Create a sub matrix according to a list of verteces */
 void spmat_sub(const spmat *A, spmat *sub, node *sub_vertexes) {
 	int i = 0, index, col_index = 0 ,counter = 0;
@@ -229,7 +237,6 @@ void spmat_sub(const spmat *A, spmat *sub, node *sub_vertexes) {
 		if (new_row == NULL) {
 			print_and_exit(1, "Error: Failed to create new row.\n");
 		}
-
 		if (vertexes_head != NULL && (A->vertex_numbers)[index] == vertexes_head->original_col) {
 			while (vertexes_curr != NULL && mat_row != NULL) {
 				if (vertexes_curr->original_col == mat_row->original_col) {
@@ -271,6 +278,7 @@ void spmat_sub(const spmat *A, spmat *sub, node *sub_vertexes) {
 		}
 		free(new_row);
 	}
+	print_k2(sub->k, sub->n);
 	compute_norm(sub);
 	compute_fig(sub);
 }
