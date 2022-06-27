@@ -1,3 +1,5 @@
+import logging
+
 from algorithms import newman
 from utils.binary_files import create_binary_network_file
 from helpers import current_time, write_to_file
@@ -41,7 +43,7 @@ def create_binarys():
             community_path = rf"{run_folder}\{graphs_folder}\community.dat"
             shani_graph = create_graph_from_edge_file(community_path)
             create_binary_network_file(shani_graph, path, graphs_folder)
-    print("done")
+    logging.debug("done")
 
 
 def create_binarys_network():

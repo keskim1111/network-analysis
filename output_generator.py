@@ -57,9 +57,9 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
         real_partition = {frozenset(G.nodes[v]["community"]) for v in G}
     else:
         real_partition = read_communities_file(real_communities_path)
-    print(f"real partition: {real_partition}")
+    logging.debug(f"real partition: {real_partition}")
     for algo in algo_dict.keys():
-        print(f'starting generating output for {algo}')
+        logging.debug(f'starting generating output for {algo}')
         partition = algo_dict[algo]["partition"]
         res = []
         index.append(algo)
@@ -69,7 +69,7 @@ def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None
         res.append(graph_sensitivity(real_partition, partition))
         res.append(graph_accuracy(real_partition, partition))
         data.append(res)
-        print(f'finished generating output for {algo}')
+        logging.debug(f'finished generating output for {algo}')
     return data, index
 
 
