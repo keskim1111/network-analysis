@@ -3,6 +3,7 @@ import os
 from pprint import pprint
 
 from flow import NetworkObj, run, RunParamInfo
+from utils.logger import setup_logger
 
 default_run_obj = RunParamInfo(
     algorithm="louvain",
@@ -42,6 +43,8 @@ def kesty_one_graph(path, run_obj=default_run_obj):
     try:
         run_obj.init_results_folder()
         network_obj = NetworkObj(path, run_obj)
+        setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
+                     log_to_file=run_obj.log_to_file, console_log_level=run_obj.console_log_level)
         logging.info(f"Running changed {run_obj.algorithm} algo on {network_obj.network_name}")
         communities = run(run_obj, network_obj)
         original_nodes_communities = convert_to_original_nodes(communities, network_obj)
@@ -84,7 +87,7 @@ if __name__ == '__main__':
     )
     # c = kesty_one_graph(yeast, yeast_run_obj)
     # c = kesty_one_graph(Arabidopsis, yeast_run_obj)
-    c = kesty_one_graph(network_path, default_run_obj)
-    print(c)
-    # d = kesty_louvain_multiple_graphs(shani_folder_paths)
-    # pprint(d)
+    # c = kesty_one_graph(network_path, default_run_obj)
+    # print(c)
+    d = kesty_multiple_graphs("C:\\Users\\kimke\\Desktop\\temp")
+    pprint(d)
