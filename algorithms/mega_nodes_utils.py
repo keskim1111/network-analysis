@@ -136,7 +136,7 @@ def newman_split_mega_nodes_whole_graph(network_obj, mega_graph, n: int, run_obj
         communities_list_sorted.append(com_sorted)
     logging.debug(f"***Number of communities after split is {len(communities_list_sorted)}***")
 
-    new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities_list_sorted, is_shani=run_obj.is_shani_files)
+    new_communities = split_communities_with_newman(network_obj.save_directory_path, network_obj.network_name, network_obj.graph_binary_input_fp, communities_list_sorted)
     G = network_obj.G
     graph = G.__class__()
     graph.add_nodes_from(G)
