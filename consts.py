@@ -12,8 +12,8 @@ level_dict = {
 }
 
 C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/newman_lp_critical')
-C_CODE_SPLIT = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/newman_split_new')
-benchmark_base_path = os.path.join("Graphs" , "Benchmark")
+C_CODE_SPLIT = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms/newman_split')
+benchmark_base_path = os.path.join("graphs", "Benchmark")
 
 yeast_path = os.path.join(benchmark_base_path, "Yeast")
 arabidopsis_path = os.path.join(benchmark_base_path, "Arabidopsis")
