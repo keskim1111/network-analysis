@@ -14,7 +14,10 @@ yeast_run_obj = RunParamInfo(
     split_method="ilp_whole_graph",
     TimeLimit=60,
     network_file_name="edges.txt",
-    community_file_name="clusters.txt"
+    community_file_name="clusters.txt",
+    console_log_level = "debug",
+    folder_name="ddd"
+
 )
 
 
@@ -37,6 +40,7 @@ def kesty_one_graph(path, run_obj=default_run_obj):
     :return: partition by our algorithm
     """
     try:
+        run_obj.init_results_folder()
         network_obj = NetworkObj(path, run_obj)
         communities = run(run_obj, network_obj)
         original_nodes_communities = convert_to_original_nodes(communities, network_obj)
@@ -70,6 +74,7 @@ if __name__ == '__main__':
     network_path = os.path.join(shani_folder_paths, "1000_0.4_0")
     network_path2 = os.path.join("C:\\Users\kimke\Desktop\\10000_0.6_2")
     yeast = "graphs\\Benchmark\\Yeast"
+    Arabidopsis = "graphs\\Benchmark\\Arabidopsis"
 
     run_obj = RunParamInfo(
         algorithm="louvain",
@@ -77,7 +82,8 @@ if __name__ == '__main__':
         folder_name="10-000 whole"
     )
     # c = kesty_one_graph(yeast, yeast_run_obj)
-    c = kesty_one_graph(network_path2, default_run_obj)
+    c = kesty_one_graph(Arabidopsis, yeast_run_obj)
+    # c = kesty_one_graph(network_path2, default_run_obj)
     print(c)
     # d = kesty_louvain_multiple_graphs(shani_folder_paths)
     # pprint(d)

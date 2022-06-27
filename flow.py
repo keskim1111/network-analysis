@@ -9,7 +9,7 @@ from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities
     min_cut_split_mega_node, random_split_mega_node, ilp_split_mega_node, ilp_split_mega_node_whole_graph, \
     newman_split_mega_nodes_whole_graph
 from utils.binary_files import create_binary_network_file
-from consts import  FOLDER2FLOW_RESULTS, default_lp_list
+from consts import FOLDER2FLOW_RESULTS, default_lp_list
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
 from helpers import init_results_folder, _pickle, read_graph_files, current_time
 from utils.logger import setup_logger
@@ -31,7 +31,7 @@ def run(run_obj, network_obj):
 def run_with_comparison_louvain(network_obj, run_obj):
     eval_results_per_network = []
     setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
-                 log_to_file=run_obj.log_to_file,console_log_level=run_obj.console_log_level)
+                 log_to_file=run_obj.log_to_file, console_log_level=run_obj.console_log_level)
     if run_obj.with_comparison:
         logging.debug(f'===================== Running: Louvain networkx =======================')
         for i in range(run_obj.number_runs_original_louvain):
@@ -112,10 +112,9 @@ def run_louvain_with_change(
         run_obj.critical = critical
         logging.warning(f'Finished runnning regular Louvain: num nodes mega graph = {mega_graph.number_of_nodes()}')
         try:
-            logging.debug(f'about to run_ilp_on_louvain')
+            network_obj.number_of_mega_nodes_before_split = mega_graph.number_of_nodes()
             # split mega graph
             if run_obj.split_method is not None:
-                network_obj.number_of_mega_nodes_before_split = mega_graph.number_of_nodes()
 
                 if run_obj.split_method == "newman_whole_graph":
                     mega_graph = newman_split_mega_nodes_whole_graph(network_obj, mega_graph, critical, run_obj)
@@ -126,7 +125,13 @@ def run_louvain_with_change(
             # regular run
             number_of_mega_nodes = mega_graph.number_of_nodes()
             network_obj.number_of_mega_nodes = number_of_mega_nodes
-            mega_communities_partition = run_ilp_on_louvain(mega_graph, run_obj.TimeLimit)
+            if network_obj.number_of_mega_nodes_before_split <= critical:
+                logging.warning(f"Running run_ilp_on_louvain")
+                mega_communities_partition = run_ilp_on_louvain(mega_graph, run_obj.TimeLimit)
+            else:
+                logging.warning(
+                    f"Not running run_ilp_on_louvain because num of mega nodes- {network_obj.number_of_mega_nodes_before_split} > lp_critical - {critical}")
+                mega_communities_partition = [mega_graph.nodes]
             curr_communities = unite_mega_nodes_and_convert2communities(mega_graph, mega_communities_partition)
             end = timer()
             # run_obj.communities = curr_communities
@@ -327,9 +332,9 @@ class RunParamInfo:
                  console_log_level="warning"
 
                  ):
+        self.folder_name = f"{current_time()}-{folder_name}"
         self.algorithm = algorithm
-        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS,
-                                                         folder_name=f"{current_time()}-{folder_name}")
+        self.path2curr_date_folder = None
         self.lp_list = lp_list
         self.split_method = split_method
         self.split_methods = {
@@ -349,7 +354,10 @@ class RunParamInfo:
         self.with_comparison = with_comparison_to_newman_louvain
         self.log_to_file = log_to_file
         self.console_log_level = console_log_level
-        self.folder_name = folder_name
+
+    def init_results_folder(self):
+        self.path2curr_date_folder = init_results_folder(FOLDER2FLOW_RESULTS,
+                                                         folder_name=self.folder_name)
 
 
 # ------------------------------- Helper functions -------------------------------
