@@ -4,32 +4,52 @@ from consts import PATH2SHANIS_GRAPHS, yeast_path
 
 from flow import NetworkObj, run, RunParamInfo
 
-# default_run_obj  = RunParamInfo(
-#         algorithm="louvain",
-#         split_method="random",
-#     )
-#
+default_run_obj = RunParamInfo(
+    algorithm="louvain",
+    split_method="random",
+    console_log_level= "info"
+)
+
+yeast_run_obj = RunParamInfo(
+    algorithm="louvain",
+    split_method="ilp_whole_graph",
+    TimeLimit=60,
+    network_file_name="edges.txt",
+    community_file_name="clusters.txt",
+    console_log_level = "debug",
+    folder_name="ddd"
+
+)
 
 
-# -------------------- API ----------------------------
+def convert_to_original_nodes(communities, network_obj):
+    original_nodes_communities = []
+    for c in communities:
+        community = []
+        for node in c:
+            community.append(network_obj.network_dictionary[node])
+        original_nodes_communities.append(community)
+    return original_nodes_communities
 
-def kesty_one_graph(path, run_obj):
 
+def kesty_one_graph(path, run_obj=default_run_obj):
     """
     :param path: path to folder with network and communities file
     :param run_obj: the run configurations
     :return: partition by our algorithm
     """
     try:
+        run_obj.init_results_folder()
         network_obj = NetworkObj(path, run_obj)
         communities = run(run_obj, network_obj)
-        return communities
+        original_nodes_communities = convert_to_original_nodes(communities, network_obj)
+        return original_nodes_communities
     except Exception as e:
         print("There is a problem to run the program")
         raise e
 
 
-def kesty_multiple_graphs(path_of_graphs, run_obj):
+def kesty_multiple_graphs(path_of_graphs, run_obj=default_run_obj):
     """
     :param path_of_graphs: path to folder with folders of networks and communities files
     :param run_obj: the run configurations
@@ -53,7 +73,7 @@ if __name__ == '__main__':
     run_obj = RunParamInfo(
         lp_list=[100],
         algorithm="louvain",
-        split_method="newman_sub_graph",
+        split_method="newman_whole_graph",
         folder_name = "newman-split_subgraph-1000"
     )
     # yeast_run_obj = RunParamInfo(
