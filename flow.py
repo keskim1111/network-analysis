@@ -296,7 +296,7 @@ class NetworkObj:
         self.network_name = os.path.basename(os.path.normpath(network_path))
         self.save_directory_path = init_results_folder(run_obj.path2curr_date_folder, self.network_name)
         self.network_dp = network_path
-        self.G, self.real_communities, dictionary = read_graph_files(self.network_dp, run_obj)
+        self.G, self.real_communities, self.network_dictionary = read_graph_files(self.network_dp, run_obj)
         _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
         self.graph_binary_input_fp = create_binary_network_file(self.G, self.save_directory_path,
                                                                 title=self.network_name)  # converting network to binary file

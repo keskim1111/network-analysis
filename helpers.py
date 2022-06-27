@@ -104,6 +104,7 @@ def read_graph_files(graph_path, run_obj, write_to_files=False):
 
     G = nx.Graph()
     dict_str_to_num = dict()
+    dict_num_to_str = dict()
     i = 0
     clusters = {}
     with open(clusters_file) as f:
@@ -113,6 +114,7 @@ def read_graph_files(graph_path, run_obj, write_to_files=False):
                 node, community = line.rstrip().split("\t")
                 if node not in dict_str_to_num:
                     dict_str_to_num[node] = i
+                    dict_num_to_str[i]=node
                     G.add_node(i)
                     i += 1
                 if community not in clusters:
@@ -142,7 +144,7 @@ def read_graph_files(graph_path, run_obj, write_to_files=False):
         with open(os.path.join(graph_path, "str_to_num.dict"), "wb") as f:
             pickle.dump(dict_str_to_num, f)
 
-    return G, clusters_list, dict_str_to_num
+    return G, clusters_list, dict_num_to_str
 
 
 def _pickle(fp, object="", is_load=False, is_dump=False):
