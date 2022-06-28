@@ -40,11 +40,36 @@ The workshop aims to improve existing algorithms for community detection in netw
 3. Download [Gurobi][1] to your machine 
 ## How to use
 
+### Input format
+
+We expect the single graph path to include two files with the following  formats:
+
+- communities.dat 
+  ```
+  1 0
+  2 0
+  3 0
+  4 1
+  5 1
+  6 1
+  ```
+- network.dat 
+  ```
+  1 2
+  2 3
+  1 3
+  4 5
+  4 6 
+  5 6
+  ```
+
+We expect the multiple graph path to include folders in the single graph format.
+
 ### Quick start
 
 ```python
 from api import kesty_one_graph, kesty_multiple_graphs
-import pprint
+from pprint import pprint
 
 ## for single graph
 graph_path = "graphs/Shani_graphs/1000_0.4_0"
@@ -74,28 +99,6 @@ pprint(communities_dictionary)
 #               }               
 
 ```
-We expect the single graph path to include two files with the following  formats:
-
-- communities.dat 
-  ```
-  1 0
-  2 0
-  3 0
-  4 1
-  5 1
-  6 1
-  ```
-- network.dat 
-  ```
-  1 2
-  2 3
-  1 3
-  4 5
-  4 6 
-  5 6
-  ```
-
-We expect the multiple graph path to include folders in the single graph format.
 
 ### Adding Run configurations
 You can play with the run object arguments - detailed table below
@@ -116,18 +119,18 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
   
 | argument     | values      | purpose  | default value|
 | :------------ |   :---:       | :-------- | :-------- |
-| `algorithm`        | `"louvain","newman"`         | The updated algorithm chosen to run   |`"louvain"`|
-| `split_method`         | `"mod_greedy","min_cut,"`<br />`"random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
-| `lp_list`         | Test2         | `Los Angeles`   |`[100]`|
-| `TimeLimit`         | Test2         | `Los Angeles`   |`60*10`|
-| `folder_name`         | Test2         | `Los Angeles`   |`""`|
-| `max_mega_node_split_size`         | Test2         | `Los Angeles`   |`float("inf")`|
-| `number_runs_original_louvain`    | Test2         | `Los Angeles`   |`1`|
-| `community_file_name`         | Test2         | `Los Angeles`   |`community.dat`|
-| `network_file_name`         | `True,False`         | `Los Angeles`   |`network.dat`|
-| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   |`True`|
-| `log_to_file`         | Test2         | `Los Angeles`   |True|
-| `console_log_level`         | Test2         | `Los Angeles`   |`info`|
+| `algorithm`        | `"louvain","newman"`         | The  algorithm chosen to run   |`"louvain"`|
+| `split_method`         | `"mod_greedy","min_cut,"`<br />`"random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split method that will be used in louvain algorithm to split the mega nodes  |`"newman_whole_graph"`|
+| `lp_list`         | list of ints         | lp values that the algorithm will run with   |`[100]`|
+| `TimeLimit`         | number in seconds         | time limit for the ilp to run with   |`60*10`|
+| `folder_name`         | string         | output folder name  |`""`|
+| `max_mega_node_split_size`         | int         | relevant for "ilp_whole_graph" split method. limits the size to split   |`float("inf")`|
+| `number_runs_original_louvain`    | int         | number of runs of louvain for comparison   |`1`|
+| `community_file_name`         | string         | the file name to read communities from  |`community.dat`|
+| `network_file_name`         | string        | the file name to read network from   |`network.dat`|
+| `with_comparison_to_newman_louvain`   | `True,False`          | to run original algorithms for comparison   |`True`|
+| `log_to_file`         | `True,False`         | log all logs to file  |True|
+| `console_log_level`         | `"debug", "info", "warning", "error"`         | minimum log level to print to console  |`info`|
 
 ### Output folder and visualization notebook
 
@@ -139,7 +142,7 @@ After every run, an output folder is created in ``results\\full-flow`` with:
   
 - pickled df
 
-you can use the last cell in `visualization/create_bar_plots.ipynb` to visualize results:
+You can use the last cell in the notebook at `visualization/create_bar_plots.ipynb` to visualize results with bar plots graphs:
 ```python
 
 # put here the name of the output folder
@@ -178,5 +181,9 @@ and you will see:
 [1] Newman, M. E. J. (2006). Modularity and community structure in networks. Proceedings of the National Academy of Sciences of the United States of America, 103(23), 8577–82. https://doi.org/10.1073/pnas.0601602103
 
 [2]  Blondel, Vincent D; Guillaume, Jean-Loup; Lambiotte, Renaud; Lefebvre, Etienne (9 October 2008). "Fast unfolding of communities in large networks". Journal of Statistical Mechanics: Theory and Experiment. 2008  doi:[10.1088/1742-5468/2008/10/P10008](10.1088/1742-5468/2008/10/P10008)
+
+[3] Evaluation of clustering algorithms for protein-protein 
+interaction networks, Brohee & van Helden, BMC 
+Bioinformatics, 2006
 
 [1]: https://www.gurobi.com/documentation/9.5/quickstart_windows/software_installation_guid.html#section:Installation
