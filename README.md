@@ -64,11 +64,11 @@ pprint(communities_dictionary)
 #               ['1','2','3','4'],
 #               ['5','6','7','8'],
 #                ],
-# {'1000_0.4_1': [
+# '1000_0.4_1': [
 #               ['5','2','3','4'],
 #               ['1','6','7','8'],
 #                ],
-# {'1000_0.4_2: [
+# '1000_0.4_2: [
 #               ['5','2','3','4','6','7','8'],
 #               ['1'],
 #                ],
@@ -130,10 +130,16 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 | `log_to_file`         | Test2         | `Los Angeles`   |True|
 | `console_log_level`         | Test2         | `Los Angeles`   |`info`|
 
+### Output folder and visualization notebook
+After every run, an output folder is created in ``results\\full-flow`` with:
 
-[1]: https://www.gurobi.com/documentation/9.5/quickstart_windows/software_installation_guid.html#section:Installation
+- log file 
+- a csv summerizing run information and evaluations (modularity, jaccard, concudance ,accuracy,time and more):
+![img.png](utils/img/img_csv.png)
+  
 
-## Description
+
+## Algorithms Description
 
 
 ### The idea 
@@ -141,7 +147,7 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 2. Run ILP on current results 
 3. Add ILP results if ΔQ > 0
 
-### Known algorithms
+### Algorithms implemented with the idea
 #### Louvain
 
 ![שרטוט לוביין עם פיצול](https://user-images.githubusercontent.com/71821335/176128435-c736d328-7a77-4853-b4dc-340041141f3d.jpg)
@@ -157,3 +163,5 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 [1] Newman, M. E. J. (2006). Modularity and community structure in networks. Proceedings of the National Academy of Sciences of the United States of America, 103(23), 8577–82. https://doi.org/10.1073/pnas.0601602103
 
 [2]  Blondel, Vincent D; Guillaume, Jean-Loup; Lambiotte, Renaud; Lefebvre, Etienne (9 October 2008). "Fast unfolding of communities in large networks". Journal of Statistical Mechanics: Theory and Experiment. 2008  doi:[10.1088/1742-5468/2008/10/P10008](10.1088/1742-5468/2008/10/P10008)
+
+[1]: https://www.gurobi.com/documentation/9.5/quickstart_windows/software_installation_guid.html#section:Installation
