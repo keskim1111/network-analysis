@@ -45,16 +45,37 @@ The workshop aims to improve existing algorithms for community detection in netw
 
 ```python
 from api import kesty_one_graph, kesty_multiple_graphs
+import pprint
 
-# for single graph
+## for single graph
 graph_path = "graphs/Shani_graphs/1000_0.4_0"
 communities = kesty_one_graph(graph_path)
-# for multiple graphs
+print(communities)
+#               [
+#               ['5','2','3','4'],
+#               ['1','6','7','8'],
+#                ],
+
+## for multiple graphs
 graphs_path = "graphs/Shani_graphs"
 communities_dictionary = kesty_multiple_graphs(graphs_path)
+pprint(communities_dictionary)
+# {'1000_0.4_0': [
+#               ['1','2','3','4'],
+#               ['5','6','7','8'],
+#                ],
+# {'1000_0.4_1': [
+#               ['5','2','3','4'],
+#               ['1','6','7','8'],
+#                ],
+# {'1000_0.4_2: [
+#               ['5','2','3','4','6','7','8'],
+#               ['1'],
+#                ],
+#               }               
 
 ```
-We expect the graph path to include two files with the following  formats:
+We expect the single graph path to include two files with the following  formats:
 
 - communities.dat 
   ```
@@ -74,25 +95,11 @@ We expect the graph path to include two files with the following  formats:
   4 6 
   5 6
   ```
+
+We expect the multiple graph path to include folders in the single graph format.
+
 ### Adding Run configurations
 You can play with the run object arguments
-
-| argument     | values      | purpose  | default value|
-| :------------ |   :---:       | :-------- | :-------- |
-| `algorithm`        | `"louvain","newman"`         | The updated algorithm chosen to run   |`"louvain"`|
-| `split_method`         | `"mod_greedy","min_cut","random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
-| `lp_list`         | Test2         | `Los Angeles`   |[100]|
-| `TimeLimit`         | Test2         | `Los Angeles`   |60*10|
-| `folder_name`         | Test2         | `Los Angeles`   |""|
-| `max_mega_node_split_size`         | Test2         | `Los Angeles`   |`float("inf")`|
-| `number_runs_original_louvain`         | Test2         | `Los Angeles`   |1|
-| `community_file_name`         | Test2         | `Los Angeles`   |"community.dat"|
-| `network_file_name`         | `True,False`         | `Los Angeles`   |"network.dat"|
-| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   |True|
-| `log_to_file`         | Test2         | `Los Angeles`   |True|
-| `console_log_level`         | Test2         | `Los Angeles`   |`info`|
-
-
 ````python
 from api import kesty_one_graph
 from flow import RunParamInfo
@@ -108,7 +115,20 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 
 ````
   
-  
+| argument     | values      | purpose  | default value|
+| :------------ |   :---:       | :-------- | :-------- |
+| `algorithm`        | `"louvain","newman"`         | The updated algorithm chosen to run   |`"louvain"`|
+| `split_method`         | `"mod_greedy","min_cut","random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
+| `lp_list`         | Test2         | `Los Angeles`   |[100]|
+| `TimeLimit`         | Test2         | `Los Angeles`   |60*10|
+| `folder_name`         | Test2         | `Los Angeles`   |""|
+| `max_mega_node_split_size`         | Test2         | `Los Angeles`   |`float("inf")`|
+| `number_runs_original_louvain`         | Test2         | `Los Angeles`   |1|
+| `community_file_name`         | Test2         | `Los Angeles`   |"community.dat"|
+| `network_file_name`         | `True,False`         | `Los Angeles`   |"network.dat"|
+| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   |True|
+| `log_to_file`         | Test2         | `Los Angeles`   |True|
+| `console_log_level`         | Test2         | `Los Angeles`   |`info`|
 
 
 [1]: https://www.gurobi.com/documentation/9.5/quickstart_windows/software_installation_guid.html#section:Installation
