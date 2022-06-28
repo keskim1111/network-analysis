@@ -7,8 +7,6 @@ import pandas as pd
 from algorithms.algorithms import algorithms_partition_for_colors
 from consts import RESULTS_FOLDER
 from utils.evaluation import graph_conductance, jaccard, graph_sensitivity, graph_accuracy, calc_modularity_nx
-from helpers import _pickle
-from input_networks import read_communities_file
 
 def create_visual_graph(G, partition, output, pos):
     pos = nx.spring_layout(G)
@@ -48,29 +46,6 @@ def create_output_folder(folder_name, G, edges_name="graph_edges"):
 def create_df(data, columns, index):
     dfObj = pd.DataFrame(data, columns=columns, index=index)
     return dfObj
-
-
-def generate_outputs(G, algo_dict, is_networkx=False, real_communities_path=None):
-    data = []
-    index = []
-    if is_networkx:
-        real_partition = {frozenset(G.nodes[v]["community"]) for v in G}
-    else:
-        real_partition = read_communities_file(real_communities_path)
-    logging.debug(f"real partition: {real_partition}")
-    for algo in algo_dict.keys():
-        logging.debug(f'starting generating output for {algo}')
-        partition = algo_dict[algo]["partition"]
-        res = []
-        index.append(algo)
-        res.append(calc_modularity_nx(G, partition))
-        res.append(graph_conductance(G, partition))
-        res.append(jaccard(partition, real_partition))
-        res.append(graph_sensitivity(real_partition, partition))
-        res.append(graph_accuracy(real_partition, partition))
-        data.append(res)
-        logging.debug(f'finished generating output for {algo}')
-    return data, index
 
 
 def generate_outputs_for_community_list(G, real_communities_list, new_communities_list, algo=""):

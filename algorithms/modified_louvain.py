@@ -9,10 +9,6 @@ from networkx.utils import py_random_state
 
 __all__ = ["modified_louvain_communities", "louvain_partitions"]
 
-from input_networks import create_random_network
-from utils.logger import setup_logger
-
-
 @py_random_state("seed")
 def modified_louvain_communities(
         G, weight="weight", resolution=1, threshold=0.0000001, seed=None, num_com_bound=float("inf")

@@ -1,10 +1,12 @@
 import logging
 
-from input_networks import *
 import math
 
 
 # Helpers
+import networkx as nx
+
+
 def calc_jaccard(clusters_dict1, clusters_dict2):
     """
     calculates jaccard score between clusters_dict1 and clusters_dict2
