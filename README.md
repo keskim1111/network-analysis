@@ -99,7 +99,7 @@ We expect the single graph path to include two files with the following  formats
 We expect the multiple graph path to include folders in the single graph format.
 
 ### Adding Run configurations
-You can play with the run object arguments
+You can play with the run object arguments - detailed table below
 ````python
 from api import kesty_one_graph
 from flow import RunParamInfo
@@ -131,13 +131,16 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 | `console_log_level`         | Test2         | `Los Angeles`   |`info`|
 
 ### Output folder and visualization notebook
+
 After every run, an output folder is created in ``results\\full-flow`` with:
 
 - log file of run
 - a csv summarizing run information and evaluations scores (modularity, jaccard, concordance , accuracy, time and more):
 ![img.png](utils/img/img_csv.png)
   
+- pickled df
 
+you can use ...
 
 ## Algorithms Description
 
