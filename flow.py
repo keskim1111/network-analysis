@@ -11,9 +11,8 @@ from algorithms.mega_nodes_utils import unite_mega_nodes_and_convert2communities
 from utils.binary_files import create_binary_network_file
 from consts import FOLDER2FLOW_RESULTS, default_lp_list
 from utils.evaluation import calc_modularity_manual, calc_modularity_nx
-from helpers import init_results_folder, _pickle, read_graph_files, current_time
-from utils.logger import setup_logger
-from algorithms.ilp_max_mod_union import ILP
+from helpers import init_results_folder, read_graph_files, current_time
+from algorithms.ilp.ilp_max_mod_union import ILP
 from output_generator import save_and_eval, create_data_dict
 from algorithms.neumann_utils import get_neumann_communities
 
@@ -386,6 +385,3 @@ def delete_in_run_files(path):
         if item.endswith(".in") or item.endswith(".out"):
             os.remove(os.path.join(path, item))
 
-
-if __name__ == '__main__':
-    pass

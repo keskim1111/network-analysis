@@ -9,10 +9,6 @@ from networkx.utils import py_random_state
 
 __all__ = ["modified_louvain_communities", "louvain_partitions"]
 
-from input_networks import create_random_network
-from utils.logger import setup_logger
-
-
 @py_random_state("seed")
 def modified_louvain_communities(
         G, weight="weight", resolution=1, threshold=0.0000001, seed=None, num_com_bound=float("inf")
@@ -350,18 +346,4 @@ def _convert_multigraph(G, weight, is_directed):
 
 
 if __name__ == '__main__':
-    setup_logger()
-    G = create_random_network(n=20, min_community=2, max_degree=10, max_community=20, average_degree=2)
-    num_it, graph = modified_louvain_communities(G, num_com_bound=5)
-    logging.debug("---------RESULT---------")
-    logging.debug(list(graph.nodes(data=True)))
-    # print("communities: \n", communities)
-    # print("num of communities: \n", len(communities))
-    # print("-------gen graph------")
-    # graph = G.__class__()
-    # graph.add_nodes_from(G)
-    # weight = "weight"
-    # graph.add_weighted_edges_from(G.edges(data=weight, default=1))
-    # print("graph before _gen_graph: \n",graph)
-    # print("graph after _gen_graph: \n", new_graph)
     pass

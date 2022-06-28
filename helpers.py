@@ -1,8 +1,6 @@
 import time
+from collections import defaultdict
 from datetime import datetime
-from pprint import pprint
-
-from consts import arabidopsis_path
 import networkx as nx
 import pickle, os
 import logging
@@ -156,17 +154,51 @@ def _pickle(fp, object="", is_load=False, is_dump=False):
             return pickle.load(f)
     return None
 
-
-def define_logger(file_directory):
-    my_handlers = [logging.FileHandler(f"{file_directory}-logs.txt"), logging.StreamHandler()]
-    format = '%(asctime)s: %(message)s'
-    logging.basicConfig(format=format, level=logging.DEBUG, handlers=my_handlers)
-
-
 def prompt_file(path):
     path = os.path.realpath(path)
     os.startfile(path)
 
+def create_graph_from_edge_list(edges_list):
+    '''
+    :param python list of sets of edges:
+    :return: a networkX graph from the file
+    '''
+    G = nx.Graph()
+    for node1, node2 in edges_list:
+        G.add_edge(int(node1), int(node2))
+    return G
 
-if __name__ == '__main__':
-    pprint(read_graph_files(arabidopsis_path))
+@timeit
+def read_communities_file(path):
+    '''
+        :param path:
+        :return: a list of lists of communities
+        '''
+    community_dict = defaultdict(list)
+    with open(path) as file:
+        lines = file.readlines()
+        for line in lines:
+            node, community = line.rstrip().split()
+            community_dict[community].append(int(node))
+    return list(community_dict.values())
+
+def create_random_network(n=1000, mu=0.4, tau1=2, tau2=1.1, average_degree=15, min_community=20, max_degree=50,max_community =50):
+    return nx.LFR_benchmark_graph(
+        n=n, tau1=tau1, tau2=tau2, mu=mu, average_degree=average_degree, max_degree=max_degree,
+        min_community=min_community, max_community=max_community
+    )
+
+
+@timeit
+def create_graph_from_edge_file(filename):
+    '''
+    :param filename:
+    :return: a networkX graph from the file
+    '''
+    G = nx.Graph()
+    with open(filename) as file:
+        lines = file.readlines()
+        for line in lines:
+            node1, node2 = line.rstrip().split()
+            G.add_edge(int(node1),int(node2))
+    return G

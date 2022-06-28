@@ -1,13 +1,7 @@
 import logging
-
 import networkx as nx
 import struct
-
-# from consts import edge_file
-from utils.evaluation import jaccard, graph_accuracy, graph_sensitivity, calc_modularity_nx
-from input_networks import create_graph_from_edge_file, \
-    create_random_network
-from helpers import timeit, current_time
+from helpers import timeit, create_graph_from_edge_file
 import os
 
 def create_mapping(edge_file):
@@ -150,31 +144,4 @@ def create_for_esty_from_edges(edge_list):
     return create_binary_network_file(G)
 
 
-def check_binary_from_edges_file(edge_file):
-    G = create_graph_from_edge_file(edge_file)
-    path = create_binary_network_file(G, "1000_0.4_8_new")
-    G2 = read_binary_network_input(path, edge_file)
-    assert are_graphs_the_same(G, G2)
 
-
-def check_lfr():
-    n = 250
-    mu = 0.1
-    tau1 = 3
-    tau2 = 1.5
-    average_degree = 5
-    min_com = 20
-    G = create_random_network(n, mu, tau1, tau2, average_degree, min_com)
-    path = create_binary_network_file(G)
-    G2 = read_binary_network_input(path)
-    assert are_graphs_the_same(G, G2)
-
-
-def are_graphs_the_same(G, H):
-    R = nx.difference(G, H)
-    return len(R.edges) == 0
-
-
-
-if __name__ == '__main__':
-    pass
