@@ -123,7 +123,7 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 | `TimeLimit`         | Test2         | `Los Angeles`   |60*10|
 | `folder_name`         | Test2         | `Los Angeles`   |""|
 | `max_mega_node_split_size`         | Test2         | `Los Angeles`   |`float("inf")`|
-| `number_runs_original_louvain`         | Test2         | `Los Angeles`   |1|
+| `number_runs_original_louvain`    | Test2         | `Los Angeles`   |1|
 | `community_file_name`         | Test2         | `Los Angeles`   |"community.dat"|
 | `network_file_name`         | `True,False`         | `Los Angeles`   |"network.dat"|
 | `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   |True|
@@ -133,8 +133,8 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 ### Output folder and visualization notebook
 After every run, an output folder is created in ``results\\full-flow`` with:
 
-- log file 
-- a csv summerizing run information and evaluations (modularity, jaccard, concudance ,accuracy,time and more):
+- log file of run
+- a csv summarizing run information and evaluations scores (modularity, jaccard, concordance , accuracy, time and more):
 ![img.png](utils/img/img_csv.png)
   
 
