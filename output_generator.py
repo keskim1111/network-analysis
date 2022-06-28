@@ -105,7 +105,7 @@ def save_and_eval(save_dp,
                   ):
     logging.debug("Saving communities object to folder")
     # Saving communities object to folder
-    _pickle(os.path.join(save_dp, f'{algo}.communities'), object=communities, is_dump=True)
+    # _pickle(os.path.join(save_dp, f'{algo}.communities'), object=communities, is_dump=True)
     # Evaluate results and save to eval_dict
     eval_dict = generate_outputs_for_community_list(network_obj.G, network_obj.real_communities, communities, algo=algo)
     eval_dict["num_coms_divided"] = network_obj.num_coms_divided
