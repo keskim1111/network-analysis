@@ -107,8 +107,7 @@ from api import kesty_one_graph
 from flow import RunParamInfo
 
 yeast_run_obj = RunParamInfo(
-  algorithm="louvain",
-  split_method="random",
+  algorithm="newman",
   network_file_name="edges.txt",
   community_file_name="clusters.txt"
 )
