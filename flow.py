@@ -369,7 +369,7 @@ class RunParamInfo:
 def create_outputs(input_network_folder, eval_results_per_network, save_directory_path):
     # Finished
     logging.info(
-        f'Finished running algo. your output is here:\t {save_directory_path}')
+        f'Finished running algo. your output is here:\n {save_directory_path}')
     # Create df per network
     logging.debug(f'Creating DF for this network')
     data_dict = create_data_dict(eval_results_per_network)

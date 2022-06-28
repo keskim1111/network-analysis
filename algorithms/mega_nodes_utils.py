@@ -125,6 +125,7 @@ def ilp_split_mega_node_whole_graph(G, mega_community_nodes, run_obj):
 
 @timeit
 def newman_split_mega_nodes_whole_graph(network_obj, mega_graph):
+    logging.info("Splitting mega nodes with newman")
     communities = unite_mega_nodes_and_convert2communities(mega_graph, [mega_graph.nodes()])
     communities_list_sorted = []
     for com in communities:
