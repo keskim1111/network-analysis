@@ -7,19 +7,18 @@ The workshop aims to improve existing algorithms for community detection in netw
 
 ## Contents
 
-- [Network-analysis Project](#network-analysis-project)
-    + [Motivation](#motivation)
-    + [Contents](#contents)
-  * [Installation](#installation)
-    + [How to use](#how-to-use)
-      - [1. NetworkX graph as input](#1-networkx-graph-as-input)
-      - [2. Graph file as input](#2-graph-file-as-input)
-    + [Description](#description)
-    + [The idea](#the-idea)
-    + [Known algorithms](#known-algorithms)
-      - [Louvain](#louvain)
-      - [Newman](#newman)
-    + [References](#references)
+- [Motivation](#motivation)
+- [Installation](#installation)
+- [How to use](#how-to-use)
+  * [Quick start](#quick-start)
+  * [Adding Run configurations](#adding-run-configurations)
+  * [Output folder and visualization notebook](#output-folder-and-visualization-notebook)
+- [Algorithms Description](#algorithms-description)
+  * [The idea](#the-idea)
+  * [Algorithms implemented with the idea](#algorithms-implemented-with-the-idea)
+    + [Louvain](#louvain)
+    + [Newman](#newman)
+- [References](#references)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
