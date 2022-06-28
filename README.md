@@ -99,7 +99,7 @@ We expect the single graph path to include two files with the following  formats
 We expect the multiple graph path to include folders in the single graph format.
 
 ### Adding Run configurations
-You can play with the run object arguments
+You can play with the run object arguments - detailed table below
 ````python
 from api import kesty_one_graph
 from flow import RunParamInfo
@@ -119,31 +119,47 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 | :------------ |   :---:       | :-------- | :-------- |
 | `algorithm`        | `"louvain","newman"`         | The updated algorithm chosen to run   |`"louvain"`|
 | `split_method`         | `"mod_greedy","min_cut,"`<br />`"random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
-| `lp_list`         | Test2         | `Los Angeles`   |[100]|
-| `TimeLimit`         | Test2         | `Los Angeles`   |60*10|
-| `folder_name`         | Test2         | `Los Angeles`   |""|
+| `lp_list`         | Test2         | `Los Angeles`   |`[100]`|
+| `TimeLimit`         | Test2         | `Los Angeles`   |`60*10`|
+| `folder_name`         | Test2         | `Los Angeles`   |`""`|
 | `max_mega_node_split_size`         | Test2         | `Los Angeles`   |`float("inf")`|
-| `number_runs_original_louvain`    | Test2         | `Los Angeles`   |1|
-| `community_file_name`         | Test2         | `Los Angeles`   |"community.dat"|
-| `network_file_name`         | `True,False`         | `Los Angeles`   |"network.dat"|
-| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   |True|
+| `number_runs_original_louvain`    | Test2         | `Los Angeles`   |`1`|
+| `community_file_name`         | Test2         | `Los Angeles`   |`community.dat`|
+| `network_file_name`         | `True,False`         | `Los Angeles`   |`network.dat`|
+| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   |`True`|
 | `log_to_file`         | Test2         | `Los Angeles`   |True|
 | `console_log_level`         | Test2         | `Los Angeles`   |`info`|
 
 ### Output folder and visualization notebook
+
 After every run, an output folder is created in ``results\\full-flow`` with:
 
 - log file of run
 - a csv summarizing run information and evaluations scores (modularity, jaccard, concordance , accuracy, time and more):
 ![img.png](utils/img/img_csv.png)
   
+- pickled df
+
+you can use the last cell in `visualization/create_bar_plots.ipynb` to visualize results:
+```python
+
+# put here the name of the output folder
+input_folder = "28-06-2022--12-00-14-del"
+df = run_visu(input_folder)
+create_bar_graphs(df,evals)
+print_means(df, evals2)
+print_times(df)
+# display(df)
+```
+and you will see:
+![img.png](utils/img/graphs_img.png)
 
 
 ## Algorithms Description
 
 
 ### The idea 
-1. Run a known algorithm until ILP can run on current results  
+1. Run a known algorithm until ILP can run on current results (lp_critical) 
 2. Run ILP on current results 
 3. Add ILP results if ΔQ > 0
 

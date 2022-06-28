@@ -375,7 +375,7 @@ def create_outputs(input_network_folder, eval_results_per_network, save_director
     logging.debug(f'Creating DF for this network')
     data_dict = create_data_dict(eval_results_per_network)
     df = pd.DataFrame(data_dict)
-    # df.to_pickle(os.path.join(save_directory_path, "results.df"))
+    df.to_pickle(os.path.join(save_directory_path, "results.df"))
     csv_name = f"results_df-{input_network_folder}.csv"
     df.to_csv(os.path.join(save_directory_path, csv_name))
 
