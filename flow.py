@@ -43,6 +43,7 @@ def run_with_comparison_louvain(network_obj, run_obj):
                                                          )
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
     logging.debug(f'eval_results_per_network={eval_results_per_network}')
+    delete_in_run_files(network_obj.save_directory_path)
     return louvain_change_communities
 
 
@@ -110,7 +111,8 @@ def run_louvain_with_change(
         start = timer()
         iterations_number, mega_graph = modified_louvain_communities(network_obj.G, num_com_bound=critical)
         run_obj.critical = critical
-        logging.info(f'Finished runnning partially regular Louvain: num nodes mega graph = {mega_graph.number_of_nodes()}')
+        logging.info(
+            f'Finished runnning partially regular Louvain: num nodes mega graph = {mega_graph.number_of_nodes()}')
         try:
             network_obj.number_of_mega_nodes_before_split = mega_graph.number_of_nodes()
             # split mega graph
@@ -155,6 +157,7 @@ def run_louvain_with_change(
             logging.error(e)
             raise e
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
+    delete_in_run_files(network_obj.save_directory_path)
     logging.debug(f'eval_results_per_network={eval_results_per_network}')
 
 
@@ -180,6 +183,7 @@ def run_with_comparison_newman(network_obj, run_obj):
     # Finished
 
     create_outputs(network_obj.network_name, eval_results_per_network, network_obj.save_directory_path)
+    delete_in_run_files(network_obj.save_directory_path)
     logging.debug(f'eval_results_per_network={eval_results_per_network}')
     return communities
 
@@ -302,7 +306,7 @@ class NetworkObj:
         self.save_directory_path = init_results_folder(run_obj.path2curr_date_folder, self.network_name)
         self.network_dp = network_path
         self.G, self.real_communities, self.network_dictionary = read_graph_files(self.network_dp, run_obj)
-        _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
+        # _pickle(os.path.join(self.save_directory_path, "real.communities"), self.real_communities, is_dump=True)
         self.graph_binary_input_fp = create_binary_network_file(self.G, self.save_directory_path,
                                                                 title=self.network_name)  # converting network to binary file
         self.communities_binary_input_fp = None
@@ -321,7 +325,7 @@ class RunParamInfo:
                  algorithm="louvain",
                  split_method="newman_whole_graph",
                  lp_list=default_lp_list,
-                 TimeLimit=60*10,
+                 TimeLimit=60 * 10,
                  folder_name="",
                  max_mega_node_split_size=float("inf"),
                  number_runs_original_louvain=1,
@@ -371,9 +375,16 @@ def create_outputs(input_network_folder, eval_results_per_network, save_director
     logging.debug(f'Creating DF for this network')
     data_dict = create_data_dict(eval_results_per_network)
     df = pd.DataFrame(data_dict)
-    df.to_pickle(os.path.join(save_directory_path, "results.df"))
+    # df.to_pickle(os.path.join(save_directory_path, "results.df"))
     csv_name = f"results_df-{input_network_folder}.csv"
     df.to_csv(os.path.join(save_directory_path, csv_name))
+
+
+def delete_in_run_files(path):
+    files = os.listdir(path)
+    for item in files:
+        if item.endswith(".in") or item.endswith(".out"):
+            os.remove(os.path.join(path, item))
 
 
 if __name__ == '__main__':
