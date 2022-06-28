@@ -30,7 +30,7 @@ The workshop aims to improve existing algorithms for community detection in netw
    ```bash
    $ git clone https://github.com/keskim1111/network-analysis.git
    ```
-2. Make sure to have a C compiler on your computer 
+2. Make sure to have a C compiler on your computer and run:
     ```bash
     cd algorithms/newman_lp_critical
     make
@@ -38,53 +38,71 @@ The workshop aims to improve existing algorithms for community detection in netw
     make
     ```
 
-4. Download [Gurobi][1] to your machine 
+3. Download [Gurobi][1] to your machine 
 ## How to use
 
 ### Quick start
+
 ```python
-from main import kesty_one_graph, kesty_multiple_graphs
+from api import kesty_one_graph, kesty_multiple_graphs
 
 # for single graph
 graph_path = "graphs/Shani_graphs/1000_0.4_0"
-graphs_path = "graphs/Shani_graphs"
 communities = kesty_one_graph(graph_path)
 # for multiple graphs
+graphs_path = "graphs/Shani_graphs"
 communities_dictionary = kesty_multiple_graphs(graphs_path)
 
 ```
-when these are the formats:
+We expect the graph path to include two files with the following  formats:
 
-communities.dat file
-```
-1 0
-2 0
-3 0
-4 1
-5 1
-6 1
-```
-network.dat file
-```
-1 2
-2 3
-1 3
-4 5
-4 6 
-5 6
-```
+- communities.dat 
+  ```
+  1 0
+  2 0
+  3 0
+  4 1
+  5 1
+  6 1
+  ```
+- network.dat 
+  ```
+  1 2
+  2 3
+  1 3
+  4 5
+  4 6 
+  5 6
+  ```
 ### Adding Run configurations
-You can play with the ............
+You can play with the run object arguments
+
+| argument     | values      | purpose  | default value|
+| :------------ |   :---:       | --------: | --------: |
+| `algorithm`        | `"louvain","newman"`         | The updated algorithm chosen to run   |`"louvain"`|
+| `split_method`         | `"mod_greedy","min_cut","random","ilp_sub_graph","ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
+| `lp_list`         | Test2         | `Los Angeles`   ||
+| `TimeLimit`         | Test2         | `Los Angeles`   ||
+| `folder_name`         | Test2         | `Los Angeles`   ||
+| `max_mega_node_split_size`         | Test2         | `Los Angeles`   ||
+| `number_runs_original_louvain`         | Test2         | `Los Angeles`   ||
+| `community_file_name`         | Test2         | `Los Angeles`   ||
+| `network_file_name`         | Test2         | `Los Angeles`   ||
+| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   ||
+| `log_to_file`         | Test2         | `Los Angeles`   ||
+| `console_log_level`         | Test2         | `Los Angeles`   ||
+
+
 ````python
-from main import kesty_one_graph
+from api import kesty_one_graph
 from flow import RunParamInfo
 
 yeast_run_obj = RunParamInfo(
-        algorithm="louvain",
-        split_method="random",
-        network_file_name="edges.txt",
-        community_file_name="clusters.txt"
-    )
+  algorithm="louvain",
+  split_method="random",
+  network_file_name="edges.txt",
+  community_file_name="clusters.txt"
+)
 graph_path = "graphs\\Benchmark\\Yeast"
 communities = kesty_one_graph(graph_path, yeast_run_obj)
 
