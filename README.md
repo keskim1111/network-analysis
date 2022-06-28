@@ -78,19 +78,19 @@ We expect the graph path to include two files with the following  formats:
 You can play with the run object arguments
 
 | argument     | values      | purpose  | default value|
-| :------------ |   :---:       | --------: | --------: |
+| :------------ |   :---:       | :-------- | :-------- |
 | `algorithm`        | `"louvain","newman"`         | The updated algorithm chosen to run   |`"louvain"`|
-| `split_method`         | `"mod_greedy","min_cut","random","ilp_sub_graph","ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
-| `lp_list`         | Test2         | `Los Angeles`   ||
-| `TimeLimit`         | Test2         | `Los Angeles`   ||
-| `folder_name`         | Test2         | `Los Angeles`   ||
-| `max_mega_node_split_size`         | Test2         | `Los Angeles`   ||
-| `number_runs_original_louvain`         | Test2         | `Los Angeles`   ||
-| `community_file_name`         | Test2         | `Los Angeles`   ||
-| `network_file_name`         | Test2         | `Los Angeles`   ||
-| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   ||
-| `log_to_file`         | Test2         | `Los Angeles`   ||
-| `console_log_level`         | Test2         | `Los Angeles`   ||
+| `split_method`         | `"mod_greedy","min_cut","random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
+| `lp_list`         | Test2         | `Los Angeles`   |[100]|
+| `TimeLimit`         | Test2         | `Los Angeles`   |60*10|
+| `folder_name`         | Test2         | `Los Angeles`   |""|
+| `max_mega_node_split_size`         | Test2         | `Los Angeles`   |`float("inf")`|
+| `number_runs_original_louvain`         | Test2         | `Los Angeles`   |1|
+| `community_file_name`         | Test2         | `Los Angeles`   |"community.dat"|
+| `network_file_name`         | `True,False`         | `Los Angeles`   |"network.dat"|
+| `with_comparison_to_newman_louvain`         | Test2         | `Los Angeles`   |True|
+| `log_to_file`         | Test2         | `Los Angeles`   |True|
+| `console_log_level`         | Test2         | `Los Angeles`   |`info`|
 
 
 ````python
