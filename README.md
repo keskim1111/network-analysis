@@ -118,7 +118,7 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 | argument     | values      | purpose  | default value|
 | :------------ |   :---:       | :-------- | :-------- |
 | `algorithm`        | `"louvain","newman"`         | The updated algorithm chosen to run   |`"louvain"`|
-| `split_method`         | `"mod_greedy","min_cut","random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
+| `split_method`         | `"mod_greedy","min_cut,"`<br />`"random","ilp_sub_graph"`<br />`"ilp_whole_graph","newman_whole_graph"`         | split   |`"newman_whole_graph"`|
 | `lp_list`         | Test2         | `Los Angeles`   |[100]|
 | `TimeLimit`         | Test2         | `Los Angeles`   |60*10|
 | `folder_name`         | Test2         | `Los Angeles`   |""|
