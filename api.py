@@ -13,12 +13,11 @@ default_run_obj = RunParamInfo(
 
 yeast_run_obj = RunParamInfo(
     algorithm="louvain",
-    split_method="ilp_whole_graph",
-    TimeLimit=60,
+    split_method="newman_whole_graph",
     network_file_name="edges.txt",
     community_file_name="clusters.txt",
     # console_log_level = "debug",
-    folder_name="ara"
+    folder_name="yeast"
 
 )
 
@@ -86,9 +85,9 @@ if __name__ == '__main__':
         split_method="ilp_whole_graph",
         folder_name="1000 whole"
     )
-    # c = kesty_one_graph(yeast, yeast_run_obj)
+    c = kesty_one_graph(yeast, yeast_run_obj)
     # c = kesty_one_graph(Arabidopsis, yeast_run_obj)
     # c = kesty_one_graph(network_path, default_run_obj)
     # print(c)
-    d = kesty_multiple_graphs("C:\\Users\\kimke\\Desktop\\temp")
-    pprint(d)
+    # d = kesty_multiple_graphs("C:\\Users\\kimke\\Desktop\\temp")
+    # pprint(d)

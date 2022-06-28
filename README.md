@@ -142,7 +142,8 @@ After every run, an output folder is created in ``results\\full-flow`` with:
   
 - pickled df
 
-You can use the last cell in the notebook at `visualization/create_bar_plots.ipynb` to visualize results with bar plots graphs:
+You can use one of the last cells in the notebook at `visualization/create_bar_plots.ipynb` to visualize results with bar plots graphs:
+for shanis file:
 ```python
 
 # put here the name of the output folder
@@ -153,6 +154,17 @@ print_means(df, evals2)
 print_times(df)
 # display(df)
 ```
+for yeast/arabadopsis file:
+```python
+#%%
+# for yeast and arabdopsis
+input_folder = "28-06-2022--15-18-23-yeast"
+df = run_visu_benchmark(input_folder)
+create_bar_graphs_benchmark(df,evals)
+print_times(df)
+# display(df)
+```
+
 and you will see:
 ![img.png](utils/img/graphs_img.png)
 
