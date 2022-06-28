@@ -1,4 +1,4 @@
-# Network-analysis Project
+![image](https://user-images.githubusercontent.com/71821335/176128096-19008ad5-2e37-4ebd-9cd1-a0a93e9b373b.png)
 
 ## Motivation
 
