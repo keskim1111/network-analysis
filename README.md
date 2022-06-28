@@ -106,7 +106,7 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 ### Known algorithms
 #### Louvain
 
-![image](https://user-images.githubusercontent.com/71821335/176126269-dc9dde89-4990-4901-a74c-98a153b99249.png)
+![שרטוט לוביין עם פיצול](https://user-images.githubusercontent.com/71821335/176128435-c736d328-7a77-4853-b4dc-340041141f3d.jpg)
 
 #### Newman 
 
