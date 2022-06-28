@@ -386,6 +386,3 @@ def delete_in_run_files(path):
         if item.endswith(".in") or item.endswith(".out"):
             os.remove(os.path.join(path, item))
 
-
-if __name__ == '__main__':
-    pass

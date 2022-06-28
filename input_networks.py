@@ -53,9 +53,3 @@ def create_graph_from_edge_list(edges_list):
     for node1, node2 in edges_list:
         G.add_edge(int(node1), int(node2))
     return G
-
-
-
-
-if __name__ == '__main__':
-    pass

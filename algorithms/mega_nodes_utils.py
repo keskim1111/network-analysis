@@ -186,6 +186,3 @@ def newman_split_mega_nodes_sub_graph(network_obj, mega_graph):
     new_graph = _gen_graph(graph, communities_after_split)
     return new_graph
 
-
-if __name__ == '__main__':
-    pass

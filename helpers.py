@@ -167,6 +167,3 @@ def prompt_file(path):
     path = os.path.realpath(path)
     os.startfile(path)
 
-
-if __name__ == '__main__':
-    pprint(read_graph_files(arabidopsis_path))

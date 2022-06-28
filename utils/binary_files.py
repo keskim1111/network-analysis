@@ -175,6 +175,3 @@ def are_graphs_the_same(G, H):
     return len(R.edges) == 0
 
 
-
-if __name__ == '__main__':
-    pass
