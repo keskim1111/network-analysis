@@ -1,6 +1,6 @@
 import logging
 import os, subprocess
-from helpers import timeit, timeout
+from utils.helpers import timeit, timeout
 from consts import C_CODE, C_CODE_SPLIT
 import time
 from utils.binary_files import read_binary_network_output, create_binary_communities_file
