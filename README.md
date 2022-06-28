@@ -38,6 +38,7 @@ The workshop aims to improve existing algorithms for community detection in netw
     ```
 
 3. Download [Gurobi][1] to your machine 
+4. Install packages from the requirements file
 ## How to use
 
 ### Input format
