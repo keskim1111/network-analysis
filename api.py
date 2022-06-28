@@ -87,7 +87,7 @@ if __name__ == '__main__':
         folder_name="1000 whole"
     )
     # c = kesty_one_graph(yeast, yeast_run_obj)
-    c = kesty_one_graph(Arabidopsis, yeast_run_obj)
+    # c = kesty_one_graph(Arabidopsis, yeast_run_obj)
     # c = kesty_one_graph(network_path, default_run_obj)
     # print(c)
     d = kesty_multiple_graphs("C:\\Users\\kimke\\Desktop\\temp")

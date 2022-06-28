@@ -1,7 +1,7 @@
 from collections import defaultdict
 import gurobipy as gp
 from gurobipy import GRB
-from helpers import timeit
+from utils.helpers import timeit
 import networkx as nx
 
 '''

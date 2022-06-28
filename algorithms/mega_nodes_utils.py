@@ -3,10 +3,10 @@ import random, os
 import networkx as nx
 from networkx.algorithms.community import greedy_modularity_communities
 from algorithms.algorithms import louvain
-from algorithms.split_community.roded_version import Newman_ILP_RODED
+from algorithms.ilp.split_community.roded_version import Newman_ILP_RODED
 from algorithms.modified_louvain import _gen_graph
-from helpers import timeit
-from algorithms.neumann_utils import split_communities_with_newman, get_neumann_communities
+from utils.helpers import timeit
+from algorithms.neumann_utils import split_communities_with_newman
 from utils.binary_files import create_binary_network_file
 
 

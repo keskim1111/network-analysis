@@ -14,7 +14,7 @@ via mathematical programming.
 
 import gurobipy as gp
 from gurobipy import GRB
-from helpers import timeit
+from utils.helpers import timeit
 
 
 # @timeout(300) # 5 min

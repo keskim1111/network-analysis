@@ -1,7 +1,7 @@
 import logging
 import networkx as nx
 import struct
-from helpers import timeit, create_graph_from_edge_file
+from utils.helpers import timeit, create_graph_from_edge_file
 import os
 
 def create_mapping(edge_file):
