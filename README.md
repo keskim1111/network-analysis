@@ -1,5 +1,6 @@
 ![image](https://user-images.githubusercontent.com/71821335/176128096-19008ad5-2e37-4ebd-9cd1-a0a93e9b373b.png)
 
+
 ## Motivation
 
 This project is as part as a workshop in [Analysis of Biological Networks](http://www.cs.tau.ac.il/~roded/courses/bnet21.html), instructed by Prof. Roded Sharan and Shani Jacobson.    
@@ -170,7 +171,8 @@ print_times(df)
 ```
 
 and you will see:
-![img.png](utils/img/graphs_img.png)
+
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/71821335/176384634-4b010657-d4ae-40dc-bc90-fea7d1613e28.gif)
 
 
 ## Algorithms Description
