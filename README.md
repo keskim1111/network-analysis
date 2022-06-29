@@ -71,8 +71,8 @@ We expect the single graph path to include two files with the following  formats
 We expect the multiple graph path to include folders in the single graph format.
 
 You can use example graphs from the `graphs` folder:
-- Benchmark  (Yeast and Arabidopsis)
-- Shani_graphs (folder of 1,000 or 10,000 nodes graphs created with different mixing parameter )
+- protein_protein_interaction_networks  (Yeast and Arabidopsis)
+- benchmark_graphs (folder of 1,000 or 10,000 nodes graphs created with different mixing parameter )
 ### Quick start
 
 ```python
@@ -80,7 +80,7 @@ from api import kesty_one_graph, kesty_multiple_graphs
 from pprint import pprint
 
 ## for single graph
-graph_path = "graphs/Shani_graphs/1000_0.4_0"
+graph_path = "graphs/benchmark_graphs/1000/1000_0.4_0"
 communities = kesty_one_graph(graph_path)
 print(communities)
 #               [
@@ -89,7 +89,7 @@ print(communities)
 #                ],
 
 ## for multiple graphs
-graphs_path = "graphs/Shani_graphs"
+graphs_path = "graphs/benchmark_graphs"
 communities_dictionary = kesty_multiple_graphs(graphs_path)
 pprint(communities_dictionary)
 # {'1000_0.4_0': [
@@ -120,7 +120,7 @@ yeast_run_obj = RunParamInfo(
   network_file_name="edges.txt",
   community_file_name="clusters.txt"
 )
-graph_path = "graphs\\Benchmark\\Yeast"
+graph_path = "graphs\\protein_protein_interaction_networks\\Yeast"
 communities = kesty_one_graph(graph_path, yeast_run_obj)
 
 ````
