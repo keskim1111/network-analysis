@@ -65,9 +65,10 @@ We expect the single graph path to include two files with the following  formats
   ```
 
 We expect the multiple graph path to include folders in the single graph format.
+
 You can use example graphs from the `graphs` folder:
-- Benchmark
-- Shani_graphs
+- Benchmark  (Yeast and Arabidopsis)
+- Shani_graphs (folder of 1,000 or 10,000 nodes graphs created with different mixing parameter )
 ### Quick start
 
 ```python
