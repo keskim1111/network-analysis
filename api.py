@@ -42,7 +42,7 @@ def kesty_one_graph(path, run_obj=default_run_obj):
         network_obj = NetworkObj(path, run_obj)
         setup_logger(os.path.join(network_obj.save_directory_path, network_obj.network_name),
                      log_to_file=run_obj.log_to_file, console_log_level=run_obj.console_log_level)
-        logging.info(f"Running changed {run_obj.algorithm} algo on {network_obj.network_name}")
+        logging.info(f"Starting Running {run_obj.algorithm} algo on {network_obj.network_name}")
         communities = run(run_obj, network_obj)
         original_nodes_communities = convert_to_original_nodes(communities, network_obj)
         return original_nodes_communities
