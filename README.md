@@ -89,7 +89,7 @@ print(communities)
 #                ],
 
 ## for multiple graphs
-graphs_path = "graphs/benchmark_graphs"
+graphs_path = "graphs/benchmark_graphs/1000"
 communities_dictionary = kesty_multiple_graphs(graphs_path)
 pprint(communities_dictionary)
 # {'1000_0.4_0': [
