@@ -140,7 +140,7 @@ communities = kesty_one_graph(graph_path, yeast_run_obj)
 
 After every run, an output folder is created in ``results\\full-flow`` with:
 
-- log file of run
+- log file of run with all level log prints
 - a csv summarizing run information and evaluations scores (modularity, jaccard, concordance , accuracy, time and more):
 ![img.png](utils/img/img_csv.png)
   
