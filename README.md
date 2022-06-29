@@ -65,7 +65,9 @@ We expect the single graph path to include two files with the following  formats
   ```
 
 We expect the multiple graph path to include folders in the single graph format.
-
+You can use example graphs from the `graphs` folder:
+- Benchmark
+- Shani_graphs
 ### Quick start
 
 ```python
@@ -102,7 +104,8 @@ pprint(communities_dictionary)
 ```
 
 ### Adding Run configurations
-You can play with the run object arguments - detailed table below
+The run object determines different parameters of the algorithm run. The default parameters are described in the table below.
+You can play with the run object arguments. Example:
 ````python
 from api import kesty_one_graph
 from flow import RunParamInfo

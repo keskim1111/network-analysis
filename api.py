@@ -1,14 +1,11 @@
 import logging
 import os
-from pprint import pprint
-
 from flow import NetworkObj, run, RunParamInfo
 from utils.logger import setup_logger
 
 default_run_obj = RunParamInfo(
     algorithm="louvain",
     split_method="newman_whole_graph",
-    folder_name="del"
 )
 
 yeast_run_obj = RunParamInfo(
@@ -73,21 +70,4 @@ def kesty_multiple_graphs(path_of_graphs, run_obj=default_run_obj):
 
 
 if __name__ == '__main__':
-    shani_folder_paths = os.path.join(
-        "C:\\Users\kimke\OneDrive\Documents\\4th_year\semeter_B\Biological_networks_sadna\\network-analysis\graphs\Shani_graphs")
-    network_path = os.path.join("C:\\Users\kimke\OneDrive\Documents\\4th_year\semeter_B\Biological_networks_sadna\\network-analysis\graphs\Shani_graphs\\1000\\1000_0.4_0")
-    network_path2 = os.path.join("C:\\Users\kimke\Desktop\\10000_0.6_2")
-    yeast = "graphs\\Benchmark\\Yeast"
-    Arabidopsis = "graphs\\Benchmark\\Arabidopsis"
-
-    run_obj = RunParamInfo(
-        algorithm="louvain",
-        split_method="ilp_whole_graph",
-        folder_name="1000 whole"
-    )
-    c = kesty_one_graph(yeast, yeast_run_obj)
-    # c = kesty_one_graph(Arabidopsis, yeast_run_obj)
-    # c = kesty_one_graph(network_path, default_run_obj)
-    # print(c)
-    # d = kesty_multiple_graphs("C:\\Users\\kimke\\Desktop\\temp")
-    # pprint(d)
+    pass
