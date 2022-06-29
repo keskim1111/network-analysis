@@ -196,7 +196,7 @@ and you will see:
 ![image](https://user-images.githubusercontent.com/71821335/170860736-d8004134-64e9-45ab-9de1-95f1e289d2f3.png)
 
 ## Limitations
-
+**Louvain-ILP:**
 - If the number of mega nodes is larger than the lp critical value, we skip the stage of running ilp on the mega nodes and return directly the partition derived from them.
 
 ## References
