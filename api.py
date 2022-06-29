@@ -1,14 +1,11 @@
 import logging
 import os
-from pprint import pprint
-
 from flow import NetworkObj, run, RunParamInfo
 from utils.logger import setup_logger
 
 default_run_obj = RunParamInfo(
     algorithm="louvain",
     split_method="newman_whole_graph",
-    folder_name="del"
 )
 
 yeast_run_obj = RunParamInfo(
