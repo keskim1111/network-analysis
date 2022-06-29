@@ -13,7 +13,7 @@ level_dict = {
 
 C_CODE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms\\newman_lp_critical')
 C_CODE_SPLIT = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'algorithms\\newman_split')
-benchmark_base_path = os.path.join("Graphs" , "Benchmark")
+benchmark_base_path = os.path.join("graphs" , "Benchmark")
 
 yeast_path = os.path.join(benchmark_base_path, "Yeast")
 arabidopsis_path = os.path.join(benchmark_base_path, "Arabidopsis")
@@ -33,6 +33,6 @@ msg = "The modularity result of the Algorithm is: "
 RESULTS_FOLDER = 'results'
 default_lp_list=[100]
 
-PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "Graphs", "Shani_graphs")
+PATH2SHANIS_GRAPHS = os.path.join(os.getcwd(), "graphs", "Shani_graphs")
 PATH2BENCHMARKS_GRAPHS = benchmark_base_path
 FOLDER2FLOW_RESULTS = os.path.join(os.getcwd(), RESULTS_FOLDER, "full_flow")
