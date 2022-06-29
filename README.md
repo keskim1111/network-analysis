@@ -9,8 +9,10 @@ The workshop aims to improve existing algorithms for community detection in netw
 ## Contents
 
 - [Motivation](#motivation)
+- [Contents](#contents)
 - [Installation](#installation)
 - [How to use](#how-to-use)
+  * [Input format](#input-format)
   * [Quick start](#quick-start)
   * [Adding Run configurations](#adding-run-configurations)
   * [Output folder and visualization notebook](#output-folder-and-visualization-notebook)
@@ -19,6 +21,7 @@ The workshop aims to improve existing algorithms for community detection in netw
   * [Algorithms implemented with the idea](#algorithms-implemented-with-the-idea)
     + [Louvain](#louvain)
     + [Newman](#newman)
+- [Limitations](#limitations)
 - [References](#references)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
