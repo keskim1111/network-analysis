@@ -164,15 +164,16 @@ def run_louvain_with_change(
 def run_with_comparison_newman(network_obj, run_obj):
     eval_results_per_network = []
     if run_obj.with_comparison:
+        logging.info(f"Running original Louvain for comparison")
         logging.debug(f'===================== Running: Louvain networkx =======================')
         run_louvain(eval_results_per_network, network_obj, run_obj)
-
+        logging.info(f"Running original Neumann for comparison")
         logging.debug(f'===================== Running: Neumann C =======================')
         run_newman(
             eval_results_per_network,
             run_obj,
             network_obj)
-
+    logging.info(f"Running changed Neumann for comparison")
     logging.debug(f'===================== Running: Neumann C changed=======================')
     communities = run_newman_with_change(
         eval_results_per_network,
@@ -275,6 +276,7 @@ def run_newman_with_change(eval_results_per_network, run_obj, network_obj):
                                                          lp_critical=lp_critical,
                                                          )
         TimeLimit = run_obj.TimeLimit  # in seconds
+        logging.info(f"Running ILP-partition on newman")
         final_communities, network_obj.num_coms_divided, network_obj.num_coms_skipped = run_ilp_on_neumann(
             network_obj,
             run_obj,
