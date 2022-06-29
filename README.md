@@ -145,7 +145,7 @@ After every run, an output folder is created in ``results\\full-flow`` with:
   
 - pickled df
 
-You can use one of the last cells in the notebook at `visualization/create_bar_plots.ipynb` to visualize results with bar plots graphs:
+You can use one of the last cells in the notebook at `visualization/create_bar_plots.ipynb` to visualize results with bar plots graphs.
 for shanis file:
 ```python
 
